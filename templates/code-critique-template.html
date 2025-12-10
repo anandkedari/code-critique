@@ -431,24 +431,36 @@
             justify-content: space-between;
             align-items: center;
             font-size: 0.8rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            min-height: 2.5rem;
         }
         
         .metric-name {
             color: #2d3748;
             font-weight: 500;
-            flex: 1;
+            flex: 1 1 auto;
+            min-width: 120px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
         
         .metric-info {
             display: flex;
             gap: 0.5rem;
             align-items: center;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+            justify-content: flex-end;
         }
         
         .metric-value-display {
             font-weight: 600;
             color: #2d3748;
             font-size: 0.75rem;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            text-align: right;
         }
         
         .metric-target-display {
