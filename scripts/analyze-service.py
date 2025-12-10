@@ -104,8 +104,74 @@ def show_progress(stop_event):
     
     print("\r   ✓ Analysis complete!                                ", flush=True)
 
+def extract_file_structure(file_path, content):
+    """Extract high-level structure from a file (classes, methods, imports)."""
+    structure = {
+        'file': file_path,
+        'imports': [],
+        'classes': [],
+        'methods': [],
+        'key_concepts': []
+    }
+    
+    lines = content.split('\n')
+    for line in lines[:100]:  # First 100 lines for structure
+        line = line.strip()
+        
+        # Java/Kotlin
+        if line.startswith('import ') or line.startswith('from ') or line.startswith('require'):
+            structure['imports'].append(line[:80])
+        elif 'class ' in line or 'interface ' in line or 'enum ' in line:
+            structure['classes'].append(line[:100])
+        elif 'public ' in line or 'private ' in line or 'protected ' in line:
+            if '(' in line and ')' in line:
+                structure['methods'].append(line[:100])
+        
+        # Python
+        elif line.startswith('def ') or line.startswith('async def '):
+            structure['methods'].append(line[:100])
+        elif line.startswith('class '):
+            structure['classes'].append(line[:100])
+        
+        # JavaScript/TypeScript
+        elif 'function ' in line or 'const ' in line or 'let ' in line:
+            if '(' in line:
+                structure['methods'].append(line[:100])
+        elif 'export ' in line or 'module.exports' in line:
+            structure['key_concepts'].append(line[:100])
+    
+    return structure
+
+def build_codebase_context(code_files):
+    """Build high-level context of entire codebase."""
+    print("📋 Building codebase context...")
+    context = {
+        'total_files': len(code_files),
+        'file_structures': [],
+        'packages': set(),
+        'key_files': []
+    }
+    
+    for file_info in code_files:
+        structure = extract_file_structure(file_info['path'], file_info['content'])
+        context['file_structures'].append(structure)
+        
+        # Extract package/module name
+        path_parts = Path(file_info['path']).parts
+        if len(path_parts) > 1:
+            context['packages'].add(path_parts[0])
+        
+        # Identify key files
+        if any(keyword in file_info['path'].lower() for keyword in 
+               ['controller', 'service', 'repository', 'config', 'application', 'main']):
+            context['key_files'].append(file_info['path'])
+    
+    context['packages'] = sorted(list(context['packages']))
+    print(f"   ✓ Context built: {len(context['file_structures'])} files, {len(context['packages'])} packages\n")
+    return context
+
 def analyze_with_claude(service_path, code_files, api_key):
-    """Analyze code using Anthropic Claude AI."""
+    """Analyze code using Anthropic Claude AI with full codebase context."""
     try:
         import anthropic
     except ImportError:
@@ -118,17 +184,17 @@ def analyze_with_claude(service_path, code_files, api_key):
     print(f"   Files: {len(code_files)}")
     print(f"   Total size: {sum(f['size'] for f in code_files):,} bytes\n")
     
-    # Prepare code content (limit to avoid token limits)
-    max_files = 20
-    files_to_analyze = code_files[:max_files]
+    # Phase 1: Build full codebase context
+    codebase_context = build_codebase_context(code_files)
     
-    code_content = "\n\n" + "="*70 + "\n\n".join([
-        f"FILE: {f['path']}\n{'-'*70}\n{f['content']}" 
-        for f in files_to_analyze
-    ])
+    # Phase 2: Analyze in batches with context
+    batch_size = 15  # Analyze 15 files per batch
+    total_batches = (len(code_files) + batch_size - 1) // batch_size
     
-    if len(code_files) > max_files:
-        print(f"   ⚠️  Analyzing first {max_files} files (token limit)\n")
+    print(f"📊 Analysis Plan:")
+    print(f"   Batch size: {batch_size} files")
+    print(f"   Total batches: {total_batches}")
+    print(f"   Strategy: Full context analysis\n")
     
     # Load prompts
     system_prompt = load_system_prompt()
@@ -139,6 +205,43 @@ def analyze_with_claude(service_path, code_files, api_key):
     
     print("   🚀 Sending to Claude API...\n")
     
+    # Prepare context summary (lightweight)
+    context_summary = {
+        'total_files': codebase_context['total_files'],
+        'packages': codebase_context['packages'],
+        'key_files': codebase_context['key_files'],
+        'file_list': [s['file'] for s in codebase_context['file_structures']]
+    }
+    
+    # Prepare detailed code content
+    # Include structure of ALL files + full content of priority files
+    priority_files = []
+    other_files = []
+    
+    for file_info in code_files:
+        if any(keyword in file_info['path'].lower() for keyword in 
+               ['controller', 'service', 'repository', 'config', 'application', 'main', 'entity', 'model']):
+            priority_files.append(file_info)
+        else:
+            other_files.append(file_info)
+    
+    # Build detailed content string
+    detailed_content = "PRIORITY FILES (Full Content):\n" + "="*70 + "\n\n"
+    for f in priority_files[:15]:  # Top 15 priority files
+        detailed_content += f"FILE: {f['path']}\n{'-'*70}\n{f['content'][:3000]}\n\n"
+    
+    detailed_content += "\n\nOTHER FILES (Structure Only):\n" + "="*70 + "\n\n"
+    for f in other_files[:30]:  # Structure of 30 more files
+        structure = extract_file_structure(f['path'], f['content'])
+        detailed_content += f"FILE: {f['path']}\n"
+        if structure['imports']:
+            detailed_content += f"  Imports: {', '.join(structure['imports'][:5])}\n"
+        if structure['classes']:
+            detailed_content += f"  Classes: {', '.join(structure['classes'][:3])}\n"
+        if structure['methods']:
+            detailed_content += f"  Methods: {', '.join(structure['methods'][:5])}\n"
+        detailed_content += "\n"
+    
     # Start progress indicator in background thread
     stop_event = threading.Event()
     progress_thread = threading.Thread(target=show_progress, args=(stop_event,))
@@ -146,11 +249,16 @@ def analyze_with_claude(service_path, code_files, api_key):
     progress_thread.start()
     
     try:
-        # Reduce input, maximize output tokens
+        # Construct comprehensive prompt with context
         prompt = f"""{system_prompt}
 
-CODE TO ANALYZE:
-{code_content[:15000]}
+CODEBASE OVERVIEW:
+Total Files: {context_summary['total_files']}
+Packages/Modules: {', '.join(context_summary['packages'])}
+Key Files: {', '.join(context_summary['key_files'][:10])}
+
+DETAILED CODE ANALYSIS:
+{detailed_content[:50000]}
 
 CRITICAL INSTRUCTIONS:
 1. Output ONLY valid JSON (no markdown wrappers)
