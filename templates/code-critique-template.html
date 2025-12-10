@@ -1564,6 +1564,76 @@
             section.classList.remove('active');
         }
         
+        function showScannedFiles() {
+            const section = document.getElementById('filtered-issues-section');
+            const title = document.getElementById('filter-title');
+            const content = document.getElementById('filtered-issues-content');
+            
+            // Build list of all scanned files
+            const allFilesWithIssues = [
+            {% set ns = namespace(file_issues={}) %}
+            {% for category in categories %}
+                {% if category.issues %}
+                    {% for issue in category.issues %}
+                        {% if issue.file_path %}
+                            {% if issue.file_path not in ns.file_issues %}
+                                {% set _ = ns.file_issues.update({issue.file_path: 1}) %}
+            {
+                file: '{{ issue.file_path }}',
+                hasIssues: true
+            },
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+            ];
+            
+            const totalScanned = {{ summary.files_scanned }};
+            const filesWithIssues = allFilesWithIssues.length;
+            const filesCompliant = totalScanned - filesWithIssues;
+            
+            // Update title
+            title.textContent = `📁 Files Scanned (${totalScanned} total)`;
+            
+            // Generate HTML
+            content.innerHTML = `
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                        <div style="background: #fff5f5; padding: 1rem; border-radius: 6px; border-left: 3px solid #f44336;">
+                            <div style="font-size: 0.75rem; color: #718096; margin-bottom: 0.25rem;">Files with Issues</div>
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #c53030;">${filesWithIssues}</div>
+                        </div>
+                        <div style="background: #f0fdf9; padding: 1rem; border-radius: 6px; border-left: 3px solid #00c853;">
+                            <div style="font-size: 0.75rem; color: #718096; margin-bottom: 0.25rem;">Compliant Files</div>
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #059669;">${filesCompliant}</div>
+                        </div>
+                        <div style="background: #eff6ff; padding: 1rem; border-radius: 6px; border-left: 3px solid #2196f3;">
+                            <div style="font-size: 0.75rem; color: #718096; margin-bottom: 0.25rem;">Total Scanned</div>
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #2563eb;">${totalScanned}</div>
+                        </div>
+                    </div>
+                    
+                    <h3 style="font-size: 1rem; margin-bottom: 0.75rem; color: #2d3748; font-weight: 600;">Files with Issues (${filesWithIssues})</h3>
+                    ${allFilesWithIssues.map(f => `
+                        <div style="background: #fff; padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 6px; border-left: 3px solid #f44336; font-family: Monaco, monospace; font-size: 0.8rem;">
+                            📄 ${f.file}
+                        </div>
+                    `).join('')}
+                    
+                    ${filesCompliant > 0 ? `
+                        <h3 style="font-size: 1rem; margin: 1.5rem 0 0.75rem; color: #2d3748; font-weight: 600;">Compliant Files (${filesCompliant})</h3>
+                        <div style="background: #f0fdf9; padding: 1rem; border-radius: 6px; text-align: center; color: #059669;">
+                            ✅ ${filesCompliant} file${filesCompliant !== 1 ? 's' : ''} scanned with no issues detected
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            // Show section
+            section.classList.add('active');
+        }
+        
         function toggleMoreIssues() {
             const moreContainer = document.getElementById('more-issues-container');
             const btn = document.getElementById('show-more-issues-btn');
