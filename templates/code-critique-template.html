@@ -914,18 +914,36 @@
         
         .bar-item {
             margin-bottom: 0.75rem;
+            background: #ffffff;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            overflow: hidden;
+        }
+        
+        .bar-item-header {
             padding: 0.5rem;
             background: #f8f9fa;
-            border-radius: 4px;
-        }
-        
-        .bar-item.clickable {
             cursor: pointer;
             transition: background 0.2s;
+            user-select: none;
         }
         
-        .bar-item.clickable:hover {
+        .bar-item-header:hover {
             background: #e9ecef;
+        }
+        
+        .bar-item-content {
+            display: none;
+            padding: 0.75rem;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .bar-item.expanded .bar-item-content {
+            display: block;
+        }
+        
+        .bar-item.expanded .bar-expand-icon {
+            transform: rotate(90deg);
         }
         
         .bar-header {
@@ -1231,15 +1249,19 @@
             {% if sorted_issues %}
                 <div id="top-issues-container">
                     {% for issue_title, issue_data, severity_rank in sorted_issues[:5] %}
-                    <div class="bar-item clickable" onclick="showIssueDetails('{{ issue_title|replace("'", "\\'") }}')">
-                        <div class="bar-header">
-                            <span class="bar-icon">{{ issue_data.icon }}</span>
-                            <span class="bar-label">{{ issue_title }}</span>
-                            <span class="bar-count {% if issue_data.severity == 'critical' %}critical{% elif issue_data.severity == 'warning' %}warning{% else %}mixed{% endif %}">
-                                {{ issue_data.count }} occurrence{{ 's' if issue_data.count != 1 else '' }}
-                            </span>
+                    <div class="bar-item" onclick="toggleTopIssue(this, '{{ issue_title|replace("'", "\\'") }}')">
+                        <div class="bar-item-header">
+                            <div class="bar-header">
+                                <span class="expand-icon bar-expand-icon">▶</span>
+                                <span class="bar-icon">{{ issue_data.icon }}</span>
+                                <span class="bar-label">{{ issue_title }}</span>
+                                <span class="bar-count {% if issue_data.severity == 'critical' %}critical{% elif issue_data.severity == 'warning' %}warning{% else %}mixed{% endif %}">
+                                    {{ issue_data.count }} occurrence{{ 's' if issue_data.count != 1 else '' }}
+                                </span>
+                            </div>
+                            <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">{{ issue_data.category }}</div>
                         </div>
-                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">{{ issue_data.category }}</div>
+                        <div class="bar-item-content"></div>
                     </div>
                     {% endfor %}
                 </div>
@@ -1550,6 +1572,57 @@
                 moreContainer.style.display = 'none';
                 const hiddenCount = moreContainer.children.length;
                 btn.textContent = `Show More Files (${hiddenCount} more)`;
+            }
+        }
+        
+        function toggleTopIssue(element, issueTitle) {
+            element.classList.toggle('expanded');
+            
+            if (element.classList.contains('expanded')) {
+                const content = element.querySelector('.bar-item-content');
+                const allIssuesData = [
+                {% for category in categories %}
+                    {% if category.issues %}
+                        {% for issue in category.issues %}
+                {
+                    title: {{ issue.title|tojson }},
+                    description: {{ issue.description|tojson }},
+                    severity: '{{ issue.severity }}',
+                    file_path: '{{ issue.file_path if issue.file_path else "" }}',
+                    line_number: '{{ issue.line_number if issue.line_number else "" }}',
+                    category: '{{ category.name }}',
+                    icon: '{{ category.icon }}',
+                    code_snippet: {{ issue.code_snippet|tojson if issue.code_snippet else 'null' }},
+                    recommendation: {{ issue.recommendation|tojson if issue.recommendation else 'null' }},
+                    fix_example: {{ issue.fix_example|tojson if issue.fix_example else 'null' }}
+                },
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+                ];
+                
+                const matchingIssues = allIssuesData.filter(issue => issue.title === issueTitle);
+                
+                content.innerHTML = matchingIssues.map((issue, index) => `
+                    <div class="file-issue-detail severity-${issue.severity}" style="margin-top: 0.5rem;">
+                        <div class="file-issue-detail-title">
+                            ${issue.severity === 'critical' ? '❌' : issue.severity === 'warning' ? '⚠️' : 'ℹ️'} Occurrence ${index + 1}
+                        </div>
+                        ${issue.file_path ? `<div class="filtered-issue-file" style="font-family: Monaco, monospace; font-size: 0.75rem; color: #718096; margin-top: 0.3rem;">📄 ${issue.file_path}${issue.line_number ? ' : Line ' + issue.line_number : ''}</div>` : ''}
+                        <div class="file-issue-detail-desc" style="margin-top: 0.4rem;">${issue.description}</div>
+                        <span class="file-issue-category">${issue.icon} ${issue.category}</span>
+                        ${issue.code_snippet ? `<div class="file-code-snippet">${issue.code_snippet}</div>` : ''}
+                        ${issue.recommendation || issue.fix_example ? `
+                            <div class="file-recommendation">
+                                ${issue.recommendation ? `
+                                    <div class="file-recommendation-label">💡 Fix:</div>
+                                    <div>${issue.recommendation}</div>
+                                ` : ''}
+                                ${issue.fix_example ? `<div class="file-fix-example">${issue.fix_example}</div>` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
             }
         }
         
