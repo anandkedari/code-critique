@@ -81,55 +81,61 @@ open ../reports/customer-service/code-critique-report.html
 
 ## 📊 What Gets Analyzed
 
-The AI analyzes your code across **8 categories**:
+The AI analyzes your code across **8 categories** (in priority order):
 
-### 1. 🏗️ Architecture & Design
-- Layer violations
-- Business logic placement
-- Dependency management
-- Design patterns
+### 1. ✨ Code Quality
+- Method length and complexity
+- Code duplication
+- Naming conventions
+- Code coverage
+- SOLID principles
 
-### 2. 🔒 Security
+### 2. 🔍 Custom Critique
+- Pre-commit checklist
+- Code review process
+- Technical debt tracking
+- Team-specific standards
+
+### 3. 🔒 Security
 - PII data handling
 - Input validation
 - SQL injection risks
 - Hardcoded secrets
 - Authentication/authorization
 
-### 3. ✨ Code Quality
-- Method length
-- Cyclomatic complexity
-- Code duplication
-- Naming conventions
-- Code coverage
-
-### 4. ⚡ Performance
-- N+1 queries
-- Pagination
-- Caching strategy
-- Database optimization
-
-### 5. 🛡️ Error Handling
+### 4. 🛡️ Error Handling
 - Exception handling
 - Error responses
 - Logging of errors
 - Retry mechanisms
+- Graceful degradation
 
-### 6. 📝 Logging
+### 5. 🏗️ Architecture & Design
+- Layer violations
+- Business logic placement
+- Dependency management
+- Design patterns
+- Service boundaries
+
+### 6. ⚡ Performance Optimization
+- N+1 queries
+- Pagination
+- Caching strategy
+- Database optimization
+- Resource management
+
+### 7. 📝 Logging
 - Logging framework usage
 - Correlation IDs
 - Log levels
 - Sensitive data in logs
+- Structured logging
 
-### 7. 🔍 Self-Critique
-- Pre-commit checklist
-- Code review process
-- Technical debt tracking
-
-### 8. 🎯 Domain-Specific
+### 8. 🎯 Domain-Specific Extensions
 - Service-specific patterns
 - Business logic validation
 - Domain model quality
+- Industry best practices
 
 ---
 
@@ -155,36 +161,60 @@ python3 analyze-service.py /absolute/path/to/customer-service
 
 ## 📋 Report Structure
 
-The generated HTML report follows this exact order:
+The generated HTML report includes the following sections:
 
-1. **Overall Summary**
-   - Score (0-100)
-   - Critical issues count
-   - Warnings count
-   - Files scanned
+### 1. **Overall Summary**
+   - Overall status badge (Excellent/Good/Needs Work/Critical)
+   - Critical issues count (clickable to filter)
+   - Warnings count (clickable to filter)
+   - Files not compliant count
+   - Total files scanned
 
-2. **Category Table**
-   - All 8 categories with scores and status
+### 2. **Assessment Status**
+   - Compact grid showing all 8 categories
+   - Status badge for each category (✅ Compliant / ⚠️ Warnings / ❌ Critical)
+   - Issue count per category
+   - Color-coded severity indicators
 
-3. **Detailed Analysis** (for each category)
-   - Metrics tracked
-   - Assessment items (✅/⚠️/❌)
-   - Specific issues with:
-     - File path
+### 3. **Issues by File**
+   - Expandable file list showing issues per file
+   - Click to expand and see all issues in that file
+   - Shows issue title, description, and severity
+   - Includes code snippets and recommendations
+   - Category badges for each issue
+
+### 4. **Top Issues** 
+   - Most frequent issues sorted by occurrence count
+   - Secondary sort by severity (critical first)
+   - Shows top 5 issues by default with "Show More" button
+   - Click any issue to see all occurrences with:
+     - File path and line number
      - Code snippet
-     - Recommendation
+     - Detailed recommendation
      - Fix example
 
-4. **Priority Actions**
+### 5. **Detailed Category Analysis**
+   - One section per category (in priority order)
+   - Category status badge
+   - Metrics in responsive grid layout
+   - Assessment items (inline badges)
+   - Expandable "Detailed Findings" section with:
+     - File path and line number
+     - Current code snippet
+     - Detailed description
+     - Actionable recommendations
+     - Example fixes
+
+### 6. **Priority Actions**
    - 🔴 Critical (fix immediately)
    - 🟡 Warnings (address soon)
    - 🔵 Suggestions (nice to have)
+   - Organized in responsive grid layout
 
-5. **Final Assessment**
-   - Overall grade
-   - Strengths
-   - Key improvements
-   - Next steps
+### 7. **Key Improvements**
+   - Summary of main areas needing attention
+   - Action-oriented recommendations
+   - Prioritized improvement list
 
 ---
 
@@ -339,6 +369,15 @@ pip install anthropic
 ---
 
 ## 🔄 Version History
+
+- **v2.0** - Enhanced report with interactive features
+  - Reordered categories (Code Quality first)
+  - Top Issues section with occurrence tracking
+  - Clickable issues with detailed drill-down
+  - Issues by File view with expandable sections
+  - Responsive grid layouts for better readability
+  - Inline status badges for quick scanning
+  - Color-coded severity indicators
 
 - **v1.0** - Initial release with real AI integration
   - Anthropic Claude 3.5 Sonnet

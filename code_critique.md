@@ -93,10 +93,10 @@ if (retryCount > MAX_RETRY_COUNT) { ... }
 
 ---
 
-## **2. SELF-CRITIQUE PROMPTS & ANALYSIS**
+## **2. CUSTOM CRITIQUE**
 
 ### Summary
-Provides structured prompts and questions for developers to self-review code before submission, promoting quality awareness and reducing review cycles.
+Provides structured prompts and questions for developers to self-review code before submission, promoting quality awareness and reducing review cycles. Includes team-specific standards and custom validation rules.
 
 ### Confidence Level
 **Medium** - Effectiveness depends on developer discipline and understanding of principles.
