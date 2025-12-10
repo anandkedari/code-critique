@@ -23,6 +23,21 @@ Maintains high code standards through metrics, conventions, and best practices. 
 | Code coverage | ≥ 80% | JaCoCo |
 | Technical debt ratio | < 5% | SonarQube |
 | Code smells | 0 critical | Static analysis |
+| Overly verbose or repetitive code | 0 | Code review |
+| Meaningful names | 100% | Code review |
+| Code modularity (SRP) | 100% | Architecture analysis |
+| Correct HTTP status codes | 100% | API testing |
+| Invalid dependencies | 0 | Dependency validation |
+| Valid imports | 100% | Import analysis |
+| Unused dependencies | 0 | Dependency audit |
+| Implemented comments | 100% | Code review |
+| Race conditions | 0 | Concurrency analysis |
+| Deadlocks possible | 0 | Concurrency analysis |
+| Unbounded threads/tasks | 0 | Resource management |
+| Missing default values | 0 | Configuration review |
+| Config separation (dev/staging/prod) | 100% | Configuration audit |
+| Valid config keys | 100% | Configuration validation |
+| Circular imports | 0 | Dependency analysis |
 
 ### Method & Class Standards:
 - Method length limit (≤30 lines excluding comments)
@@ -261,6 +276,10 @@ Implements comprehensive error handling to provide meaningful error messages, ma
 | Error response consistency | 100% | API contract testing |
 | Exception logging | 100% | Log analysis |
 | Recovery mechanisms | 100% coverage | Error scenario testing |
+| Meaningful error messages | 100% | Error message review |
+| Retries and fallbacks | 100% | Resilience testing |
+| Null and boundary checks | 100% | Code review |
+| Incorrect variable logging | 0 | Log validation |
 
 ### Exception Management:
 - Global exception handler (`@RestControllerAdvice`)
@@ -337,6 +356,14 @@ Ensures proper architectural patterns and design principles are followed in micr
 | Class dependencies | ≤ 4 per class | Dependency analysis tools |
 | Method parameters | ≤ 3 per method | Static analysis |
 | Methods per class | ≤ 10 public methods | Code metrics |
+| Unnecessary abstraction | 0 | Architecture review |
+| Fake configuration keys | 0 | Configuration validation |
+| Wrong function parameters | 0 | Type checking & validation |
+| Architecture invented without instruction | 0 | Design review |
+| Dependency version mismatch | 0 | Dependency analysis |
+| Unnecessary libraries | 0 | Dependency audit |
+| SOLID principles violations | 0 | Design pattern analysis |
+| Over-engineered layers | 0 | Architecture review |
 
 ### Items Covered:
 - Layer separation enforcement (Controller → Service → Repository)
@@ -480,6 +507,8 @@ Implements structured, secure logging with appropriate levels and context to ena
 | Incorrect log levels | < 5% | Manual review |
 | Exception logging | 100% | Exception handler audit |
 | MDC usage | 100% | Request tracing check |
+| Tracing spans added | 100% | Distributed tracing check |
+| Structured logging | 100% | Log format validation |
 
 ### Structured Logging:
 - SLF4J usage (not `System.out.println`)
@@ -545,7 +574,113 @@ MDC.put("correlationId", request.getHeader("X-Correlation-ID"));
 
 ---
 
-## **8. DOMAIN-SPECIFIC EXTENSIONS**
+## **8. LLM AS A JUDGE**
+
+### Summary
+Detects AI-generated code quality issues including hallucinated functions, invented libraries, placeholder code, and other common problems from AI-assisted development. Ensures AI-generated code is production-ready and not relying on non-existent functionality.
+
+### Confidence Level
+**High** - AI-specific patterns are detectable through code analysis and validation against known libraries/APIs.
+
+### Metrics
+| Metric | Target | Measurement Method |
+|--------|--------|-------------------|
+| Hallucinated Functions | 0 | Function validation against actual APIs |
+| Non-existent Libraries | 0 | Import validation, dependency check |
+| Fake Configuration Keys | 0 | Config validation against documentation |
+| Generic Placeholder Code | 0 | TODO/placeholder detection |
+| Invented API Endpoints | 0 | Route validation against framework |
+| Copy-Paste Inconsistencies | 0 | Code duplication analysis |
+| Overconfident Assumptions | 0 | Comment vs implementation validation |
+| Inappropriate Design Patterns | 0 | Pattern appropriateness analysis |
+| Missing Error Context | 0 | Error handling completeness |
+| Unrealistic Performance Claims | 0 | Optimization validation |
+
+### AI-Generated Code Issues:
+- No invented functions or methods that don't exist in the actual framework
+- All imported libraries and dependencies actually exist
+- Configuration keys are valid and documented
+- No "TODO" or placeholder implementations in production code
+- No fictional REST endpoints or routes
+- No duplicated AI-generated blocks with slight variations
+- Comments accurately describe implemented functionality
+- Design patterns fit the actual use case
+- Error handling accounts for real failure scenarios
+- Performance optimizations actually work as claimed
+
+### Common Issues & Fixes
+
+#### Issue 1: Hallucinated Function Calls
+**Detection:** Function calls to methods that don't exist in the framework
+**Fix:**
+```java
+// ❌ Before (AI invented this method)
+repository.findByNameAndEmailOptimized(name, email);
+
+// ✅ After (Use actual Spring Data method)
+repository.findByNameAndEmail(name, email);
+```
+
+#### Issue 2: Non-existent Library
+**Detection:** Imports that reference packages not in dependencies
+**Fix:**
+```java
+// ❌ Before (AI invented this library)
+import com.fancy.ai.OptimizedCache;
+
+// ✅ After (Use actual Spring Cache)
+import org.springframework.cache.annotation.Cacheable;
+```
+
+#### Issue 3: Fake Configuration Keys
+**Detection:** Configuration keys that don't exist in application.yml schema
+**Fix:**
+```yaml
+# ❌ Before (AI invented this key)
+spring.datasource.auto-optimize: true
+
+# ✅ After (Use actual Spring properties)
+spring.jpa.properties.hibernate.jdbc.batch_size: 20
+```
+
+#### Issue 4: Generic Placeholder Code
+**Detection:** TODO comments or incomplete implementations in production
+**Fix:**
+```java
+// ❌ Before
+public void processPayment(Order order) {
+    // TODO: Implement payment processing
+    throw new UnsupportedOperationException("Not implemented yet");
+}
+
+// ✅ After
+public void processPayment(Order order) {
+    paymentGateway.charge(order.getTotal(), order.getPaymentMethod());
+    orderRepository.updateStatus(order.getId(), OrderStatus.PAID);
+}
+```
+
+#### Issue 5: Overconfident Comments
+**Detection:** Comments claiming functionality that isn't actually implemented
+**Fix:**
+```java
+// ❌ Before
+// This method uses advanced caching and handles all edge cases
+public User getUser(Long id) {
+    return userRepository.findById(id).orElse(null);
+}
+
+// ✅ After
+// Retrieves user by ID, returns null if not found
+// TODO: Add caching and error handling
+public User getUser(Long id) {
+    return userRepository.findById(id).orElse(null);
+}
+```
+
+---
+
+## **9. DOMAIN-SPECIFIC EXTENSIONS**
 
 ### Summary
 Industry-specific rules and compliance requirements tailored to different domains like Financial Services, Healthcare, and E-Commerce.
@@ -560,11 +695,9 @@ Industry-specific rules and compliance requirements tailored to different domain
 | BigDecimal usage for money | 100% | Static analysis |
 | Transaction audit trail | 100% | Audit log verification |
 | Regulatory compliance | 100% | Compliance scan |
-| **Healthcare** | | |
 | PHI encryption | 100% | Security audit |
 | HIPAA compliance | 100% | Compliance tools |
 | Access logging | 100% | Audit trail check |
-| **E-Commerce** | | |
 | Payment data logging | 0 occurrences | Log scanning |
 | Order idempotency | 100% | API testing |
 | Transactional integrity | 100% | Database testing |
@@ -640,13 +773,25 @@ public class Transaction {
 
 | Metric | Value |
 |--------|-------|
-| **Total Core Categories** | 8 streamlined areas |
-| **Total Rules** | 45+ specific rules |
+| **Total Core Categories** | 9 streamlined areas |
+| **Total Metrics Analyzed** | 77 metrics |
+| **Total Rules** | 50+ specific rules |
 | **Severity Levels** | 3 (Critical, Warning, Info) |
 | **Domain Extensions** | 3+ (Financial, Healthcare, E-Commerce) |
-| **Primary Focus** | Code Quality, Custom Critique, Security, Error Handling, Architecture, Performance, Logging, Domain Extensions |
+| **Primary Focus** | Code Quality, Custom Critique, Security, Error Handling, Architecture, Performance, Logging, LLM as a Judge, Domain Extensions |
+
+**Metrics Breakdown:**
+- Code Quality: 21 metrics
+- Custom Critique: 10 metrics
+- Security: 8 metrics
+- Error Handling: 10 metrics
+- Architecture: 13 metrics
+- Performance: 6 metrics
+- Logging: 8 metrics
+- LLM as a Judge: 10 metrics
+- Domain: 1 metric
 
 ---
 
 *Generated from consolidated documentation analysis*  
-*Last Updated: December 9, 2024*
+*Last Updated: December 10, 2024*

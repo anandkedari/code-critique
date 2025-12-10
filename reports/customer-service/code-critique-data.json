@@ -1,0 +1,851 @@
+{
+  "metadata": {
+    "service_name": "customer-service",
+    "generated_at": "2025-12-09T21:57:00Z",
+    "framework": "Spring Boot 3.2.1",
+    "language": "Java 21",
+    "files_scanned": 24
+  },
+  "summary": {
+    "critical_count": 3,
+    "warning_count": 8,
+    "info_count": 5,
+    "success_count": 12,
+    "files_scanned": 24
+  },
+  "categories": [
+    {
+      "id": 1,
+      "name": "Code Quality",
+      "icon": "\u2728",
+      "metrics": [
+        {
+          "label": "Code Verbosity",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Meaningful Names",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Single Responsibility",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Method Length",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Code Formatting",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Factual Comments",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Cyclomatic Complexity",
+          "value": "\u2705 Compliant",
+          "target": "<10"
+        },
+        {
+          "label": "Code Duplication",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "HTTP Status Codes",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Dependency Validation",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Import Validation",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Unused Dependencies",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Unimplemented Comments",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Race Conditions",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Deadlock Risks",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Unbounded Resources",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Missing Default Values",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Config Separation",
+          "value": "\u26a0\ufe0f Not visible",
+          "target": "0"
+        },
+        {
+          "label": "Valid Config Keys",
+          "value": "\u26a0\ufe0f Not visible",
+          "target": "0"
+        },
+        {
+          "label": "Circular Imports",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Code Smells",
+          "value": "\u274c 1 violation in 2 files",
+          "target": "0"
+        }
+      ],
+      "items": [
+        {
+          "title": "Clean Code Structure",
+          "assessment": "compliant",
+          "description": "Well-organized packages with clear separation of concerns"
+        },
+        {
+          "title": "Meaningful Naming",
+          "assessment": "compliant",
+          "description": "Classes, methods, and variables have descriptive names"
+        },
+        {
+          "title": "DTO Immutability",
+          "assessment": "info",
+          "description": "DTOs use Lombok @Data instead of Java Records for immutability"
+        }
+      ],
+      "issues": [
+        {
+          "severity": "info",
+          "title": "Consider Using Java Records for DTOs",
+          "description": "DTOs could be immutable using Java 17+ Records instead of Lombok",
+          "file_path": "src/main/java/com/pulse/customerservice/dto/CustomerRequest.java",
+          "code_snippet": "@Data\npublic class CustomerRequest {",
+          "recommendation": "Use Java Records for immutable DTOs to reduce boilerplate",
+          "fix_example": "public record CustomerRequest(\n  @NotBlank String firstName,\n  @NotBlank String lastName\n) {}"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Custom Critique",
+      "icon": "\ud83d\udd0d",
+      "metrics": [
+        {
+          "label": "Unit Test Coverage",
+          "value": "\u274c No tests found",
+          "target": ">80%"
+        },
+        {
+          "label": "Bugs Identified",
+          "value": "\u274c 3 potential bugs",
+          "target": "0"
+        },
+        {
+          "label": "Production Risks",
+          "value": "\u274c 2 risks identified",
+          "target": "0"
+        },
+        {
+          "label": "Missing Edge Cases",
+          "value": "\u274c 3 edge cases",
+          "target": "0"
+        },
+        {
+          "label": "Hallucinated Logic",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "API Misuse",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Unimplemented Comments",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Concurrency Primitives",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Over-Engineering",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Silent Failures",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        }
+      ],
+      "items": [
+        {
+          "title": "No Unit Tests",
+          "assessment": "critical",
+          "description": "No test files provided for service or controller logic"
+        },
+        {
+          "title": "Missing Edge Case Handling",
+          "assessment": "warning",
+          "description": "Several edge cases not handled in service layer"
+        }
+      ],
+      "issues": [
+        {
+          "severity": "critical",
+          "title": "No Unit Tests Found",
+          "description": "No test coverage for service or controller logic",
+          "file_path": "src/test/",
+          "code_snippet": "// No test files provided",
+          "recommendation": "Add unit tests for CustomerService and CustomerController",
+          "fix_example": "@Test\nvoid createCustomer_ShouldReturnCreatedCustomer() {\n  // test logic\n}"
+        },
+        {
+          "severity": "warning",
+          "title": "Potential Bug: No Duplicate Check Before Create",
+          "description": "Service may allow duplicate customers with same name",
+          "file_path": "CustomerService.java",
+          "code_snippet": "// Missing duplicate check in createCustomer",
+          "recommendation": "Check existsByFirstNameAndLastName before creating customer",
+          "fix_example": "if (repository.existsByFirstNameAndLastName(firstName, lastName)) {\n  throw new DuplicateCustomerException();\n}"
+        },
+        {
+          "severity": "warning",
+          "title": "Production Risk: Unbounded List Return",
+          "description": "getAllCustomers returns entire collection without pagination",
+          "file_path": "CustomerController.java",
+          "code_snippet": "List<CustomerResponse> customers = customerService.getAllCustomers();",
+          "recommendation": "Implement pagination using Pageable and Page<T>",
+          "fix_example": "Page<CustomerResponse> getCustomers(Pageable pageable) {\n  return repository.findAll(pageable);\n}"
+        },
+        {
+          "severity": "info",
+          "title": "Missing Edge Case: Null Age Filter",
+          "description": "Age filter doesn't validate for negative or zero values",
+          "file_path": "CustomerController.java",
+          "code_snippet": "@RequestParam(required = false) Integer age",
+          "recommendation": "Add validation for age parameter range",
+          "fix_example": "if (age != null && age < 1) {\n  throw new InvalidParameterException();\n}"
+        },
+        {
+          "severity": "info",
+          "title": "Missing Edge Case: Empty String Validation",
+          "description": "Validation allows strings with only whitespace",
+          "file_path": "CustomerRequest.java",
+          "code_snippet": "@NotBlank(message = \"First name is required\")",
+          "recommendation": "Add custom validator to trim and check for empty strings",
+          "fix_example": "@Pattern(regexp = \"^(?!\\\\s*$).+\", message = \"Cannot be blank\")"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Security",
+      "icon": "\ud83d\udd12",
+      "metrics": [
+        {
+          "label": "Sensitive Data in Logs",
+          "value": "\u26a0\ufe0f 1 violation in 1 file",
+          "target": "0"
+        },
+        {
+          "label": "Unmasked PII",
+          "value": "\u274c 2 violations in 2 files",
+          "target": "0"
+        },
+        {
+          "label": "SQL Injection Risks",
+          "value": "\u2705 Compliant (MongoDB)",
+          "target": "0"
+        },
+        {
+          "label": "Hardcoded Secrets",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Input Validation",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Insecure Defaults",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "External Call Timeouts",
+          "value": "\u2705 N/A",
+          "target": "0"
+        },
+        {
+          "label": "Environment Variables",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        }
+      ],
+      "items": [
+        {
+          "title": "Input Validation Present",
+          "assessment": "compliant",
+          "description": "Jakarta validation annotations properly used on DTOs"
+        },
+        {
+          "title": "PII Exposure Risk",
+          "assessment": "critical",
+          "description": "Customer PII returned unmasked in API responses"
+        },
+        {
+          "title": "PII in Logs",
+          "assessment": "warning",
+          "description": "Customer names logged without masking"
+        }
+      ],
+      "issues": [
+        {
+          "severity": "critical",
+          "title": "Unmasked PII in API Response",
+          "description": "Address and full name exposed without masking in CustomerResponse",
+          "file_path": "src/main/java/com/pulse/customerservice/dto/CustomerResponse.java",
+          "code_snippet": "private String address;\nprivate String firstName;",
+          "recommendation": "Implement PII masking for sensitive fields in responses",
+          "fix_example": "@JsonSerialize(using = AddressMasker.class)\nprivate String address;"
+        },
+        {
+          "severity": "warning",
+          "title": "PII Logged Without Masking",
+          "description": "Customer first and last names logged in plain text",
+          "file_path": "src/main/java/com/pulse/customerservice/controller/CustomerController.java",
+          "code_snippet": "log.info(\"Creating customer: {} {}\", request.getFirstName(), request.getLastName());",
+          "recommendation": "Mask PII in logs or use customer ID only",
+          "fix_example": "log.info(\"Creating customer with ID: {}\", customerId);"
+        },
+        {
+          "severity": "critical",
+          "title": "No Authentication/Authorization",
+          "description": "Endpoints lack security configuration (Spring Security not visible)",
+          "file_path": "CustomerController.java",
+          "code_snippet": "@RestController\npublic class CustomerController {",
+          "recommendation": "Add Spring Security with JWT or OAuth2 authentication",
+          "fix_example": "@PreAuthorize(\"hasRole('ADMIN')\")\npublic ResponseEntity<CustomerResponse> createCustomer()"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Error Handling",
+      "icon": "\ud83d\udee1\ufe0f",
+      "metrics": [
+        {
+          "label": "Exception Handling",
+          "value": "\u274c No global handler",
+          "target": "0"
+        },
+        {
+          "label": "Retry Logic",
+          "value": "\u2705 N/A",
+          "target": "0"
+        },
+        {
+          "label": "Error Messages",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Failure Escalation",
+          "value": "\u2705 N/A",
+          "target": "0"
+        },
+        {
+          "label": "Defensive Coding",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Uncaught Exceptions",
+          "value": "\u274c 1 risk identified",
+          "target": "0"
+        },
+        {
+          "label": "Correct Variable Logging",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        }
+      ],
+      "items": [
+        {
+          "title": "Validation Error Handling",
+          "assessment": "compliant",
+          "description": "Jakarta validation provides automatic error responses"
+        },
+        {
+          "title": "Global Exception Handler Missing",
+          "assessment": "critical",
+          "description": "No @ControllerAdvice for consistent error responses"
+        }
+      ],
+      "issues": [
+        {
+          "severity": "critical",
+          "title": "No Global Exception Handler",
+          "description": "Missing @ControllerAdvice for consistent error handling",
+          "file_path": "src/main/java/com/pulse/customerservice/",
+          "code_snippet": "// No GlobalExceptionHandler class found",
+          "recommendation": "Create @ControllerAdvice to handle exceptions globally",
+          "fix_example": "@ControllerAdvice\nclass GlobalExceptionHandler {\n  @ExceptionHandler(ResourceNotFoundException.class)\n  ResponseEntity<ErrorResponse> handleNotFound()\n}"
+        },
+        {
+          "severity": "warning",
+          "title": "Service Layer Missing Exception Handling",
+          "description": "CustomerService not visible but likely throws uncaught exceptions",
+          "file_path": "CustomerService.java",
+          "code_snippet": "// Service implementation not provided",
+          "recommendation": "Throw custom exceptions like CustomerNotFoundException",
+          "fix_example": "throw new CustomerNotFoundException(\"Customer not found: \" + id);"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Architecture",
+      "icon": "\ud83c\udfd7\ufe0f",
+      "metrics": [
+        {
+          "label": "Unnecessary Abstraction",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Dependency Injection",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Interface Usage",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Invented Classes/Libraries",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Fake Configuration Keys",
+          "value": "\u26a0\ufe0f Cannot verify",
+          "target": "0"
+        },
+        {
+          "label": "Function Parameter Mismatch",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Invented Architecture",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Dependency Version Mismatch",
+          "value": "\u26a0\ufe0f Cannot verify",
+          "target": "0"
+        },
+        {
+          "label": "Unnecessary Libraries",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "SOLID Principles",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Over-engineered Layers",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        }
+      ],
+      "items": [
+        {
+          "title": "Clean Layered Architecture",
+          "assessment": "compliant",
+          "description": "Proper separation: Controller \u2192 Service \u2192 Repository"
+        },
+        {
+          "title": "Dependency Injection",
+          "assessment": "compliant",
+          "description": "Constructor injection used with @RequiredArgsConstructor"
+        },
+        {
+          "title": "MapStruct Integration",
+          "assessment": "compliant",
+          "description": "Proper use of MapStruct for DTO-Entity mapping"
+        }
+      ],
+      "issues": []
+    },
+    {
+      "id": 6,
+      "name": "Performance",
+      "icon": "\u26a1",
+      "metrics": [
+        {
+          "label": "Algorithmic Complexity",
+          "value": "\u2705 Compliant",
+          "target": "O(n)"
+        },
+        {
+          "label": "Memory Usage",
+          "value": "\u274c 1 violation",
+          "target": "0"
+        },
+        {
+          "label": "Async/Await Handling",
+          "value": "\u2705 N/A",
+          "target": "0"
+        },
+        {
+          "label": "Unnecessary Conversions",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        }
+      ],
+      "items": [
+        {
+          "title": "Efficient Mapping",
+          "assessment": "compliant",
+          "description": "MapStruct provides compile-time optimized mapping"
+        },
+        {
+          "title": "No Pagination",
+          "assessment": "critical",
+          "description": "getAllCustomers loads entire collection into memory"
+        }
+      ],
+      "issues": [
+        {
+          "severity": "critical",
+          "title": "Missing Pagination for List Endpoints",
+          "description": "getAllCustomers returns unbounded list causing memory issues",
+          "file_path": "src/main/java/com/pulse/customerservice/controller/CustomerController.java",
+          "code_snippet": "List<CustomerResponse> customers = customerService.getAllCustomers();",
+          "recommendation": "Implement pagination using Spring Data Pageable",
+          "fix_example": "Page<CustomerResponse> getCustomers(Pageable pageable) {\n  return service.getCustomers(pageable);\n}"
+        },
+        {
+          "severity": "warning",
+          "title": "No Database Indexing Visible",
+          "description": "findByFirstNameAndLastName may be slow without index",
+          "file_path": "CustomerRepository.java",
+          "code_snippet": "Optional<Customer> findByFirstNameAndLastName(String firstName, String lastName);",
+          "recommendation": "Add compound index on firstName and lastName",
+          "fix_example": "@Indexed\n@CompoundIndex(def = \"{'firstName': 1, 'lastName': 1}\")"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Logging",
+      "icon": "\ud83d\udcdd",
+      "metrics": [
+        {
+          "label": "System.out Usage",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Sensitive Data in Logs",
+          "value": "\u274c 1 violation",
+          "target": "0"
+        },
+        {
+          "label": "Trace/Correlation IDs",
+          "value": "\u274c Not implemented",
+          "target": "0"
+        },
+        {
+          "label": "Structured Logging",
+          "value": "\u26a0\ufe0f Partial",
+          "target": "0"
+        },
+        {
+          "label": "Tracing Spans",
+          "value": "\u274c Not implemented",
+          "target": "0"
+        }
+      ],
+      "items": [
+        {
+          "title": "SLF4J Logging Used",
+          "assessment": "compliant",
+          "description": "Proper use of @Slf4j and log.info/error"
+        },
+        {
+          "title": "Missing Correlation IDs",
+          "assessment": "warning",
+          "description": "No trace/correlation ID in logs for request tracking"
+        },
+        {
+          "title": "PII in Logs",
+          "assessment": "warning",
+          "description": "Customer names logged without masking"
+        }
+      ],
+      "issues": [
+        {
+          "severity": "warning",
+          "title": "No Correlation ID in Logs",
+          "description": "Logs lack trace/correlation IDs for distributed tracing",
+          "file_path": "CustomerController.java",
+          "code_snippet": "log.info(\"GET /v1/customers/{} - Fetching customer by ID\", id);",
+          "recommendation": "Add MDC context with correlation ID from headers",
+          "fix_example": "MDC.put(\"correlationId\", request.getHeader(\"X-Correlation-ID\"));\nlog.info(\"Fetching customer\");"
+        },
+        {
+          "severity": "warning",
+          "title": "No Distributed Tracing",
+          "description": "Missing Spring Cloud Sleuth or OpenTelemetry integration",
+          "file_path": "pom.xml",
+          "code_snippet": "// No tracing dependency visible",
+          "recommendation": "Add Spring Cloud Sleuth or Micrometer Tracing",
+          "fix_example": "<dependency>\n  <groupId>org.springframework.cloud</groupId>\n  <artifactId>spring-cloud-starter-sleuth</artifactId>\n</dependency>"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "LLM as a Judge",
+      "icon": "\ud83e\udd16",
+      "metrics": [
+        {
+          "label": "Hallucinated Functions",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Non-existent Libraries",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Fake Configuration Keys",
+          "value": "\u26a0\ufe0f Cannot verify",
+          "target": "0"
+        },
+        {
+          "label": "Generic Placeholder Code",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Invented API Endpoints",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Copy-Paste Inconsistencies",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Overconfident Assumptions",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Inappropriate Design Patterns",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Missing Error Context",
+          "value": "\u26a0\ufe0f 1 issue",
+          "target": "0"
+        },
+        {
+          "label": "Unrealistic Performance Claims",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        }
+      ],
+      "items": [
+        {
+          "title": "Real Dependencies Used",
+          "assessment": "compliant",
+          "description": "All imports are valid Spring Boot and Jakarta libraries"
+        },
+        {
+          "title": "No Placeholder Code",
+          "assessment": "compliant",
+          "description": "No TODO comments or unimplemented methods"
+        },
+        {
+          "title": "Appropriate Patterns",
+          "assessment": "compliant",
+          "description": "Repository pattern and DTO mapping are appropriate for use case"
+        }
+      ],
+      "issues": [
+        {
+          "severity": "info",
+          "title": "Service Implementation Not Provided",
+          "description": "CustomerService interface/implementation not visible for full analysis",
+          "file_path": "CustomerService.java",
+          "code_snippet": "// Service implementation not in provided files",
+          "recommendation": "Ensure service layer properly implements business logic",
+          "fix_example": "@Service\npublic class CustomerServiceImpl implements CustomerService { ... }"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "Domain",
+      "icon": "\ud83c\udfaf",
+      "metrics": [
+        {
+          "label": "Domain-Specific Compliance",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        }
+      ],
+      "items": [
+        {
+          "title": "Customer Domain Model",
+          "assessment": "compliant",
+          "description": "Customer entity properly models domain with appropriate fields"
+        },
+        {
+          "title": "Business Validation",
+          "assessment": "compliant",
+          "description": "Age constraints and field validations match business rules"
+        }
+      ],
+      "issues": [
+        {
+          "severity": "info",
+          "title": "Consider Additional Business Rules",
+          "description": "May need email, phone, or customer status fields for real-world use",
+          "file_path": "Customer.java",
+          "code_snippet": "// Only basic fields present",
+          "recommendation": "Add email, phone, status fields if required by business",
+          "fix_example": "@Email\nprivate String email;\nprivate CustomerStatus status;"
+        }
+      ]
+    }
+  ],
+  "priority_actions": {
+    "critical": [
+      {
+        "title": "Implement Pagination",
+        "description": "getAllCustomers returns unbounded list causing memory issues",
+        "category": "Performance"
+      },
+      {
+        "title": "Add Global Exception Handler",
+        "description": "Missing @ControllerAdvice for consistent error responses",
+        "category": "Error Handling"
+      },
+      {
+        "title": "Mask PII in API Responses",
+        "description": "Address and names exposed without masking",
+        "category": "Security"
+      }
+    ],
+    "warnings": [
+      {
+        "title": "Add Correlation IDs to Logs",
+        "description": "Logs lack trace IDs for distributed tracing",
+        "category": "Logging"
+      },
+      {
+        "title": "Implement Authentication",
+        "description": "Endpoints lack security configuration",
+        "category": "Security"
+      },
+      {
+        "title": "Add Database Indexes",
+        "description": "Compound queries may be slow without indexes",
+        "category": "Performance"
+      },
+      {
+        "title": "Remove PII from Logs",
+        "description": "Customer names logged without masking",
+        "category": "Security"
+      },
+      {
+        "title": "Add Duplicate Check",
+        "description": "Service may allow duplicate customers",
+        "category": "Custom Critique"
+      }
+    ],
+    "suggestions": [
+      {
+        "title": "Use Java Records for DTOs",
+        "description": "Replace Lombok @Data with Records for immutability",
+        "category": "Code Quality"
+      },
+      {
+        "title": "Add Unit Tests",
+        "description": "No test coverage found for service or controller",
+        "category": "Custom Critique"
+      },
+      {
+        "title": "Add Age Parameter Validation",
+        "description": "Age filter doesn't validate for negative values",
+        "category": "Custom Critique"
+      },
+      {
+        "title": "Add Distributed Tracing",
+        "description": "Integrate Spring Cloud Sleuth or OpenTelemetry",
+        "category": "Logging"
+      },
+      {
+        "title": "Consider Additional Domain Fields",
+        "description": "Add email, phone, status for real-world use",
+        "category": "Domain"
+      }
+    ]
+  },
+  "final_assessment": {
+    "key_improvements": [
+      "Implement pagination for list endpoints to prevent memory issues",
+      "Add global exception handler for consistent error responses",
+      "Mask PII in API responses and logs for security compliance",
+      "Add authentication/authorization using Spring Security",
+      "Implement correlation IDs and distributed tracing for observability"
+    ]
+  }
+}

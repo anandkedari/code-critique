@@ -1052,7 +1052,7 @@
 
         <!-- SECTION 3: Issues by File -->
         <div class="categories-overview">
-            <h2>📁 Issues by File</h2>
+            <h2>📁 Issues by File (Sorted by Issue Count)</h2>
             <div class="files-issues-grid">
                 {% set ns = namespace(file_issues={}) %}
                 {% for category in categories %}
@@ -1077,7 +1077,16 @@
                     {% endif %}
                 {% endfor %}
                 
+                {# Sort files by issue count (descending) #}
+                {% set sorted_files = [] %}
                 {% for file_path, issues in ns.file_issues.items() %}
+                    {% set _ = sorted_files.append((file_path, issues)) %}
+                {% endfor %}
+                {% set sorted_files = sorted_files|sort(attribute='1', reverse=True)|sort(attribute='1|length', reverse=True) %}
+                
+                {# Show top 5 files #}
+                <div id="top-files-container">
+                {% for file_path, issues in sorted_files[:5] %}
                 <div class="file-issues-item">
                     <div class="file-issues-header" onclick="toggleFileIssues(this)">
                         <span class="expand-icon">▶</span>
@@ -1117,6 +1126,56 @@
                     </div>
                 </div>
                 {% endfor %}
+                </div>
+                
+                {# Show remaining files (hidden by default) #}
+                {% if sorted_files|length > 5 %}
+                <div id="more-files-container" style="display: none;">
+                {% for file_path, issues in sorted_files[5:] %}
+                <div class="file-issues-item">
+                    <div class="file-issues-header" onclick="toggleFileIssues(this)">
+                        <span class="expand-icon">▶</span>
+                        <span class="file-icon">📄</span>
+                        <span class="file-name">{{ file_path }}</span>
+                        <span class="file-issues-count">{{ issues|length }} issue{{ 's' if issues|length != 1 else '' }}</span>
+                    </div>
+                    <div class="file-issues-content">
+                        {% for issue in issues %}
+                        <div class="file-issue-detail severity-{{ issue.severity }}">
+                            <div class="file-issue-detail-title">
+                                {% if issue.severity == 'critical' %}❌
+                                {% elif issue.severity == 'warning' %}⚠️
+                                {% else %}ℹ️{% endif %}
+                                {{ issue.title }}
+                            </div>
+                            <div class="file-issue-detail-desc">{{ issue.description }}</div>
+                            <span class="file-issue-category">{{ issue.icon }} {{ issue.category }}</span>
+                            
+                            {% if issue.code_snippet %}
+                            <div class="file-code-snippet">{{ issue.code_snippet }}</div>
+                            {% endif %}
+                            
+                            {% if issue.recommendation or issue.fix_example %}
+                            <div class="file-recommendation">
+                                {% if issue.recommendation %}
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>{{ issue.recommendation }}</div>
+                                {% endif %}
+                                {% if issue.fix_example %}
+                                <div class="file-fix-example">{{ issue.fix_example }}</div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+                </div>
+                <button id="show-more-files-btn" onclick="toggleMoreFiles()" style="margin-top: 0.75rem; padding: 0.5rem 1rem; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
+                    Show More Files ({{ sorted_files|length - 5 }} more)
+                </button>
+                {% endif %}
             </div>
         </div>
 
@@ -1471,6 +1530,20 @@
                 moreContainer.style.display = 'none';
                 const hiddenCount = moreContainer.children.length;
                 btn.textContent = `Show More (${hiddenCount} more)`;
+            }
+        }
+        
+        function toggleMoreFiles() {
+            const moreContainer = document.getElementById('more-files-container');
+            const btn = document.getElementById('show-more-files-btn');
+            
+            if (moreContainer.style.display === 'none') {
+                moreContainer.style.display = 'block';
+                btn.textContent = 'Show Less';
+            } else {
+                moreContainer.style.display = 'none';
+                const hiddenCount = moreContainer.children.length;
+                btn.textContent = `Show More Files (${hiddenCount} more)`;
             }
         }
         

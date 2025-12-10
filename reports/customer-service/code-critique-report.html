@@ -1,0 +1,4643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Critique Report - customer-service</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.5;
+            color: #333333;
+            background: #f5f5f5;
+            font-size: 14px;
+        }
+        
+        .header {
+            background: #333333;
+            color: #ffffff;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-bottom: 3px solid #00c853;
+        }
+        
+        .header h1 { font-size: 1.8rem; margin-bottom: 0.3rem; font-weight: 600; }
+        
+        .header .metadata {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 0.75rem;
+            font-size: 0.8rem;
+            opacity: 0.85;
+        }
+        
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        
+        /* Section 1: Overall Summary */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card {
+            background: #ffffff;
+            border-radius: 3px;
+            padding: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border: 1px solid #e0e0e0;
+            transition: transform 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card:hover { transform: translateY(-2px); box-shadow: 0 3px 10px rgba(0,0,0,0.12); }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.6rem;
+        }
+        
+        .card-title {
+            font-size: 0.75rem;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .card-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+        
+        .badge-critical { background: #f44336; color: #ffffff; }
+        .badge-warning { background: #ff9800; color: #ffffff; }
+        .badge-info { background: #2196f3; color: #ffffff; }
+        .badge-success { background: #00c853; color: #ffffff; }
+        
+        /* Section 2: Category Status Table */
+        .categories-overview {
+            background: #ffffff;
+            border-radius: 3px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border: 1px solid #e0e0e0;
+        }
+        
+        .categories-overview h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        /* Category Summary Grid */
+        .category-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 0.75rem;
+        }
+        
+        .category-summary-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: #ead7c1;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+        
+        .category-summary-name {
+            flex: 1;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .category-summary-count {
+            color: #718096;
+            font-size: 0.8rem;
+            padding: 0.25rem 0.6rem;
+            background: #fff;
+            border-radius: 12px;
+        }
+        
+        /* Compact Status Grid */
+        .compact-status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 0.5rem;
+        }
+        
+        .compact-status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.6rem 0.75rem;
+            background: #75b1d0;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            border-left: 3px solid transparent;
+        }
+        
+        .compact-status-item.status-excellent { border-left-color: #059669; }
+        .compact-status-item.status-good { border-left-color: #2563eb; }
+        .compact-status-item.status-needs-work { border-left-color: #d97706; }
+        .compact-status-item.status-critical { border-left-color: #c53030; }
+        
+        .status-icon {
+            font-size: 1.1rem;
+        }
+        
+        .status-name {
+            flex: 1;
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.85rem;
+        }
+        
+        .status-badge-inline {
+            font-weight: 600;
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+        }
+        
+        .status-excellent .status-badge-inline { background: #d1fae5; color: #059669; }
+        .status-good .status-badge-inline { background: #dbeafe; color: #2563eb; }
+        .status-needs-work .status-badge-inline { background: #fef3c7; color: #d97706; }
+        .status-critical .status-badge-inline { background: #ffd4d4; color: #c53030; }
+        
+        .status-metrics {
+            color: #000000;
+            font-size: 0.75rem;
+        }
+        
+        /* Files Issues Grid */
+        .files-issues-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+        
+        .file-issues-item {
+            background: #ffffff;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            overflow: hidden;
+        }
+        
+        .file-issues-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            user-select: none;
+        }
+        
+        .file-issues-header:hover {
+            background: #f8f9fa;
+        }
+        
+        .expand-icon {
+            font-size: 0.8rem;
+            color: #718096;
+            transition: transform 0.2s;
+        }
+        
+        .file-issues-item.expanded .expand-icon {
+            transform: rotate(90deg);
+        }
+        
+        .file-icon {
+            font-size: 1.1rem;
+        }
+        
+        .file-name {
+            flex: 1;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .file-issues-count {
+            color: #718096;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.6rem;
+            background: #f0f0f0;
+            border-radius: 12px;
+        }
+        
+        .file-issues-content {
+            display: none;
+            padding: 0 0.75rem 0.75rem 0.75rem;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .file-issues-item.expanded .file-issues-content {
+            display: block;
+        }
+        
+        .file-issue-detail {
+            padding: 0.6rem;
+            margin-top: 0.5rem;
+            background: #f8f9fa;
+            border-left: 3px solid #ddd;
+            border-radius: 3px;
+            font-size: 0.8rem;
+        }
+        
+        .file-issue-detail.severity-critical {
+            border-left-color: #f44336;
+            background: #fff5f5;
+        }
+        
+        .file-issue-detail.severity-warning {
+            border-left-color: #ff9800;
+            background: #fffbf0;
+        }
+        
+        .file-issue-detail.severity-info {
+            border-left-color: #2196f3;
+            background: #f0f8ff;
+        }
+        
+        .file-issue-detail-title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.8rem;
+        }
+        
+        .file-issue-detail-desc {
+            color: #4a5568;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            margin-bottom: 0.4rem;
+        }
+        
+        .file-issue-category {
+            display: inline-block;
+            margin-top: 0.3rem;
+            padding: 0.15rem 0.4rem;
+            background: #ffffff;
+            border-radius: 8px;
+            font-size: 0.65rem;
+            color: #718096;
+        }
+        
+        .file-code-snippet {
+            background: #2d3748;
+            color: #f8f8f2;
+            padding: 0.4rem 0.5rem;
+            border-radius: 3px;
+            overflow-x: auto;
+            margin: 0.4rem 0;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.7rem;
+            line-height: 1.3;
+            white-space: pre-wrap;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        
+        .file-recommendation {
+            background: #e8f4f8;
+            padding: 0.4rem 0.5rem;
+            margin-top: 0.4rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            line-height: 1.4;
+        }
+        
+        .file-recommendation-label {
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 0.2rem;
+            font-size: 0.7rem;
+        }
+        
+        .file-fix-example {
+            background: #1e3a2e;
+            color: #90ee90;
+            padding: 0.4rem 0.5rem;
+            border-radius: 3px;
+            overflow-x: auto;
+            margin-top: 0.3rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.7rem;
+            line-height: 1.3;
+            white-space: pre-wrap;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        
+        /* Section 3: Detailed Category Analysis */
+        .category-section {
+            background: #ffffff;
+            border-radius: 3px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border: 1px solid #e0e0e0;
+        }
+        
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #f3e8dc;
+        }
+        
+        .category-title {
+            font-size: 1.1rem;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-weight: 600;
+        }
+        
+        .category-status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        
+        .category-status-excellent { background: #d1fae5; color: #059669; }
+        .category-status-good { background: #dbeafe; color: #2563eb; }
+        .category-status-needs-work { background: #fef3c7; color: #d97706; }
+        .category-status-critical { background: #ffd4d4; color: #c53030; }
+        
+        .category-icon { font-size: 1.3rem; }
+        
+        .compliance-badge {
+            padding: 0.35rem 1rem;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .compliance-compliant { background: #d1fae5; color: #059669; }
+        .compliance-needs-work { background: #fef3c7; color: #856404; }
+        .compliance-suggestion { background: #dbeafe; color: #1e40af; }
+        .compliance-inconsistency { background: #fce7f3; color: #9f1239; }
+        
+        /* Metrics List (2-Column Grid) */
+        .metrics-list {
+            margin-bottom: 1rem;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.0rem;
+        }
+        
+        .metric-row {
+            padding: 0.4rem 0.6rem;
+            background: #dadada;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+        }
+        
+        .metric-name {
+            color: #2d3748;
+            font-weight: 500;
+            flex: 1;
+        }
+        
+        .metric-info {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .metric-value-display {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.75rem;
+        }
+        
+        .metric-target-display {
+            font-size: 0.7rem;
+            color: #718096;
+        }
+        
+        /* Items List - Inline Format */
+        .items-list {
+            margin-bottom: 1rem;
+        }
+        
+        .items-list h3 {
+            font-size: 0.95rem;
+            margin-bottom: 0.75rem;
+            color: #4a5568;
+            font-weight: 600;
+        }
+        
+        .item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.7rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            background: #fcf9f4;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            font-size: 0.8rem;
+        }
+        
+        .item-compliant { 
+            border-color: #d1fae5;
+            background: #f0fdf9;
+        }
+        .item-warning { 
+            border-color: #fef3c7;
+            background: #fffbeb;
+        }
+        .item-critical { 
+            border-color: #ffd4d4;
+            background: #fff5f5;
+        }
+        .item-info { 
+            border-color: #dbeafe;
+            background: #eff6ff;
+        }
+        
+        .item-icon {
+            font-size: 0.9rem;
+        }
+        
+        .item-content {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        .item-title {
+            font-weight: 500;
+            color: #2d3748;
+            font-size: 0.8rem;
+        }
+        
+        .item-description {
+            display: none;
+        }
+        
+        /* Issues */
+        .issues-list h3 {
+            font-size: 0.95rem;
+            margin-bottom: 0.75rem;
+            color: #4a5568;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .issues-list h3:hover {
+            color: #2d3748;
+        }
+        
+        .issues-list-toggle {
+            font-size: 0.8rem;
+            color: #718096;
+            transition: transform 0.2s;
+        }
+        
+        .issues-list.collapsed .issues-list-toggle {
+            transform: rotate(-90deg);
+        }
+        
+        .issues-list.collapsed .issues-list-content {
+            display: none;
+        }
+        
+        .issue {
+            background: #f2f2f299;
+            border-left: 3px solid #ddd;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+        
+        .issue-critical { border-left-color: #c53030; }
+        .issue-warning { border-left-color: #d97706; }
+        .issue-info { border-left-color: #2563eb; }
+        
+        .issue-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+        
+        .issue-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #2d3748;
+        }
+        
+        .issue-description {
+            color: #4a5568;
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+        
+        .file-path {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.75rem;
+            color: #718096;
+            background: #fff;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #f8f8f2;
+            padding: 0.75rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 0.5rem 0;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        
+        .code-label {
+            font-size: 0.75rem;
+            color: #718096;
+            margin-bottom: 0.2rem;
+            margin-top: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .recommendation {
+            background: #9fc15c3d;
+            border-left: 3px solid #2563eb;
+            padding: 0.75rem;
+            margin-top: 0.75rem;
+            border-radius: 4px;
+        }
+        
+        .recommendation-title {
+            font-weight: 600;
+            color: #046423;
+            margin-bottom: 0.35rem;
+            font-size: 0.85rem;
+        }
+        
+        /* Section 4: Priority Actions */
+        .priority-section {
+            background: #ffffff;
+            border-radius: 3px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border: 1px solid #e0e0e0;
+            border-left: 4px solid #ff9800;
+        }
+        
+        .priority-section h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        .priority-group {
+            margin-bottom: 1.25rem;
+        }
+        
+        .priority-group h3 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .priority-group.critical h3 { color: #c53030; }
+        .priority-group.warnings h3 { color: #d97706; }
+        .priority-group.suggestions h3 { color: #2563eb; }
+        
+        .priority-items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 0.75rem;
+        }
+        
+        .priority-item {
+            padding: 0.75rem;
+            background: #dadada;
+            border-radius: 6px;
+            border-left: 3px solid #ddd;
+            font-size: 0.85rem;
+        }
+        
+        .priority-item.critical { border-left-color: #c53030; }
+        .priority-item.warning { border-left-color: #d97706; }
+        .priority-item.info { border-left-color: #2563eb; }
+        
+        .priority-title {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            color: #2d3748;
+            font-size: 0.85rem;
+        }
+        
+        .priority-description {
+            color: #4a5568;
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+        
+        .priority-category {
+            display: inline-block;
+            margin-top: 0.35rem;
+            padding: 0.2rem 0.6rem;
+            background: #fff;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            color: #718096;
+        }
+        
+        /* Section 5: Final Assessment */
+        .final-assessment {
+            background: #e8f5e9;
+            border-radius: 3px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border: 1px solid #e0e0e0;
+            border-left: 4px solid #00c853;
+        }
+        
+        .final-assessment h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        .grade-display {
+            text-align: center;
+            padding: 2rem;
+            background: #00c853;
+            color: white;
+            border-radius: 3px;
+            margin-bottom: 2rem;
+        }
+        
+        .grade-value {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .grade-label {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .assessment-section {
+            margin-bottom: 0;
+        }
+        
+        .assessment-list {
+            list-style: none;
+        }
+        
+        .assessment-list li {
+            padding: 0.6rem;
+            margin-bottom: 0.4rem;
+            background: #f0fdf9;
+            border-radius: 6px;
+            padding-left: 2rem;
+            position: relative;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: #4a5568;
+        }
+        
+        .assessment-list.improvements li:before {
+            content: "⚠";
+            position: absolute;
+            left: 0.65rem;
+            color: #d97706;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: #718096;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 1.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .no-issues {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 500;
+            margin: 0.75rem 0;
+            font-size: 0.85rem;
+        }
+        
+        /* Issue Filter Section */
+        .issue-filter-section {
+            background: #ffffff;
+            border-radius: 3px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border: 1px solid #e0e0e0;
+            display: none;
+        }
+        
+        .issue-filter-section.active {
+            display: block;
+        }
+        
+        .issue-filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .issue-filter-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .close-filter {
+            background: #e0e0e0;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .close-filter:hover {
+            background: #d0d0d0;
+        }
+        
+        .filtered-issue-item {
+            background: #f8f9fa;
+            border-left: 3px solid #ddd;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        
+        .filtered-issue-item.severity-critical {
+            border-left-color: #c53030;
+        }
+        
+        .filtered-issue-item.severity-warning {
+            border-left-color: #d97706;
+        }
+        
+        .filtered-issue-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+        
+        .filtered-issue-title {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.9rem;
+        }
+        
+        .filtered-issue-category {
+            font-size: 0.75rem;
+            color: #718096;
+            background: #fff;
+            padding: 0.2rem 0.5rem;
+            border-radius: 8px;
+        }
+        
+        .filtered-issue-file {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.75rem;
+            color: #718096;
+            margin-bottom: 0.35rem;
+        }
+        
+        .filtered-issue-desc {
+            color: #4a5568;
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+        
+        .card.clickable {
+            cursor: pointer;
+        }
+        
+        /* Issues Bar Graph Section */
+        .bar-graph-section {
+            background: #ffffff;
+            border-radius: 3px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border: 1px solid #e0e0e0;
+        }
+        
+        .bar-graph-section h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        .bar-item {
+            margin-bottom: 0.75rem;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .bar-item.clickable {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .bar-item.clickable:hover {
+            background: #e9ecef;
+        }
+        
+        .bar-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.3rem;
+            font-size: 0.85rem;
+        }
+        
+        .bar-icon {
+            font-size: 1.1rem;
+        }
+        
+        .bar-label {
+            flex: 1;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .bar-count {
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+        }
+        
+        .bar-count.critical { background: #ffd4d4; color: #c53030; }
+        .bar-count.warning { background: #fef3c7; color: #d97706; }
+        .bar-count.mixed { background: #e0e0e0; color: #2d3748; }
+        
+        .bar-graph {
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+            font-size: 0.9rem;
+        }
+        
+        .bar-emoji {
+            display: inline-block;
+        }
+        
+        .bar-critical { color: #c53030; }
+        .bar-warning { color: #d97706; }
+        
+        @media print {
+            body { background: white; }
+            .card:hover { transform: none; }
+            .issue-filter-section { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>🔍 Code Critique Report</h1>
+        <div class="metadata">
+            <div><strong>Service:</strong> customer-service</div>
+            <div><strong>Generated:</strong> 2025-12-09T21:57:00Z</div>
+            <div><strong>Framework:</strong> Spring Boot 3.2.1</div>
+            <div><strong>Language:</strong> Java 21</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- SECTION 1: Overall Summary -->
+        <div class="summary-cards">
+            <div class="card">
+                <div class="card-title">Overall Status</div>
+                <span class="badge badge-warning">
+                    NEEDS WORK
+                    
+                </span>
+            </div>
+            
+            <div class="card clickable" onclick="showFilteredIssues('critical')">
+                <div class="card-title">Critical Issues</div>
+                <span class="badge badge-critical">3</span>
+            </div>
+            
+            <div class="card clickable" onclick="showFilteredIssues('warning')">
+                <div class="card-title">Warnings</div>
+                <span class="badge badge-warning">8</span>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Files Not Compliant</div>
+                
+                
+                    
+                        
+                            
+                                
+                                    
+                                
+                            
+                        
+                    
+                
+                    
+                        
+                            
+                                
+                                    
+                                
+                            
+                        
+                            
+                                
+                                    
+                                
+                            
+                        
+                            
+                                
+                                    
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                                    
+                                
+                            
+                        
+                    
+                
+                    
+                        
+                            
+                                
+                                    
+                                
+                            
+                        
+                            
+                                
+                                    
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                    
+                
+                    
+                        
+                            
+                                
+                                    
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                    
+                
+                    
+                
+                    
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                                    
+                                
+                            
+                        
+                    
+                
+                    
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                                    
+                                
+                            
+                        
+                    
+                
+                    
+                        
+                            
+                                
+                            
+                        
+                    
+                
+                    
+                        
+                            
+                                
+                                    
+                                
+                            
+                        
+                    
+                
+                <span class="badge badge-warning">11</span>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Files Scanned</div>
+                <span class="badge badge-info">24</span>
+            </div>
+        </div>
+
+        <!-- SECTION 2: Assessment Status -->
+        <div class="categories-overview">
+            <h2>📋 Assessment Status</h2>
+            <div class="compact-status-grid">
+                
+                
+                
+                <div class="compact-status-item status-excellent">
+                    <span class="status-icon">✨</span>
+                    <span class="status-name">Code Quality</span>
+                    <span class="status-badge-inline">
+                        ✅ COMPLIANT
+                        
+                    </span>
+                    <span class="status-metrics">1 issue</span>
+                </div>
+                
+                
+                
+                <div class="compact-status-item status-needs-work">
+                    <span class="status-icon">🔍</span>
+                    <span class="status-name">Custom Critique</span>
+                    <span class="status-badge-inline">
+                        ❌ 1 CRITICAL
+                    </span>
+                    <span class="status-metrics">5 issues</span>
+                </div>
+                
+                
+                
+                <div class="compact-status-item status-needs-work">
+                    <span class="status-icon">🔒</span>
+                    <span class="status-name">Security</span>
+                    <span class="status-badge-inline">
+                        ❌ 2 CRITICAL
+                    </span>
+                    <span class="status-metrics">3 issues</span>
+                </div>
+                
+                
+                
+                <div class="compact-status-item status-needs-work">
+                    <span class="status-icon">🛡️</span>
+                    <span class="status-name">Error Handling</span>
+                    <span class="status-badge-inline">
+                        ❌ 1 CRITICAL
+                    </span>
+                    <span class="status-metrics">2 issues</span>
+                </div>
+                
+                
+                
+                <div class="compact-status-item status-excellent">
+                    <span class="status-icon">🏗️</span>
+                    <span class="status-name">Architecture</span>
+                    <span class="status-badge-inline">
+                        ✅ COMPLIANT
+                        
+                    </span>
+                    <span class="status-metrics">0 issues</span>
+                </div>
+                
+                
+                
+                <div class="compact-status-item status-needs-work">
+                    <span class="status-icon">⚡</span>
+                    <span class="status-name">Performance</span>
+                    <span class="status-badge-inline">
+                        ❌ 1 CRITICAL
+                    </span>
+                    <span class="status-metrics">2 issues</span>
+                </div>
+                
+                
+                
+                <div class="compact-status-item status-good">
+                    <span class="status-icon">📝</span>
+                    <span class="status-name">Logging</span>
+                    <span class="status-badge-inline">
+                        ⚠️ 2 WARNINGs
+                        
+                    </span>
+                    <span class="status-metrics">2 issues</span>
+                </div>
+                
+                
+                
+                <div class="compact-status-item status-excellent">
+                    <span class="status-icon">🤖</span>
+                    <span class="status-name">LLM as a Judge</span>
+                    <span class="status-badge-inline">
+                        ✅ COMPLIANT
+                        
+                    </span>
+                    <span class="status-metrics">1 issue</span>
+                </div>
+                
+                
+                
+                <div class="compact-status-item status-excellent">
+                    <span class="status-icon">🎯</span>
+                    <span class="status-name">Domain</span>
+                    <span class="status-badge-inline">
+                        ✅ COMPLIANT
+                        
+                    </span>
+                    <span class="status-metrics">1 issue</span>
+                </div>
+                
+            </div>
+        </div>
+
+        <!-- SECTION 3: Issues by File -->
+        <div class="categories-overview">
+            <h2>📁 Issues by File</h2>
+            <div class="files-issues-grid">
+                
+                
+                    
+                        
+                            
+                                
+                                    
+                                
+                                
+                            
+                        
+                    
+                
+                    
+                        
+                            
+                                
+                                    
+                                
+                                
+                            
+                        
+                            
+                                
+                                    
+                                
+                                
+                            
+                        
+                            
+                                
+                                    
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                    
+                                
+                                
+                            
+                        
+                    
+                
+                    
+                        
+                            
+                                
+                                    
+                                
+                                
+                            
+                        
+                            
+                                
+                                    
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                    
+                
+                    
+                        
+                            
+                                
+                                    
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                    
+                
+                    
+                
+                    
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                    
+                                
+                                
+                            
+                        
+                    
+                
+                    
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                    
+                                
+                                
+                            
+                        
+                    
+                
+                    
+                        
+                            
+                                
+                                
+                            
+                        
+                    
+                
+                    
+                        
+                            
+                                
+                                    
+                                
+                                
+                            
+                        
+                    
+                
+                
+                
+                <div class="file-issues-item">
+                    <div class="file-issues-header" onclick="toggleFileIssues(this)">
+                        <span class="expand-icon">▶</span>
+                        <span class="file-icon">📄</span>
+                        <span class="file-name">src/main/java/com/pulse/customerservice/dto/CustomerRequest.java</span>
+                        <span class="file-issues-count">1 issue</span>
+                    </div>
+                    <div class="file-issues-content">
+                        
+                        <div class="file-issue-detail severity-info">
+                            <div class="file-issue-detail-title">
+                                ℹ️
+                                Consider Using Java Records for DTOs
+                            </div>
+                            <div class="file-issue-detail-desc">DTOs could be immutable using Java 17+ Records instead of Lombok</div>
+                            <span class="file-issue-category">✨ Code Quality</span>
+                            
+                            
+                            <div class="file-code-snippet">@Data
+public class CustomerRequest {</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Use Java Records for immutable DTOs to reduce boilerplate</div>
+                                
+                                
+                                <div class="file-fix-example">public record CustomerRequest(
+  @NotBlank String firstName,
+  @NotBlank String lastName
+) {}</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <div class="file-issues-item">
+                    <div class="file-issues-header" onclick="toggleFileIssues(this)">
+                        <span class="expand-icon">▶</span>
+                        <span class="file-icon">📄</span>
+                        <span class="file-name">src/test/</span>
+                        <span class="file-issues-count">1 issue</span>
+                    </div>
+                    <div class="file-issues-content">
+                        
+                        <div class="file-issue-detail severity-critical">
+                            <div class="file-issue-detail-title">
+                                ❌
+                                
+                                No Unit Tests Found
+                            </div>
+                            <div class="file-issue-detail-desc">No test coverage for service or controller logic</div>
+                            <span class="file-issue-category">🔍 Custom Critique</span>
+                            
+                            
+                            <div class="file-code-snippet">// No test files provided</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Add unit tests for CustomerService and CustomerController</div>
+                                
+                                
+                                <div class="file-fix-example">@Test
+void createCustomer_ShouldReturnCreatedCustomer() {
+  // test logic
+}</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <div class="file-issues-item">
+                    <div class="file-issues-header" onclick="toggleFileIssues(this)">
+                        <span class="expand-icon">▶</span>
+                        <span class="file-icon">📄</span>
+                        <span class="file-name">CustomerService.java</span>
+                        <span class="file-issues-count">3 issues</span>
+                    </div>
+                    <div class="file-issues-content">
+                        
+                        <div class="file-issue-detail severity-warning">
+                            <div class="file-issue-detail-title">
+                                ⚠️
+                                
+                                Potential Bug: No Duplicate Check Before Create
+                            </div>
+                            <div class="file-issue-detail-desc">Service may allow duplicate customers with same name</div>
+                            <span class="file-issue-category">🔍 Custom Critique</span>
+                            
+                            
+                            <div class="file-code-snippet">// Missing duplicate check in createCustomer</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Check existsByFirstNameAndLastName before creating customer</div>
+                                
+                                
+                                <div class="file-fix-example">if (repository.existsByFirstNameAndLastName(firstName, lastName)) {
+  throw new DuplicateCustomerException();
+}</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-warning">
+                            <div class="file-issue-detail-title">
+                                ⚠️
+                                
+                                Service Layer Missing Exception Handling
+                            </div>
+                            <div class="file-issue-detail-desc">CustomerService not visible but likely throws uncaught exceptions</div>
+                            <span class="file-issue-category">🛡️ Error Handling</span>
+                            
+                            
+                            <div class="file-code-snippet">// Service implementation not provided</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Throw custom exceptions like CustomerNotFoundException</div>
+                                
+                                
+                                <div class="file-fix-example">throw new CustomerNotFoundException("Customer not found: " + id);</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-info">
+                            <div class="file-issue-detail-title">
+                                ℹ️
+                                Service Implementation Not Provided
+                            </div>
+                            <div class="file-issue-detail-desc">CustomerService interface/implementation not visible for full analysis</div>
+                            <span class="file-issue-category">🤖 LLM as a Judge</span>
+                            
+                            
+                            <div class="file-code-snippet">// Service implementation not in provided files</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Ensure service layer properly implements business logic</div>
+                                
+                                
+                                <div class="file-fix-example">@Service
+public class CustomerServiceImpl implements CustomerService { ... }</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <div class="file-issues-item">
+                    <div class="file-issues-header" onclick="toggleFileIssues(this)">
+                        <span class="expand-icon">▶</span>
+                        <span class="file-icon">📄</span>
+                        <span class="file-name">CustomerController.java</span>
+                        <span class="file-issues-count">4 issues</span>
+                    </div>
+                    <div class="file-issues-content">
+                        
+                        <div class="file-issue-detail severity-warning">
+                            <div class="file-issue-detail-title">
+                                ⚠️
+                                
+                                Production Risk: Unbounded List Return
+                            </div>
+                            <div class="file-issue-detail-desc">getAllCustomers returns entire collection without pagination</div>
+                            <span class="file-issue-category">🔍 Custom Critique</span>
+                            
+                            
+                            <div class="file-code-snippet">List<CustomerResponse> customers = customerService.getAllCustomers();</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Implement pagination using Pageable and Page<T></div>
+                                
+                                
+                                <div class="file-fix-example">Page<CustomerResponse> getCustomers(Pageable pageable) {
+  return repository.findAll(pageable);
+}</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-info">
+                            <div class="file-issue-detail-title">
+                                ℹ️
+                                Missing Edge Case: Null Age Filter
+                            </div>
+                            <div class="file-issue-detail-desc">Age filter doesn't validate for negative or zero values</div>
+                            <span class="file-issue-category">🔍 Custom Critique</span>
+                            
+                            
+                            <div class="file-code-snippet">@RequestParam(required = false) Integer age</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Add validation for age parameter range</div>
+                                
+                                
+                                <div class="file-fix-example">if (age != null && age < 1) {
+  throw new InvalidParameterException();
+}</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-critical">
+                            <div class="file-issue-detail-title">
+                                ❌
+                                
+                                No Authentication/Authorization
+                            </div>
+                            <div class="file-issue-detail-desc">Endpoints lack security configuration (Spring Security not visible)</div>
+                            <span class="file-issue-category">🔒 Security</span>
+                            
+                            
+                            <div class="file-code-snippet">@RestController
+public class CustomerController {</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Add Spring Security with JWT or OAuth2 authentication</div>
+                                
+                                
+                                <div class="file-fix-example">@PreAuthorize("hasRole('ADMIN')")
+public ResponseEntity<CustomerResponse> createCustomer()</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-warning">
+                            <div class="file-issue-detail-title">
+                                ⚠️
+                                
+                                No Correlation ID in Logs
+                            </div>
+                            <div class="file-issue-detail-desc">Logs lack trace/correlation IDs for distributed tracing</div>
+                            <span class="file-issue-category">📝 Logging</span>
+                            
+                            
+                            <div class="file-code-snippet">log.info("GET /v1/customers/{} - Fetching customer by ID", id);</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Add MDC context with correlation ID from headers</div>
+                                
+                                
+                                <div class="file-fix-example">MDC.put("correlationId", request.getHeader("X-Correlation-ID"));
+log.info("Fetching customer");</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <div class="file-issues-item">
+                    <div class="file-issues-header" onclick="toggleFileIssues(this)">
+                        <span class="expand-icon">▶</span>
+                        <span class="file-icon">📄</span>
+                        <span class="file-name">CustomerRequest.java</span>
+                        <span class="file-issues-count">1 issue</span>
+                    </div>
+                    <div class="file-issues-content">
+                        
+                        <div class="file-issue-detail severity-info">
+                            <div class="file-issue-detail-title">
+                                ℹ️
+                                Missing Edge Case: Empty String Validation
+                            </div>
+                            <div class="file-issue-detail-desc">Validation allows strings with only whitespace</div>
+                            <span class="file-issue-category">🔍 Custom Critique</span>
+                            
+                            
+                            <div class="file-code-snippet">@NotBlank(message = "First name is required")</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Add custom validator to trim and check for empty strings</div>
+                                
+                                
+                                <div class="file-fix-example">@Pattern(regexp = "^(?!\\s*$).+", message = "Cannot be blank")</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <div class="file-issues-item">
+                    <div class="file-issues-header" onclick="toggleFileIssues(this)">
+                        <span class="expand-icon">▶</span>
+                        <span class="file-icon">📄</span>
+                        <span class="file-name">src/main/java/com/pulse/customerservice/dto/CustomerResponse.java</span>
+                        <span class="file-issues-count">1 issue</span>
+                    </div>
+                    <div class="file-issues-content">
+                        
+                        <div class="file-issue-detail severity-critical">
+                            <div class="file-issue-detail-title">
+                                ❌
+                                
+                                Unmasked PII in API Response
+                            </div>
+                            <div class="file-issue-detail-desc">Address and full name exposed without masking in CustomerResponse</div>
+                            <span class="file-issue-category">🔒 Security</span>
+                            
+                            
+                            <div class="file-code-snippet">private String address;
+private String firstName;</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Implement PII masking for sensitive fields in responses</div>
+                                
+                                
+                                <div class="file-fix-example">@JsonSerialize(using = AddressMasker.class)
+private String address;</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <div class="file-issues-item">
+                    <div class="file-issues-header" onclick="toggleFileIssues(this)">
+                        <span class="expand-icon">▶</span>
+                        <span class="file-icon">📄</span>
+                        <span class="file-name">src/main/java/com/pulse/customerservice/controller/CustomerController.java</span>
+                        <span class="file-issues-count">2 issues</span>
+                    </div>
+                    <div class="file-issues-content">
+                        
+                        <div class="file-issue-detail severity-warning">
+                            <div class="file-issue-detail-title">
+                                ⚠️
+                                
+                                PII Logged Without Masking
+                            </div>
+                            <div class="file-issue-detail-desc">Customer first and last names logged in plain text</div>
+                            <span class="file-issue-category">🔒 Security</span>
+                            
+                            
+                            <div class="file-code-snippet">log.info("Creating customer: {} {}", request.getFirstName(), request.getLastName());</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Mask PII in logs or use customer ID only</div>
+                                
+                                
+                                <div class="file-fix-example">log.info("Creating customer with ID: {}", customerId);</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-critical">
+                            <div class="file-issue-detail-title">
+                                ❌
+                                
+                                Missing Pagination for List Endpoints
+                            </div>
+                            <div class="file-issue-detail-desc">getAllCustomers returns unbounded list causing memory issues</div>
+                            <span class="file-issue-category">⚡ Performance</span>
+                            
+                            
+                            <div class="file-code-snippet">List<CustomerResponse> customers = customerService.getAllCustomers();</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Implement pagination using Spring Data Pageable</div>
+                                
+                                
+                                <div class="file-fix-example">Page<CustomerResponse> getCustomers(Pageable pageable) {
+  return service.getCustomers(pageable);
+}</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <div class="file-issues-item">
+                    <div class="file-issues-header" onclick="toggleFileIssues(this)">
+                        <span class="expand-icon">▶</span>
+                        <span class="file-icon">📄</span>
+                        <span class="file-name">src/main/java/com/pulse/customerservice/</span>
+                        <span class="file-issues-count">1 issue</span>
+                    </div>
+                    <div class="file-issues-content">
+                        
+                        <div class="file-issue-detail severity-critical">
+                            <div class="file-issue-detail-title">
+                                ❌
+                                
+                                No Global Exception Handler
+                            </div>
+                            <div class="file-issue-detail-desc">Missing @ControllerAdvice for consistent error handling</div>
+                            <span class="file-issue-category">🛡️ Error Handling</span>
+                            
+                            
+                            <div class="file-code-snippet">// No GlobalExceptionHandler class found</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Create @ControllerAdvice to handle exceptions globally</div>
+                                
+                                
+                                <div class="file-fix-example">@ControllerAdvice
+class GlobalExceptionHandler {
+  @ExceptionHandler(ResourceNotFoundException.class)
+  ResponseEntity<ErrorResponse> handleNotFound()
+}</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <div class="file-issues-item">
+                    <div class="file-issues-header" onclick="toggleFileIssues(this)">
+                        <span class="expand-icon">▶</span>
+                        <span class="file-icon">📄</span>
+                        <span class="file-name">CustomerRepository.java</span>
+                        <span class="file-issues-count">1 issue</span>
+                    </div>
+                    <div class="file-issues-content">
+                        
+                        <div class="file-issue-detail severity-warning">
+                            <div class="file-issue-detail-title">
+                                ⚠️
+                                
+                                No Database Indexing Visible
+                            </div>
+                            <div class="file-issue-detail-desc">findByFirstNameAndLastName may be slow without index</div>
+                            <span class="file-issue-category">⚡ Performance</span>
+                            
+                            
+                            <div class="file-code-snippet">Optional<Customer> findByFirstNameAndLastName(String firstName, String lastName);</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Add compound index on firstName and lastName</div>
+                                
+                                
+                                <div class="file-fix-example">@Indexed
+@CompoundIndex(def = "{'firstName': 1, 'lastName': 1}")</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <div class="file-issues-item">
+                    <div class="file-issues-header" onclick="toggleFileIssues(this)">
+                        <span class="expand-icon">▶</span>
+                        <span class="file-icon">📄</span>
+                        <span class="file-name">pom.xml</span>
+                        <span class="file-issues-count">1 issue</span>
+                    </div>
+                    <div class="file-issues-content">
+                        
+                        <div class="file-issue-detail severity-warning">
+                            <div class="file-issue-detail-title">
+                                ⚠️
+                                
+                                No Distributed Tracing
+                            </div>
+                            <div class="file-issue-detail-desc">Missing Spring Cloud Sleuth or OpenTelemetry integration</div>
+                            <span class="file-issue-category">📝 Logging</span>
+                            
+                            
+                            <div class="file-code-snippet">// No tracing dependency visible</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Add Spring Cloud Sleuth or Micrometer Tracing</div>
+                                
+                                
+                                <div class="file-fix-example"><dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-sleuth</artifactId>
+</dependency></div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <div class="file-issues-item">
+                    <div class="file-issues-header" onclick="toggleFileIssues(this)">
+                        <span class="expand-icon">▶</span>
+                        <span class="file-icon">📄</span>
+                        <span class="file-name">Customer.java</span>
+                        <span class="file-issues-count">1 issue</span>
+                    </div>
+                    <div class="file-issues-content">
+                        
+                        <div class="file-issue-detail severity-info">
+                            <div class="file-issue-detail-title">
+                                ℹ️
+                                Consider Additional Business Rules
+                            </div>
+                            <div class="file-issue-detail-desc">May need email, phone, or customer status fields for real-world use</div>
+                            <span class="file-issue-category">🎯 Domain</span>
+                            
+                            
+                            <div class="file-code-snippet">// Only basic fields present</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Add email, phone, status fields if required by business</div>
+                                
+                                
+                                <div class="file-fix-example">@Email
+private String email;
+private CustomerStatus status;</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+        <!-- SECTION 4: Top Issues -->
+        <div class="bar-graph-section">
+            <h2>📊 Top Issues</h2>
+            
+            <!-- Issue Details Section (Hidden by default) -->
+            <div id="filtered-issues-section" class="issue-filter-section">
+                <div class="issue-filter-header">
+                    <div class="issue-filter-title" id="filter-title">Issues</div>
+                    <button class="close-filter" onclick="closeFilteredIssues()">✕ Close</button>
+                </div>
+                <div id="filtered-issues-content"></div>
+            </div>
+            
+            
+                
+                    
+                        
+                        
+                            
+                        
+                    
+                
+            
+                
+                    
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                    
+                
+            
+                
+                    
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                    
+                
+            
+                
+                    
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                    
+                
+            
+                
+            
+                
+                    
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                    
+                
+            
+                
+                    
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                    
+                
+            
+                
+                    
+                        
+                        
+                            
+                        
+                    
+                
+            
+                
+                    
+                        
+                        
+                            
+                        
+                    
+                
+            
+            
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+            
+            
+            
+                <div id="top-issues-container">
+                    
+                    <div class="bar-item clickable" onclick="showIssueDetails('No Unit Tests Found')">
+                        <div class="bar-header">
+                            <span class="bar-icon">🔍</span>
+                            <span class="bar-label">No Unit Tests Found</span>
+                            <span class="bar-count critical">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Custom Critique</div>
+                    </div>
+                    
+                    <div class="bar-item clickable" onclick="showIssueDetails('Unmasked PII in API Response')">
+                        <div class="bar-header">
+                            <span class="bar-icon">🔒</span>
+                            <span class="bar-label">Unmasked PII in API Response</span>
+                            <span class="bar-count critical">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Security</div>
+                    </div>
+                    
+                    <div class="bar-item clickable" onclick="showIssueDetails('No Authentication/Authorization')">
+                        <div class="bar-header">
+                            <span class="bar-icon">🔒</span>
+                            <span class="bar-label">No Authentication/Authorization</span>
+                            <span class="bar-count critical">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Security</div>
+                    </div>
+                    
+                    <div class="bar-item clickable" onclick="showIssueDetails('No Global Exception Handler')">
+                        <div class="bar-header">
+                            <span class="bar-icon">🛡️</span>
+                            <span class="bar-label">No Global Exception Handler</span>
+                            <span class="bar-count critical">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Error Handling</div>
+                    </div>
+                    
+                    <div class="bar-item clickable" onclick="showIssueDetails('Missing Pagination for List Endpoints')">
+                        <div class="bar-header">
+                            <span class="bar-icon">⚡</span>
+                            <span class="bar-label">Missing Pagination for List Endpoints</span>
+                            <span class="bar-count critical">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Performance</div>
+                    </div>
+                    
+                </div>
+                
+                
+                <div id="more-issues-container" style="display: none;">
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">✨</span>
+                            <span class="bar-label">Consider Using Java Records for DTOs</span>
+                            <span class="bar-count mixed">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Code Quality</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">🔍</span>
+                            <span class="bar-label">Potential Bug: No Duplicate Check Before Create</span>
+                            <span class="bar-count warning">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Custom Critique</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">🔍</span>
+                            <span class="bar-label">Production Risk: Unbounded List Return</span>
+                            <span class="bar-count warning">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Custom Critique</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">🔍</span>
+                            <span class="bar-label">Missing Edge Case: Null Age Filter</span>
+                            <span class="bar-count mixed">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Custom Critique</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">🔍</span>
+                            <span class="bar-label">Missing Edge Case: Empty String Validation</span>
+                            <span class="bar-count mixed">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Custom Critique</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">🔒</span>
+                            <span class="bar-label">PII Logged Without Masking</span>
+                            <span class="bar-count warning">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Security</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">🛡️</span>
+                            <span class="bar-label">Service Layer Missing Exception Handling</span>
+                            <span class="bar-count warning">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Error Handling</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">⚡</span>
+                            <span class="bar-label">No Database Indexing Visible</span>
+                            <span class="bar-count warning">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Performance</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">📝</span>
+                            <span class="bar-label">No Correlation ID in Logs</span>
+                            <span class="bar-count warning">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Logging</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">📝</span>
+                            <span class="bar-label">No Distributed Tracing</span>
+                            <span class="bar-count warning">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Logging</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">🤖</span>
+                            <span class="bar-label">Service Implementation Not Provided</span>
+                            <span class="bar-count mixed">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">LLM as a Judge</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">🎯</span>
+                            <span class="bar-label">Consider Additional Business Rules</span>
+                            <span class="bar-count mixed">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Domain</div>
+                    </div>
+                    
+                </div>
+                <button id="show-more-issues-btn" onclick="toggleMoreIssues()" style="margin-top: 0.75rem; padding: 0.5rem 1rem; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
+                    Show More (12 more)
+                </button>
+                
+            
+        </div>
+
+
+        <!-- SECTION 5: Detailed Category Analysis -->
+        
+        <div class="category-section">
+            <!-- 3.1 Category Name with Status -->
+            <div class="category-header">
+                <div class="category-title">
+                    <span class="category-icon">✨</span>
+                    1. Code Quality
+                </div>
+                
+                
+                <span class="category-status-badge category-status-excellent">
+                    ✅ COMPLIANT
+                    
+                </span>
+            </div>
+
+            <!-- Metrics -->
+            
+            <div class="metrics-list">
+                <div class="metrics-grid">
+                
+                <div class="metric-row">
+                    <span class="metric-name">Code Verbosity</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Meaningful Names</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Single Responsibility</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Method Length</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Code Formatting</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Factual Comments</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Cyclomatic Complexity</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Code Duplication</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">HTTP Status Codes</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Dependency Validation</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Import Validation</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Unused Dependencies</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Unimplemented Comments</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Race Conditions</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Deadlock Risks</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Unbounded Resources</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Missing Default Values</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Config Separation</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">⚠️ Not visible</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Valid Config Keys</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">⚠️ Not visible</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Circular Imports</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Code Smells</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ 1 violation in 2 files</span>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
+            
+
+            <!-- 3.2 List of Items with Assessment -->
+            
+
+            <!-- 3.3 List of Issues -->
+            
+            <div class="issues-list collapsed">
+                <h3 onclick="toggleIssuesList(this)">
+                    <span class="issues-list-toggle">▼</span>
+                    Detailed Findings
+                </h3>
+                <div class="issues-list-content">
+                
+                <div class="issue issue-info">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ℹ️
+                            Consider Using Java Records for DTOs
+                        </div>
+                        <span class="badge badge-info">INFO</span>
+                    </div>
+                    
+                    <div class="issue-description">DTOs could be immutable using Java 17+ Records instead of Lombok</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/pulse/customerservice/dto/CustomerRequest.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">@Data
+public class CustomerRequest {</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Use Java Records for immutable DTOs to reduce boilerplate</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">public record CustomerRequest(
+  @NotBlank String firstName,
+  @NotBlank String lastName
+) {}</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="category-section">
+            <!-- 3.1 Category Name with Status -->
+            <div class="category-header">
+                <div class="category-title">
+                    <span class="category-icon">🔍</span>
+                    2. Custom Critique
+                </div>
+                
+                
+                <span class="category-status-badge category-status-needs-work">
+                    ❌ 1 CRITICAL
+                </span>
+            </div>
+
+            <!-- Metrics -->
+            
+            <div class="metrics-list">
+                <div class="metrics-grid">
+                
+                <div class="metric-row">
+                    <span class="metric-name">Unit Test Coverage</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ No tests found</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Bugs Identified</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ 3 potential bugs</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Production Risks</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ 2 risks identified</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Missing Edge Cases</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ 3 edge cases</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Hallucinated Logic</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">API Misuse</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Unimplemented Comments</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Concurrency Primitives</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Over-Engineering</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Silent Failures</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
+            
+
+            <!-- 3.2 List of Items with Assessment -->
+            
+
+            <!-- 3.3 List of Issues -->
+            
+            <div class="issues-list collapsed">
+                <h3 onclick="toggleIssuesList(this)">
+                    <span class="issues-list-toggle">▼</span>
+                    Detailed Findings
+                </h3>
+                <div class="issues-list-content">
+                
+                <div class="issue issue-critical">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ❌
+                            
+                            No Unit Tests Found
+                        </div>
+                        <span class="badge badge-critical">CRITICAL</span>
+                    </div>
+                    
+                    <div class="issue-description">No test coverage for service or controller logic</div>
+                    
+                    
+                    <div class="file-path">📄 src/test/</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">// No test files provided</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Add unit tests for CustomerService and CustomerController</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">@Test
+void createCustomer_ShouldReturnCreatedCustomer() {
+  // test logic
+}</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                <div class="issue issue-warning">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ⚠️
+                            
+                            Potential Bug: No Duplicate Check Before Create
+                        </div>
+                        <span class="badge badge-warning">WARNING</span>
+                    </div>
+                    
+                    <div class="issue-description">Service may allow duplicate customers with same name</div>
+                    
+                    
+                    <div class="file-path">📄 CustomerService.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">// Missing duplicate check in createCustomer</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Check existsByFirstNameAndLastName before creating customer</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">if (repository.existsByFirstNameAndLastName(firstName, lastName)) {
+  throw new DuplicateCustomerException();
+}</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                <div class="issue issue-warning">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ⚠️
+                            
+                            Production Risk: Unbounded List Return
+                        </div>
+                        <span class="badge badge-warning">WARNING</span>
+                    </div>
+                    
+                    <div class="issue-description">getAllCustomers returns entire collection without pagination</div>
+                    
+                    
+                    <div class="file-path">📄 CustomerController.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">List<CustomerResponse> customers = customerService.getAllCustomers();</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Implement pagination using Pageable and Page<T></div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">Page<CustomerResponse> getCustomers(Pageable pageable) {
+  return repository.findAll(pageable);
+}</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                <div class="issue issue-info">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ℹ️
+                            Missing Edge Case: Null Age Filter
+                        </div>
+                        <span class="badge badge-info">INFO</span>
+                    </div>
+                    
+                    <div class="issue-description">Age filter doesn't validate for negative or zero values</div>
+                    
+                    
+                    <div class="file-path">📄 CustomerController.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">@RequestParam(required = false) Integer age</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Add validation for age parameter range</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">if (age != null && age < 1) {
+  throw new InvalidParameterException();
+}</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                <div class="issue issue-info">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ℹ️
+                            Missing Edge Case: Empty String Validation
+                        </div>
+                        <span class="badge badge-info">INFO</span>
+                    </div>
+                    
+                    <div class="issue-description">Validation allows strings with only whitespace</div>
+                    
+                    
+                    <div class="file-path">📄 CustomerRequest.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">@NotBlank(message = "First name is required")</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Add custom validator to trim and check for empty strings</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">@Pattern(regexp = "^(?!\\s*$).+", message = "Cannot be blank")</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="category-section">
+            <!-- 3.1 Category Name with Status -->
+            <div class="category-header">
+                <div class="category-title">
+                    <span class="category-icon">🔒</span>
+                    3. Security
+                </div>
+                
+                
+                <span class="category-status-badge category-status-needs-work">
+                    ❌ 2 CRITICAL
+                </span>
+            </div>
+
+            <!-- Metrics -->
+            
+            <div class="metrics-list">
+                <div class="metrics-grid">
+                
+                <div class="metric-row">
+                    <span class="metric-name">Sensitive Data in Logs</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">⚠️ 1 violation in 1 file</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Unmasked PII</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ 2 violations in 2 files</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">SQL Injection Risks</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant (MongoDB)</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Hardcoded Secrets</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Input Validation</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Insecure Defaults</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">External Call Timeouts</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ N/A</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Environment Variables</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
+            
+
+            <!-- 3.2 List of Items with Assessment -->
+            
+
+            <!-- 3.3 List of Issues -->
+            
+            <div class="issues-list collapsed">
+                <h3 onclick="toggleIssuesList(this)">
+                    <span class="issues-list-toggle">▼</span>
+                    Detailed Findings
+                </h3>
+                <div class="issues-list-content">
+                
+                <div class="issue issue-critical">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ❌
+                            
+                            Unmasked PII in API Response
+                        </div>
+                        <span class="badge badge-critical">CRITICAL</span>
+                    </div>
+                    
+                    <div class="issue-description">Address and full name exposed without masking in CustomerResponse</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/pulse/customerservice/dto/CustomerResponse.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">private String address;
+private String firstName;</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Implement PII masking for sensitive fields in responses</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">@JsonSerialize(using = AddressMasker.class)
+private String address;</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                <div class="issue issue-warning">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ⚠️
+                            
+                            PII Logged Without Masking
+                        </div>
+                        <span class="badge badge-warning">WARNING</span>
+                    </div>
+                    
+                    <div class="issue-description">Customer first and last names logged in plain text</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/pulse/customerservice/controller/CustomerController.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">log.info("Creating customer: {} {}", request.getFirstName(), request.getLastName());</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Mask PII in logs or use customer ID only</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">log.info("Creating customer with ID: {}", customerId);</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                <div class="issue issue-critical">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ❌
+                            
+                            No Authentication/Authorization
+                        </div>
+                        <span class="badge badge-critical">CRITICAL</span>
+                    </div>
+                    
+                    <div class="issue-description">Endpoints lack security configuration (Spring Security not visible)</div>
+                    
+                    
+                    <div class="file-path">📄 CustomerController.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">@RestController
+public class CustomerController {</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Add Spring Security with JWT or OAuth2 authentication</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">@PreAuthorize("hasRole('ADMIN')")
+public ResponseEntity<CustomerResponse> createCustomer()</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="category-section">
+            <!-- 3.1 Category Name with Status -->
+            <div class="category-header">
+                <div class="category-title">
+                    <span class="category-icon">🛡️</span>
+                    4. Error Handling
+                </div>
+                
+                
+                <span class="category-status-badge category-status-needs-work">
+                    ❌ 1 CRITICAL
+                </span>
+            </div>
+
+            <!-- Metrics -->
+            
+            <div class="metrics-list">
+                <div class="metrics-grid">
+                
+                <div class="metric-row">
+                    <span class="metric-name">Exception Handling</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ No global handler</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Retry Logic</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ N/A</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Error Messages</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Failure Escalation</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ N/A</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Defensive Coding</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Uncaught Exceptions</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ 1 risk identified</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Correct Variable Logging</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
+            
+
+            <!-- 3.2 List of Items with Assessment -->
+            
+
+            <!-- 3.3 List of Issues -->
+            
+            <div class="issues-list collapsed">
+                <h3 onclick="toggleIssuesList(this)">
+                    <span class="issues-list-toggle">▼</span>
+                    Detailed Findings
+                </h3>
+                <div class="issues-list-content">
+                
+                <div class="issue issue-critical">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ❌
+                            
+                            No Global Exception Handler
+                        </div>
+                        <span class="badge badge-critical">CRITICAL</span>
+                    </div>
+                    
+                    <div class="issue-description">Missing @ControllerAdvice for consistent error handling</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/pulse/customerservice/</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">// No GlobalExceptionHandler class found</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Create @ControllerAdvice to handle exceptions globally</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">@ControllerAdvice
+class GlobalExceptionHandler {
+  @ExceptionHandler(ResourceNotFoundException.class)
+  ResponseEntity<ErrorResponse> handleNotFound()
+}</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                <div class="issue issue-warning">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ⚠️
+                            
+                            Service Layer Missing Exception Handling
+                        </div>
+                        <span class="badge badge-warning">WARNING</span>
+                    </div>
+                    
+                    <div class="issue-description">CustomerService not visible but likely throws uncaught exceptions</div>
+                    
+                    
+                    <div class="file-path">📄 CustomerService.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">// Service implementation not provided</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Throw custom exceptions like CustomerNotFoundException</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">throw new CustomerNotFoundException("Customer not found: " + id);</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="category-section">
+            <!-- 3.1 Category Name with Status -->
+            <div class="category-header">
+                <div class="category-title">
+                    <span class="category-icon">🏗️</span>
+                    5. Architecture
+                </div>
+                
+                
+                <span class="category-status-badge category-status-excellent">
+                    ✅ COMPLIANT
+                    
+                </span>
+            </div>
+
+            <!-- Metrics -->
+            
+            <div class="metrics-list">
+                <div class="metrics-grid">
+                
+                <div class="metric-row">
+                    <span class="metric-name">Unnecessary Abstraction</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Dependency Injection</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Interface Usage</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Invented Classes/Libraries</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Fake Configuration Keys</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">⚠️ Cannot verify</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Function Parameter Mismatch</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Invented Architecture</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Dependency Version Mismatch</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">⚠️ Cannot verify</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Unnecessary Libraries</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">SOLID Principles</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Over-engineered Layers</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
+            
+
+            <!-- 3.2 List of Items with Assessment -->
+            
+
+            <!-- 3.3 List of Issues -->
+            
+            <div class="no-issues">✅ No issues found in this category</div>
+            
+        </div>
+        
+        <div class="category-section">
+            <!-- 3.1 Category Name with Status -->
+            <div class="category-header">
+                <div class="category-title">
+                    <span class="category-icon">⚡</span>
+                    6. Performance
+                </div>
+                
+                
+                <span class="category-status-badge category-status-needs-work">
+                    ❌ 1 CRITICAL
+                </span>
+            </div>
+
+            <!-- Metrics -->
+            
+            <div class="metrics-list">
+                <div class="metrics-grid">
+                
+                <div class="metric-row">
+                    <span class="metric-name">Algorithmic Complexity</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Memory Usage</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ 1 violation</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Async/Await Handling</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ N/A</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Unnecessary Conversions</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
+            
+
+            <!-- 3.2 List of Items with Assessment -->
+            
+
+            <!-- 3.3 List of Issues -->
+            
+            <div class="issues-list collapsed">
+                <h3 onclick="toggleIssuesList(this)">
+                    <span class="issues-list-toggle">▼</span>
+                    Detailed Findings
+                </h3>
+                <div class="issues-list-content">
+                
+                <div class="issue issue-critical">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ❌
+                            
+                            Missing Pagination for List Endpoints
+                        </div>
+                        <span class="badge badge-critical">CRITICAL</span>
+                    </div>
+                    
+                    <div class="issue-description">getAllCustomers returns unbounded list causing memory issues</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/pulse/customerservice/controller/CustomerController.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">List<CustomerResponse> customers = customerService.getAllCustomers();</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Implement pagination using Spring Data Pageable</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">Page<CustomerResponse> getCustomers(Pageable pageable) {
+  return service.getCustomers(pageable);
+}</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                <div class="issue issue-warning">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ⚠️
+                            
+                            No Database Indexing Visible
+                        </div>
+                        <span class="badge badge-warning">WARNING</span>
+                    </div>
+                    
+                    <div class="issue-description">findByFirstNameAndLastName may be slow without index</div>
+                    
+                    
+                    <div class="file-path">📄 CustomerRepository.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">Optional<Customer> findByFirstNameAndLastName(String firstName, String lastName);</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Add compound index on firstName and lastName</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">@Indexed
+@CompoundIndex(def = "{'firstName': 1, 'lastName': 1}")</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="category-section">
+            <!-- 3.1 Category Name with Status -->
+            <div class="category-header">
+                <div class="category-title">
+                    <span class="category-icon">📝</span>
+                    7. Logging
+                </div>
+                
+                
+                <span class="category-status-badge category-status-good">
+                    ⚠️ 2 WARNINGs
+                    
+                </span>
+            </div>
+
+            <!-- Metrics -->
+            
+            <div class="metrics-list">
+                <div class="metrics-grid">
+                
+                <div class="metric-row">
+                    <span class="metric-name">System.out Usage</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Sensitive Data in Logs</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ 1 violation</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Trace/Correlation IDs</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ Not implemented</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Structured Logging</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">⚠️ Partial</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Tracing Spans</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ Not implemented</span>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
+            
+
+            <!-- 3.2 List of Items with Assessment -->
+            
+
+            <!-- 3.3 List of Issues -->
+            
+            <div class="issues-list collapsed">
+                <h3 onclick="toggleIssuesList(this)">
+                    <span class="issues-list-toggle">▼</span>
+                    Detailed Findings
+                </h3>
+                <div class="issues-list-content">
+                
+                <div class="issue issue-warning">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ⚠️
+                            
+                            No Correlation ID in Logs
+                        </div>
+                        <span class="badge badge-warning">WARNING</span>
+                    </div>
+                    
+                    <div class="issue-description">Logs lack trace/correlation IDs for distributed tracing</div>
+                    
+                    
+                    <div class="file-path">📄 CustomerController.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">log.info("GET /v1/customers/{} - Fetching customer by ID", id);</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Add MDC context with correlation ID from headers</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">MDC.put("correlationId", request.getHeader("X-Correlation-ID"));
+log.info("Fetching customer");</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                <div class="issue issue-warning">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ⚠️
+                            
+                            No Distributed Tracing
+                        </div>
+                        <span class="badge badge-warning">WARNING</span>
+                    </div>
+                    
+                    <div class="issue-description">Missing Spring Cloud Sleuth or OpenTelemetry integration</div>
+                    
+                    
+                    <div class="file-path">📄 pom.xml</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">// No tracing dependency visible</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Add Spring Cloud Sleuth or Micrometer Tracing</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block"><dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-sleuth</artifactId>
+</dependency></div>
+                        
+                    </div>
+                    
+                </div>
+                
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="category-section">
+            <!-- 3.1 Category Name with Status -->
+            <div class="category-header">
+                <div class="category-title">
+                    <span class="category-icon">🤖</span>
+                    8. LLM as a Judge
+                </div>
+                
+                
+                <span class="category-status-badge category-status-excellent">
+                    ✅ COMPLIANT
+                    
+                </span>
+            </div>
+
+            <!-- Metrics -->
+            
+            <div class="metrics-list">
+                <div class="metrics-grid">
+                
+                <div class="metric-row">
+                    <span class="metric-name">Hallucinated Functions</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Non-existent Libraries</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Fake Configuration Keys</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">⚠️ Cannot verify</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Generic Placeholder Code</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Invented API Endpoints</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Copy-Paste Inconsistencies</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Overconfident Assumptions</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Inappropriate Design Patterns</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Missing Error Context</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">⚠️ 1 issue</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Unrealistic Performance Claims</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
+            
+
+            <!-- 3.2 List of Items with Assessment -->
+            
+
+            <!-- 3.3 List of Issues -->
+            
+            <div class="issues-list collapsed">
+                <h3 onclick="toggleIssuesList(this)">
+                    <span class="issues-list-toggle">▼</span>
+                    Detailed Findings
+                </h3>
+                <div class="issues-list-content">
+                
+                <div class="issue issue-info">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ℹ️
+                            Service Implementation Not Provided
+                        </div>
+                        <span class="badge badge-info">INFO</span>
+                    </div>
+                    
+                    <div class="issue-description">CustomerService interface/implementation not visible for full analysis</div>
+                    
+                    
+                    <div class="file-path">📄 CustomerService.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">// Service implementation not in provided files</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Ensure service layer properly implements business logic</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">@Service
+public class CustomerServiceImpl implements CustomerService { ... }</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="category-section">
+            <!-- 3.1 Category Name with Status -->
+            <div class="category-header">
+                <div class="category-title">
+                    <span class="category-icon">🎯</span>
+                    9. Domain
+                </div>
+                
+                
+                <span class="category-status-badge category-status-excellent">
+                    ✅ COMPLIANT
+                    
+                </span>
+            </div>
+
+            <!-- Metrics -->
+            
+            <div class="metrics-list">
+                <div class="metrics-grid">
+                
+                <div class="metric-row">
+                    <span class="metric-name">Domain-Specific Compliance</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
+            
+
+            <!-- 3.2 List of Items with Assessment -->
+            
+
+            <!-- 3.3 List of Issues -->
+            
+            <div class="issues-list collapsed">
+                <h3 onclick="toggleIssuesList(this)">
+                    <span class="issues-list-toggle">▼</span>
+                    Detailed Findings
+                </h3>
+                <div class="issues-list-content">
+                
+                <div class="issue issue-info">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ℹ️
+                            Consider Additional Business Rules
+                        </div>
+                        <span class="badge badge-info">INFO</span>
+                    </div>
+                    
+                    <div class="issue-description">May need email, phone, or customer status fields for real-world use</div>
+                    
+                    
+                    <div class="file-path">📄 Customer.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">// Only basic fields present</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Add email, phone, status fields if required by business</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">@Email
+private String email;
+private CustomerStatus status;</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                </div>
+            </div>
+            
+        </div>
+        
+
+        <!-- SECTION 6: Priority Actions -->
+        <div class="priority-section">
+            <h2>🎯 Priority Actions</h2>
+            
+            
+            <div class="priority-group critical">
+                <h3>🔴 Critical (Fix Immediately)</h3>
+                <div class="priority-items-grid">
+                    
+                    <div class="priority-item critical">
+                        <div class="priority-title">Implement Pagination</div>
+                        <div class="priority-description">getAllCustomers returns unbounded list causing memory issues</div>
+                        <div class="priority-category">Performance</div>
+                    </div>
+                    
+                    <div class="priority-item critical">
+                        <div class="priority-title">Add Global Exception Handler</div>
+                        <div class="priority-description">Missing @ControllerAdvice for consistent error responses</div>
+                        <div class="priority-category">Error Handling</div>
+                    </div>
+                    
+                    <div class="priority-item critical">
+                        <div class="priority-title">Mask PII in API Responses</div>
+                        <div class="priority-description">Address and names exposed without masking</div>
+                        <div class="priority-category">Security</div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            
+            
+            <div class="priority-group warnings">
+                <h3>🟡 Warnings (Address Soon)</h3>
+                <div class="priority-items-grid">
+                    
+                    <div class="priority-item warning">
+                        <div class="priority-title">Add Correlation IDs to Logs</div>
+                        <div class="priority-description">Logs lack trace IDs for distributed tracing</div>
+                        <div class="priority-category">Logging</div>
+                    </div>
+                    
+                    <div class="priority-item warning">
+                        <div class="priority-title">Implement Authentication</div>
+                        <div class="priority-description">Endpoints lack security configuration</div>
+                        <div class="priority-category">Security</div>
+                    </div>
+                    
+                    <div class="priority-item warning">
+                        <div class="priority-title">Add Database Indexes</div>
+                        <div class="priority-description">Compound queries may be slow without indexes</div>
+                        <div class="priority-category">Performance</div>
+                    </div>
+                    
+                    <div class="priority-item warning">
+                        <div class="priority-title">Remove PII from Logs</div>
+                        <div class="priority-description">Customer names logged without masking</div>
+                        <div class="priority-category">Security</div>
+                    </div>
+                    
+                    <div class="priority-item warning">
+                        <div class="priority-title">Add Duplicate Check</div>
+                        <div class="priority-description">Service may allow duplicate customers</div>
+                        <div class="priority-category">Custom Critique</div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            
+            
+            <div class="priority-group suggestions">
+                <h3>🔵 Suggestions (Nice to Have)</h3>
+                <div class="priority-items-grid">
+                    
+                    <div class="priority-item info">
+                        <div class="priority-title">Use Java Records for DTOs</div>
+                        <div class="priority-description">Replace Lombok @Data with Records for immutability</div>
+                        <div class="priority-category">Code Quality</div>
+                    </div>
+                    
+                    <div class="priority-item info">
+                        <div class="priority-title">Add Unit Tests</div>
+                        <div class="priority-description">No test coverage found for service or controller</div>
+                        <div class="priority-category">Custom Critique</div>
+                    </div>
+                    
+                    <div class="priority-item info">
+                        <div class="priority-title">Add Age Parameter Validation</div>
+                        <div class="priority-description">Age filter doesn't validate for negative values</div>
+                        <div class="priority-category">Custom Critique</div>
+                    </div>
+                    
+                    <div class="priority-item info">
+                        <div class="priority-title">Add Distributed Tracing</div>
+                        <div class="priority-description">Integrate Spring Cloud Sleuth or OpenTelemetry</div>
+                        <div class="priority-category">Logging</div>
+                    </div>
+                    
+                    <div class="priority-item info">
+                        <div class="priority-title">Consider Additional Domain Fields</div>
+                        <div class="priority-description">Add email, phone, status for real-world use</div>
+                        <div class="priority-category">Domain</div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- SECTION 7: Key Improvements -->
+        
+        <div class="final-assessment">
+            <h2>⚠️ Key Improvements</h2>
+            
+            <div class="assessment-section">
+                <ul class="assessment-list improvements">
+                    
+                    <li>Implement pagination for list endpoints to prevent memory issues</li>
+                    
+                    <li>Add global exception handler for consistent error responses</li>
+                    
+                    <li>Mask PII in API responses and logs for security compliance</li>
+                    
+                    <li>Add authentication/authorization using Spring Security</li>
+                    
+                    <li>Implement correlation IDs and distributed tracing for observability</li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Generated by Sentinel Code Critique Framework</strong></p>
+            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Based on industry best practices and security standards</p>
+            <p style="font-size: 0.85rem; margin-top: 1rem; color: #999;">
+                Report Date: 2025-12-09T21:57:00Z | Version: 1.0.0
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        function toggleFileIssues(header) {
+            const item = header.parentElement;
+            item.classList.toggle('expanded');
+        }
+        
+        function toggleIssuesList(header) {
+            const issuesList = header.parentElement;
+            issuesList.classList.toggle('collapsed');
+        }
+        
+        function showFilteredIssues(severity) {
+            const section = document.getElementById('filtered-issues-section');
+            const title = document.getElementById('filter-title');
+            const content = document.getElementById('filtered-issues-content');
+            
+            // Collect all issues of this severity
+            const allIssues = [
+            
+                
+                    
+                {
+                    severity: 'info',
+                    title: "Consider Using Java Records for DTOs",
+                    description: "DTOs could be immutable using Java 17+ Records instead of Lombok",
+                    file_path: 'src/main/java/com/pulse/customerservice/dto/CustomerRequest.java',
+                    category: 'Code Quality',
+                    icon: '✨'
+                },
+                    
+                
+            
+                
+                    
+                {
+                    severity: 'critical',
+                    title: "No Unit Tests Found",
+                    description: "No test coverage for service or controller logic",
+                    file_path: 'src/test/',
+                    category: 'Custom Critique',
+                    icon: '🔍'
+                },
+                    
+                {
+                    severity: 'warning',
+                    title: "Potential Bug: No Duplicate Check Before Create",
+                    description: "Service may allow duplicate customers with same name",
+                    file_path: 'CustomerService.java',
+                    category: 'Custom Critique',
+                    icon: '🔍'
+                },
+                    
+                {
+                    severity: 'warning',
+                    title: "Production Risk: Unbounded List Return",
+                    description: "getAllCustomers returns entire collection without pagination",
+                    file_path: 'CustomerController.java',
+                    category: 'Custom Critique',
+                    icon: '🔍'
+                },
+                    
+                {
+                    severity: 'info',
+                    title: "Missing Edge Case: Null Age Filter",
+                    description: "Age filter doesn\u0027t validate for negative or zero values",
+                    file_path: 'CustomerController.java',
+                    category: 'Custom Critique',
+                    icon: '🔍'
+                },
+                    
+                {
+                    severity: 'info',
+                    title: "Missing Edge Case: Empty String Validation",
+                    description: "Validation allows strings with only whitespace",
+                    file_path: 'CustomerRequest.java',
+                    category: 'Custom Critique',
+                    icon: '🔍'
+                },
+                    
+                
+            
+                
+                    
+                {
+                    severity: 'critical',
+                    title: "Unmasked PII in API Response",
+                    description: "Address and full name exposed without masking in CustomerResponse",
+                    file_path: 'src/main/java/com/pulse/customerservice/dto/CustomerResponse.java',
+                    category: 'Security',
+                    icon: '🔒'
+                },
+                    
+                {
+                    severity: 'warning',
+                    title: "PII Logged Without Masking",
+                    description: "Customer first and last names logged in plain text",
+                    file_path: 'src/main/java/com/pulse/customerservice/controller/CustomerController.java',
+                    category: 'Security',
+                    icon: '🔒'
+                },
+                    
+                {
+                    severity: 'critical',
+                    title: "No Authentication/Authorization",
+                    description: "Endpoints lack security configuration (Spring Security not visible)",
+                    file_path: 'CustomerController.java',
+                    category: 'Security',
+                    icon: '🔒'
+                },
+                    
+                
+            
+                
+                    
+                {
+                    severity: 'critical',
+                    title: "No Global Exception Handler",
+                    description: "Missing @ControllerAdvice for consistent error handling",
+                    file_path: 'src/main/java/com/pulse/customerservice/',
+                    category: 'Error Handling',
+                    icon: '🛡️'
+                },
+                    
+                {
+                    severity: 'warning',
+                    title: "Service Layer Missing Exception Handling",
+                    description: "CustomerService not visible but likely throws uncaught exceptions",
+                    file_path: 'CustomerService.java',
+                    category: 'Error Handling',
+                    icon: '🛡️'
+                },
+                    
+                
+            
+                
+            
+                
+                    
+                {
+                    severity: 'critical',
+                    title: "Missing Pagination for List Endpoints",
+                    description: "getAllCustomers returns unbounded list causing memory issues",
+                    file_path: 'src/main/java/com/pulse/customerservice/controller/CustomerController.java',
+                    category: 'Performance',
+                    icon: '⚡'
+                },
+                    
+                {
+                    severity: 'warning',
+                    title: "No Database Indexing Visible",
+                    description: "findByFirstNameAndLastName may be slow without index",
+                    file_path: 'CustomerRepository.java',
+                    category: 'Performance',
+                    icon: '⚡'
+                },
+                    
+                
+            
+                
+                    
+                {
+                    severity: 'warning',
+                    title: "No Correlation ID in Logs",
+                    description: "Logs lack trace/correlation IDs for distributed tracing",
+                    file_path: 'CustomerController.java',
+                    category: 'Logging',
+                    icon: '📝'
+                },
+                    
+                {
+                    severity: 'warning',
+                    title: "No Distributed Tracing",
+                    description: "Missing Spring Cloud Sleuth or OpenTelemetry integration",
+                    file_path: 'pom.xml',
+                    category: 'Logging',
+                    icon: '📝'
+                },
+                    
+                
+            
+                
+                    
+                {
+                    severity: 'info',
+                    title: "Service Implementation Not Provided",
+                    description: "CustomerService interface/implementation not visible for full analysis",
+                    file_path: 'CustomerService.java',
+                    category: 'LLM as a Judge',
+                    icon: '🤖'
+                },
+                    
+                
+            
+                
+                    
+                {
+                    severity: 'info',
+                    title: "Consider Additional Business Rules",
+                    description: "May need email, phone, or customer status fields for real-world use",
+                    file_path: 'Customer.java',
+                    category: 'Domain',
+                    icon: '🎯'
+                },
+                    
+                
+            
+            ];
+            
+            const filteredIssues = allIssues.filter(issue => issue.severity === severity);
+            
+            // Update title
+            if (severity === 'critical') {
+                title.textContent = `🔴 Critical Issues (${filteredIssues.length})`;
+            } else if (severity === 'warning') {
+                title.textContent = `⚠️ Warnings (${filteredIssues.length})`;
+            }
+            
+            // Generate HTML
+            if (filteredIssues.length === 0) {
+                content.innerHTML = '<div class="no-issues">✅ No issues found</div>';
+            } else {
+                content.innerHTML = filteredIssues.map(issue => `
+                    <div class="filtered-issue-item severity-${issue.severity}">
+                        <div class="filtered-issue-header">
+                            <div class="filtered-issue-title">
+                                ${issue.severity === 'critical' ? '❌' : '⚠️'} ${issue.title}
+                            </div>
+                            <div class="filtered-issue-category">${issue.icon} ${issue.category}</div>
+                        </div>
+                        ${issue.file_path ? `<div class="filtered-issue-file">📄 ${issue.file_path}</div>` : ''}
+                        <div class="filtered-issue-desc">${issue.description}</div>
+                    </div>
+                `).join('');
+            }
+            
+            // Show section and scroll to it
+            section.classList.add('active');
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        function closeFilteredIssues() {
+            const section = document.getElementById('filtered-issues-section');
+            section.classList.remove('active');
+        }
+        
+        function toggleMoreIssues() {
+            const moreContainer = document.getElementById('more-issues-container');
+            const btn = document.getElementById('show-more-issues-btn');
+            
+            if (moreContainer.style.display === 'none') {
+                moreContainer.style.display = 'block';
+                btn.textContent = 'Show Less';
+            } else {
+                moreContainer.style.display = 'none';
+                const hiddenCount = moreContainer.children.length;
+                btn.textContent = `Show More (${hiddenCount} more)`;
+            }
+        }
+        
+        function showIssueDetails(issueTitle) {
+            const allIssuesData = [
+            
+                
+                    
+                {
+                    title: "Consider Using Java Records for DTOs",
+                    description: "DTOs could be immutable using Java 17+ Records instead of Lombok",
+                    severity: 'info',
+                    file_path: 'src/main/java/com/pulse/customerservice/dto/CustomerRequest.java',
+                    line_number: '',
+                    category: 'Code Quality',
+                    icon: '✨',
+                    code_snippet: "@Data\npublic class CustomerRequest {",
+                    recommendation: "Use Java Records for immutable DTOs to reduce boilerplate",
+                    fix_example: "public record CustomerRequest(\n  @NotBlank String firstName,\n  @NotBlank String lastName\n) {}"
+                },
+                    
+                
+            
+                
+                    
+                {
+                    title: "No Unit Tests Found",
+                    description: "No test coverage for service or controller logic",
+                    severity: 'critical',
+                    file_path: 'src/test/',
+                    line_number: '',
+                    category: 'Custom Critique',
+                    icon: '🔍',
+                    code_snippet: "// No test files provided",
+                    recommendation: "Add unit tests for CustomerService and CustomerController",
+                    fix_example: "@Test\nvoid createCustomer_ShouldReturnCreatedCustomer() {\n  // test logic\n}"
+                },
+                    
+                {
+                    title: "Potential Bug: No Duplicate Check Before Create",
+                    description: "Service may allow duplicate customers with same name",
+                    severity: 'warning',
+                    file_path: 'CustomerService.java',
+                    line_number: '',
+                    category: 'Custom Critique',
+                    icon: '🔍',
+                    code_snippet: "// Missing duplicate check in createCustomer",
+                    recommendation: "Check existsByFirstNameAndLastName before creating customer",
+                    fix_example: "if (repository.existsByFirstNameAndLastName(firstName, lastName)) {\n  throw new DuplicateCustomerException();\n}"
+                },
+                    
+                {
+                    title: "Production Risk: Unbounded List Return",
+                    description: "getAllCustomers returns entire collection without pagination",
+                    severity: 'warning',
+                    file_path: 'CustomerController.java',
+                    line_number: '',
+                    category: 'Custom Critique',
+                    icon: '🔍',
+                    code_snippet: "List\u003cCustomerResponse\u003e customers = customerService.getAllCustomers();",
+                    recommendation: "Implement pagination using Pageable and Page\u003cT\u003e",
+                    fix_example: "Page\u003cCustomerResponse\u003e getCustomers(Pageable pageable) {\n  return repository.findAll(pageable);\n}"
+                },
+                    
+                {
+                    title: "Missing Edge Case: Null Age Filter",
+                    description: "Age filter doesn\u0027t validate for negative or zero values",
+                    severity: 'info',
+                    file_path: 'CustomerController.java',
+                    line_number: '',
+                    category: 'Custom Critique',
+                    icon: '🔍',
+                    code_snippet: "@RequestParam(required = false) Integer age",
+                    recommendation: "Add validation for age parameter range",
+                    fix_example: "if (age != null \u0026\u0026 age \u003c 1) {\n  throw new InvalidParameterException();\n}"
+                },
+                    
+                {
+                    title: "Missing Edge Case: Empty String Validation",
+                    description: "Validation allows strings with only whitespace",
+                    severity: 'info',
+                    file_path: 'CustomerRequest.java',
+                    line_number: '',
+                    category: 'Custom Critique',
+                    icon: '🔍',
+                    code_snippet: "@NotBlank(message = \"First name is required\")",
+                    recommendation: "Add custom validator to trim and check for empty strings",
+                    fix_example: "@Pattern(regexp = \"^(?!\\\\s*$).+\", message = \"Cannot be blank\")"
+                },
+                    
+                
+            
+                
+                    
+                {
+                    title: "Unmasked PII in API Response",
+                    description: "Address and full name exposed without masking in CustomerResponse",
+                    severity: 'critical',
+                    file_path: 'src/main/java/com/pulse/customerservice/dto/CustomerResponse.java',
+                    line_number: '',
+                    category: 'Security',
+                    icon: '🔒',
+                    code_snippet: "private String address;\nprivate String firstName;",
+                    recommendation: "Implement PII masking for sensitive fields in responses",
+                    fix_example: "@JsonSerialize(using = AddressMasker.class)\nprivate String address;"
+                },
+                    
+                {
+                    title: "PII Logged Without Masking",
+                    description: "Customer first and last names logged in plain text",
+                    severity: 'warning',
+                    file_path: 'src/main/java/com/pulse/customerservice/controller/CustomerController.java',
+                    line_number: '',
+                    category: 'Security',
+                    icon: '🔒',
+                    code_snippet: "log.info(\"Creating customer: {} {}\", request.getFirstName(), request.getLastName());",
+                    recommendation: "Mask PII in logs or use customer ID only",
+                    fix_example: "log.info(\"Creating customer with ID: {}\", customerId);"
+                },
+                    
+                {
+                    title: "No Authentication/Authorization",
+                    description: "Endpoints lack security configuration (Spring Security not visible)",
+                    severity: 'critical',
+                    file_path: 'CustomerController.java',
+                    line_number: '',
+                    category: 'Security',
+                    icon: '🔒',
+                    code_snippet: "@RestController\npublic class CustomerController {",
+                    recommendation: "Add Spring Security with JWT or OAuth2 authentication",
+                    fix_example: "@PreAuthorize(\"hasRole(\u0027ADMIN\u0027)\")\npublic ResponseEntity\u003cCustomerResponse\u003e createCustomer()"
+                },
+                    
+                
+            
+                
+                    
+                {
+                    title: "No Global Exception Handler",
+                    description: "Missing @ControllerAdvice for consistent error handling",
+                    severity: 'critical',
+                    file_path: 'src/main/java/com/pulse/customerservice/',
+                    line_number: '',
+                    category: 'Error Handling',
+                    icon: '🛡️',
+                    code_snippet: "// No GlobalExceptionHandler class found",
+                    recommendation: "Create @ControllerAdvice to handle exceptions globally",
+                    fix_example: "@ControllerAdvice\nclass GlobalExceptionHandler {\n  @ExceptionHandler(ResourceNotFoundException.class)\n  ResponseEntity\u003cErrorResponse\u003e handleNotFound()\n}"
+                },
+                    
+                {
+                    title: "Service Layer Missing Exception Handling",
+                    description: "CustomerService not visible but likely throws uncaught exceptions",
+                    severity: 'warning',
+                    file_path: 'CustomerService.java',
+                    line_number: '',
+                    category: 'Error Handling',
+                    icon: '🛡️',
+                    code_snippet: "// Service implementation not provided",
+                    recommendation: "Throw custom exceptions like CustomerNotFoundException",
+                    fix_example: "throw new CustomerNotFoundException(\"Customer not found: \" + id);"
+                },
+                    
+                
+            
+                
+            
+                
+                    
+                {
+                    title: "Missing Pagination for List Endpoints",
+                    description: "getAllCustomers returns unbounded list causing memory issues",
+                    severity: 'critical',
+                    file_path: 'src/main/java/com/pulse/customerservice/controller/CustomerController.java',
+                    line_number: '',
+                    category: 'Performance',
+                    icon: '⚡',
+                    code_snippet: "List\u003cCustomerResponse\u003e customers = customerService.getAllCustomers();",
+                    recommendation: "Implement pagination using Spring Data Pageable",
+                    fix_example: "Page\u003cCustomerResponse\u003e getCustomers(Pageable pageable) {\n  return service.getCustomers(pageable);\n}"
+                },
+                    
+                {
+                    title: "No Database Indexing Visible",
+                    description: "findByFirstNameAndLastName may be slow without index",
+                    severity: 'warning',
+                    file_path: 'CustomerRepository.java',
+                    line_number: '',
+                    category: 'Performance',
+                    icon: '⚡',
+                    code_snippet: "Optional\u003cCustomer\u003e findByFirstNameAndLastName(String firstName, String lastName);",
+                    recommendation: "Add compound index on firstName and lastName",
+                    fix_example: "@Indexed\n@CompoundIndex(def = \"{\u0027firstName\u0027: 1, \u0027lastName\u0027: 1}\")"
+                },
+                    
+                
+            
+                
+                    
+                {
+                    title: "No Correlation ID in Logs",
+                    description: "Logs lack trace/correlation IDs for distributed tracing",
+                    severity: 'warning',
+                    file_path: 'CustomerController.java',
+                    line_number: '',
+                    category: 'Logging',
+                    icon: '📝',
+                    code_snippet: "log.info(\"GET /v1/customers/{} - Fetching customer by ID\", id);",
+                    recommendation: "Add MDC context with correlation ID from headers",
+                    fix_example: "MDC.put(\"correlationId\", request.getHeader(\"X-Correlation-ID\"));\nlog.info(\"Fetching customer\");"
+                },
+                    
+                {
+                    title: "No Distributed Tracing",
+                    description: "Missing Spring Cloud Sleuth or OpenTelemetry integration",
+                    severity: 'warning',
+                    file_path: 'pom.xml',
+                    line_number: '',
+                    category: 'Logging',
+                    icon: '📝',
+                    code_snippet: "// No tracing dependency visible",
+                    recommendation: "Add Spring Cloud Sleuth or Micrometer Tracing",
+                    fix_example: "\u003cdependency\u003e\n  \u003cgroupId\u003eorg.springframework.cloud\u003c/groupId\u003e\n  \u003cartifactId\u003espring-cloud-starter-sleuth\u003c/artifactId\u003e\n\u003c/dependency\u003e"
+                },
+                    
+                
+            
+                
+                    
+                {
+                    title: "Service Implementation Not Provided",
+                    description: "CustomerService interface/implementation not visible for full analysis",
+                    severity: 'info',
+                    file_path: 'CustomerService.java',
+                    line_number: '',
+                    category: 'LLM as a Judge',
+                    icon: '🤖',
+                    code_snippet: "// Service implementation not in provided files",
+                    recommendation: "Ensure service layer properly implements business logic",
+                    fix_example: "@Service\npublic class CustomerServiceImpl implements CustomerService { ... }"
+                },
+                    
+                
+            
+                
+                    
+                {
+                    title: "Consider Additional Business Rules",
+                    description: "May need email, phone, or customer status fields for real-world use",
+                    severity: 'info',
+                    file_path: 'Customer.java',
+                    line_number: '',
+                    category: 'Domain',
+                    icon: '🎯',
+                    code_snippet: "// Only basic fields present",
+                    recommendation: "Add email, phone, status fields if required by business",
+                    fix_example: "@Email\nprivate String email;\nprivate CustomerStatus status;"
+                },
+                    
+                
+            
+            ];
+            
+            const matchingIssues = allIssuesData.filter(issue => issue.title === issueTitle);
+            
+            const section = document.getElementById('filtered-issues-section');
+            const title = document.getElementById('filter-title');
+            const content = document.getElementById('filtered-issues-content');
+            
+            title.textContent = `🔍 ${issueTitle} (${matchingIssues.length} occurrence${matchingIssues.length !== 1 ? 's' : ''})`;
+            
+            content.innerHTML = matchingIssues.map((issue, index) => `
+                <div class="filtered-issue-item severity-${issue.severity}" style="margin-bottom: 1rem;">
+                    <div class="filtered-issue-header">
+                        <div class="filtered-issue-title">
+                            ${issue.severity === 'critical' ? '❌' : issue.severity === 'warning' ? '⚠️' : 'ℹ️'} Occurrence ${index + 1}
+                        </div>
+                        <div class="filtered-issue-category">${issue.icon} ${issue.category}</div>
+                    </div>
+                    ${issue.file_path ? `<div class="filtered-issue-file">📄 ${issue.file_path}${issue.line_number ? ' : Line ' + issue.line_number : ''}</div>` : ''}
+                    <div class="filtered-issue-desc" style="margin-top: 0.5rem;">${issue.description}</div>
+                    ${issue.code_snippet ? `
+                        <div style="margin-top: 0.75rem;">
+                            <div style="font-size: 0.75rem; color: #718096; margin-bottom: 0.3rem; font-weight: 600;">❌ Current Code:</div>
+                            <div class="file-code-snippet">${issue.code_snippet}</div>
+                        </div>
+                    ` : ''}
+                    ${issue.recommendation || issue.fix_example ? `
+                        <div class="file-recommendation" style="margin-top: 0.75rem;">
+                            ${issue.recommendation ? `
+                                <div class="file-recommendation-label">💡 Recommendation:</div>
+                                <div style="margin-bottom: 0.5rem;">${issue.recommendation}</div>
+                            ` : ''}
+                            ${issue.fix_example ? `
+                                <div style="font-size: 0.75rem; color: #1e40af; margin-bottom: 0.3rem; font-weight: 600;">✅ Recommended Fix:</div>
+                                <div class="file-fix-example">${issue.fix_example}</div>
+                            ` : ''}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+            
+            section.classList.add('active');
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    </script>
+</body>
+</html>

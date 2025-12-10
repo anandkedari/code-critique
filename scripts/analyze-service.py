@@ -154,11 +154,12 @@ CODE TO ANALYZE:
 
 CRITICAL INSTRUCTIONS:
 1. Output ONLY valid JSON (no markdown wrappers)
-2. Include ALL 8 categories with full metrics
+2. Include ALL 9 categories with full metrics (including LLM as a Judge)
 3. Keep descriptions concise (under 80 chars)
 4. List ALL issues found (no artificial limits)
 5. Code snippets max 2 lines each
 6. MUST output COMPLETE valid JSON
+7. DYNAMICALLY COUNT issues - do not use fixed numbers
 
 STATUS VALUES (use these exact values):
 - "excellent": Outstanding code quality
@@ -207,6 +208,9 @@ Begin JSON:"""
         analysis_data['metadata']['files_scanned'] = len(code_files)
         analysis_data['summary']['files_scanned'] = len(code_files)
         
+        # CRITICAL: Validate and correct counts
+        analysis_data = validate_and_correct_counts(analysis_data)
+        
         return analysis_data
         
     except anthropic.APIError as e:
@@ -224,6 +228,74 @@ Begin JSON:"""
     finally:
         # Ensure progress indicator is stopped
         stop_event.set()
+
+def validate_and_correct_counts(data):
+    """Validate AI counts match actual issues and correct if needed."""
+    print("\n🔍 Validating issue counts...")
+    
+    # Count actual issues by severity across all categories
+    actual_critical = 0
+    actual_warning = 0
+    actual_info = 0
+    actual_compliant = 0
+    
+    for category in data.get('categories', []):
+        for issue in category.get('issues', []):
+            severity = issue.get('severity', '').lower()
+            if severity == 'critical':
+                actual_critical += 1
+            elif severity == 'warning':
+                actual_warning += 1
+            elif severity == 'info':
+                actual_info += 1
+        
+        # Count compliant items
+        for item in category.get('items', []):
+            assessment = item.get('assessment', '').lower()
+            if assessment == 'compliant':
+                actual_compliant += 1
+    
+    # Get reported counts
+    reported_critical = data['summary'].get('critical_count', 0)
+    reported_warning = data['summary'].get('warning_count', 0)
+    reported_info = data['summary'].get('info_count', 0)
+    reported_compliant = data['summary'].get('success_count', 0)
+    
+    # Check for mismatches
+    corrections_made = False
+    
+    if reported_critical != actual_critical:
+        print(f"   ⚠️  Critical count mismatch: AI said {reported_critical}, actual is {actual_critical}")
+        data['summary']['critical_count'] = actual_critical
+        corrections_made = True
+    
+    if reported_warning != actual_warning:
+        print(f"   ⚠️  Warning count mismatch: AI said {reported_warning}, actual is {actual_warning}")
+        data['summary']['warning_count'] = actual_warning
+        corrections_made = True
+    
+    if reported_info != actual_info:
+        print(f"   ⚠️  Info count mismatch: AI said {reported_info}, actual is {actual_info}")
+        data['summary']['info_count'] = actual_info
+        corrections_made = True
+    
+    if reported_compliant != actual_compliant:
+        print(f"   ⚠️  Success count mismatch: AI said {reported_compliant}, actual is {actual_compliant}")
+        data['summary']['success_count'] = actual_compliant
+        corrections_made = True
+    
+    if corrections_made:
+        print("   ✓ Counts corrected to match actual issues")
+    else:
+        print("   ✓ All counts accurate!")
+    
+    # Validate category count
+    expected_categories = 9
+    actual_categories = len(data.get('categories', []))
+    if actual_categories != expected_categories:
+        print(f"   ⚠️  Category count: Expected {expected_categories}, got {actual_categories}")
+    
+    return data
 
 def validate_json(data, schema_path):
     """Validate JSON output against schema."""

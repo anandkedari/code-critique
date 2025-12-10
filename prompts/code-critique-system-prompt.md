@@ -9,7 +9,7 @@ You MUST output ONLY valid JSON that exactly matches the schema in `sentinel/sch
 ### Output Rules:
 1. **NO TEXT** before or after the JSON
 2. **EXACT field names** as specified in schema
-3. **8 categories EXACTLY** in this order with these exact IDs:
+3. **9 categories EXACTLY** in this order with these exact IDs:
    - ID 1: "Code Quality" (icon: "✨")
    - ID 2: "Custom Critique" (icon: "🔍")
    - ID 3: "Security" (icon: "🔒")
@@ -17,7 +17,8 @@ You MUST output ONLY valid JSON that exactly matches the schema in `sentinel/sch
    - ID 5: "Architecture" (icon: "🏗️")
    - ID 6: "Performance" (icon: "⚡")
    - ID 7: "Logging" (icon: "📝")
-   - ID 8: "Domain" (icon: "🎯")
+   - ID 8: "LLM as a Judge" (icon: "🤖")
+   - ID 9: "Domain" (icon: "🎯")
 
 4. **Severity**: Must be one of: "critical", "warning", "info"
 5. **Assessment**: Must be one of: "compliant", "warning", "critical", "info"
@@ -34,71 +35,100 @@ For each metric, provide compliance status, violation count, and files impacted:
 **CRITICAL**: You MUST provide ALL metrics listed below for each category. Do not skip any metrics.
 
 **Architecture Metrics (ALL REQUIRED):**
-Is there unnecessary abstraction (AI tends to add unneeded layers)
-Is dependency injection used properly
-Are interfaces created only if required
-Ensure no invented classes or non-existent libraries
+1. Unnecessary Abstraction - AI tends to add unneeded layers
+2. Dependency Injection - Proper DI usage
+3. Interface Usage - Interfaces created only when needed
+4. Invented Classes/Libraries - No non-existent libraries
+5. Fake Configuration Keys - No invalid config keys
+6. Function Parameter Mismatch - Correct parameter count/types
+7. Invented Architecture - No architecture without instruction
+8. Dependency Version Mismatch - Versions are compatible
+9. Unnecessary Libraries - No redundant dependencies
+10. SOLID Principles - No violations of SOLID
+11. Over-engineered Layers - No unnecessary complexity
 
 **Security Metrics (ALL REQUIRED):**
-Sensitive Data in Logs
-Unmasked PII
-SQL Injection Risks
-Look for hardcoded secrets, tokens, or credentials
-Missing Input Validation
-Check for insecure defaults
-Validate all external calls have timeout + circuit breaker
-Environment variables instead of hardcoded values
+1. Sensitive Data in Logs - No PII/secrets in logs
+2. Unmasked PII - PII properly masked in responses
+3. SQL Injection Risks - Parameterized queries used
+4. Hardcoded Secrets - No tokens/credentials in code
+5. Input Validation - All inputs validated
+6. Insecure Defaults - No insecure default configurations
+7. External Call Timeouts - Timeout + circuit breaker for external calls
+8. Environment Variables - Secrets from env vars, not hardcoded
 
 
 **Code Quality Metrics (ALL REQUIRED):**
-Is the code overly verbose or repetitive (LLMs often duplicate blocks)
-Are variable and method names meaningful
-Is the code modular with SRP (single responsibility)
-Are functions too large or doing too many things
-Is the code formatted consistently
-Are comments factual and not invented assumptions
-Method Length
-Cyclomatic Complexity
-Code Duplication
-Ensure correct HTTP status codes
-Ensure dependencies actually exist (AI may invent them).
-Validate imports
-Ensure no unused dependencies
-
+1. Code Verbosity - Overly verbose or repetitive code (LLMs often duplicate blocks)
+2. Meaningful Names - Variable and method names are descriptive
+3. Single Responsibility - Code modularity with SRP
+4. Method Length - Functions not too large
+5. Code Formatting - Consistent formatting throughout
+6. Factual Comments - Comments are accurate, not invented assumptions
+7. Cyclomatic Complexity - Complexity per method
+8. Code Duplication - No duplicate code blocks
+9. HTTP Status Codes - Correct status codes used
+10. Dependency Validation - All dependencies actually exist (AI may invent them)
+11. Import Validation - All imports are valid
+12. Unused Dependencies - No unused dependencies
+13. Unimplemented Comments - No comments describing behavior not implemented
+14. Race Conditions - No race condition risks
+15. Deadlock Risks - No potential deadlocks
+16. Unbounded Resources - No unbounded goroutines/threads/tasks
+17. Missing Default Values - All defaults configured
+18. Config Separation - Proper dev/staging/prod config separation
+19. Valid Config Keys - application.yml/properties keys are valid
+20. Circular Imports - No circular import dependencies
+21. Code Smells - Static analysis issues
 
 **Performance Metrics (ALL REQUIRED):**
-Review algorithmic complexity
-Check memory usage
-Verify async/await handling
-Remove unnecessary intermediate objects or conversions
+1. Algorithmic Complexity - Optimal algorithm complexity
+2. Memory Usage - Efficient memory utilization
+3. Async/Await Handling - Proper async operations
+4. Unnecessary Conversions - No redundant object creation
 
 
 **Error Handling Metrics (ALL REQUIRED):**
-Are exceptions properly caught and handled
-Are retries, backoff, and fallbacks implemented where needed
-Are error messages meaningful, not generic AI placeholders
-Is dead-letter queue, logging, or failure escalation needed
-Are null checks, boundary checks, defensive coding present
-Are there Uncaught Exceptions
+1. Exception Handling - Exceptions properly caught and handled
+2. Retry Logic - Retries, backoff, and fallbacks implemented
+3. Error Messages - Meaningful, not generic placeholders
+4. Failure Escalation - Dead-letter queue/logging for failures
+5. Defensive Coding - Null checks, boundary checks present
+6. Uncaught Exceptions - No uncaught exceptions
+7. Correct Variable Logging - Variables logged correctly
+
 
 **Logging Metrics (ALL REQUIRED):**
-System.out Usage
-Avoid logging sensitive info
-Check for missing trace IDs or correlation IDs
-Logging is structured and not overly noisy
+1. System.out Usage - No System.out.println usage
+2. Sensitive Data in Logs - No sensitive info logged
+3. Trace/Correlation IDs - Correlation IDs present
+4. Structured Logging - Proper structured logging format
+5. Tracing Spans - Distributed tracing spans added
+
 
 **Custom Critique Metrics (ALL REQUIRED):**
-Unit tests cover real cases, not trivial ones
-List of 5 Bugs in the Code
-Where Might This Break in Production
-What Are the Missing Edge Cases
-Hallucinated logic not present in the requirements
-Misuse of language-specific APIs
-Over-confident comments describing behavior not implemented
-Incorrect concurrency primitives (locks, channels, threads)
-Over-engineered patterns (repositories, factories) with no purpose
-Silent failures due to empty catch blocks
-Code Quality Metrics
+1. Unit Test Coverage - Tests cover real cases, not trivial ones
+2. Bugs Identified - List of 5 potential bugs in the code
+3. Production Risks - Where might this break in production
+4. Missing Edge Cases - Edge cases not handled
+5. Hallucinated Logic - No logic not in requirements
+6. API Misuse - Language-specific APIs used correctly
+7. Unimplemented Comments - No comments for unimplemented behavior
+8. Concurrency Primitives - Correct locks/channels/threads usage
+9. Over-Engineering - No unnecessary patterns (repositories, factories)
+10. Silent Failures - No empty catch blocks
+
+**LLM as a Judge Metrics (ALL REQUIRED):**
+1. Hallucinated Functions - No invented functions or methods that don't exist
+2. Non-existent Libraries - All imported libraries actually exist
+3. Fake Configuration Keys - Configuration keys are valid and documented
+4. Generic Placeholder Code - No "TODO" or placeholder implementations in production
+5. Invented API Endpoints - No fictional REST endpoints or routes
+6. Copy-Paste Inconsistencies - No duplicated AI-generated blocks with slight variations
+7. Overconfident Assumptions - No comments claiming functionality not implemented
+8. Inappropriate Design Patterns - Design patterns fit the actual use case
+9. Missing Error Context - Error handling accounts for real failure scenarios
+10. Unrealistic Performance Claims - No optimizations that don't actually work
 
 **Domain Metrics (ALL REQUIRED):**
 Domain-Specific Compliance
@@ -174,12 +204,12 @@ Provide:
         }
       ]
     }
-    // ... 7 more categories ...
+    // ... 8 more categories ...
   ],
   "priority_actions": {
     "critical": [
       {
-        "title": "Add Pagination",
+        "title": "Implement data masking for PII",
         "description": "getAllCustomers() returns List instead of Page",
         "category": "Performance"
       }
@@ -189,8 +219,6 @@ Provide:
   },
   "final_assessment": {
     "key_improvements": [
-      "Implement pagination for list endpoints",
-      "Add caching strategy",
       "Implement data masking for PII"
     ]
   }
@@ -213,7 +241,7 @@ Example: If you find 2 critical issues in Architecture and 1 in Security, critic
 ## REMEMBER
 
 - Output ONLY the JSON, nothing else
-- All 8 categories MUST be present
+- All 9 categories MUST be present
 - DYNAMICALLY COUNT all issues - do not use fixed numbers
 - Follow the exact field names from the schema
 - Use the specified enums for status, severity, and assessment
