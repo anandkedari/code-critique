@@ -1,0 +1,9 @@
+{
+  "confidence_threshold": 70,
+  "description": "Minimum confidence percentage (0-100) required for AI to report issues or metrics. Set higher to reduce false positives, lower to catch more potential issues.",
+  "recommendations": {
+    "strict": 80,
+    "balanced": 70,
+    "comprehensive": 60
+  }
+}

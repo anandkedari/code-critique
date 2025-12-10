@@ -23,6 +23,35 @@ You MUST output ONLY valid JSON that exactly matches the schema in `sentinel/sch
 4. **Severity**: Must be one of: "critical", "warning", "info"
 5. **Assessment**: Must be one of: "compliant", "warning", "critical", "info"
 
+## CONFIDENCE-BASED ISSUE REPORTING
+
+**CRITICAL RULE**: Only report issues and metric violations where you have confidence ABOVE the configured threshold.
+
+The confidence threshold will be provided in the prompt. You MUST meet this confidence level for:
+1. ✅ **Issues** - Only report if confidence > threshold
+2. ✅ **Metric Violations** - Only mark as "❌" if confidence > threshold
+3. ✅ **Assessment Items** - Only mark as non-compliant if confidence > threshold
+
+### When Confidence is LOW (below threshold):
+- ❌ **DO NOT** report the issue
+- ❌ **DO NOT** mark metric as violated (use "✅ Compliant" instead)
+- ❌ **DO NOT** mark assessment item as critical/warning
+- ✅ **SKIP IT ENTIRELY** - treat as if you didn't notice it
+
+### High Confidence Examples (REPORT THESE):
+✅ Hardcoded password visible in code: `password = "admin123"`
+✅ Missing null check: `user.getName()` without null guard
+✅ No timeout on HTTP call: `restTemplate.getForObject(url)` (you see the actual call)
+✅ System.out.println in production code (visible)
+✅ Empty catch block swallowing exceptions (visible)
+
+### Low Confidence Examples (SKIP THESE - Mark as Compliant):
+❌ "Might not have pagination" - Can't see full implementation
+❌ "Could have SQL injection" - No actual vulnerable query visible
+❌ "May lack error handling" - Handler might exist elsewhere
+❌ "Possibly missing validation" - Validation might be in another layer
+❌ "Could be inefficient" - No profiling data
+
 ## Analysis Instructions
 
 For each category from `code_critique.md`, you must provide:
@@ -104,7 +133,7 @@ For each metric, provide compliance status, violation count, and files impacted:
 7. Concurrency Primitives - Correct locks/channels/threads usage
 8. Over-Engineering - No unnecessary patterns (repositories, factories)
 9. Silent Failures - No empty catch blocks
-
+ not
 **LLM as a Judge Metrics (ALL REQUIRED):**
 1. Hallucinated Functions - No invented functions or methods that don't exist
 2. Non-existent Libraries - All imported libraries actually exist
@@ -136,14 +165,16 @@ For each issue found, provide:
 ## Priority Actions
 
 Group all issues into:
-1. **Critical**: Issues that can cause security breaches, data loss, or system failures
-2. **Warnings**: Issues that affect code quality, performance, or maintainability
-3. **Suggestions**: Nice-to-have improvements
+1. **Critical**: Issues that can cause security breaches, data loss, or system failures (only if confidence > threshold)
+2. **Warnings**: Issues that affect code quality, performance, or maintainability (only if confidence > threshold)
+3. **Suggestions**: Nice-to-have improvements (only if confidence > threshold)
+
+**IMPORTANT**: Only include issues where confidence exceeds the configured threshold. Skip all others.
 
 ## Final Assessment
 
 Provide:
-- **Key Improvements**: 3-5 most important fixes
+- **Key Improvements**: 3-5 most important fixes based on high-confidence issues only
 
 ## Example JSON Structure
 

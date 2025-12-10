@@ -61,6 +61,17 @@ def load_code_files(service_path):
     print(f"   Total: {len(code_files)} files loaded\n")
     return code_files
 
+def load_config():
+    """Load configuration including confidence threshold."""
+    script_dir = Path(__file__).parent
+    config_file = script_dir.parent / 'config.json'
+    try:
+        with open(config_file, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print("⚠️  Config file not found, using default confidence threshold: 70%")
+        return {"confidence_threshold": 70}
+
 def load_system_prompt():
     """Load the structured system prompt."""
     script_dir = Path(__file__).parent
@@ -196,9 +207,14 @@ def analyze_with_claude(service_path, code_files, api_key):
     print(f"   Total batches: {total_batches}")
     print(f"   Strategy: Full context analysis\n")
     
-    # Load prompts
+    # Load configuration and prompts
+    config = load_config()
+    confidence_threshold = config.get('confidence_threshold', 70)
     system_prompt = load_system_prompt()
     guidelines = load_guidelines()
+    
+    print(f"   📊 Confidence Threshold: {confidence_threshold}%")
+    print(f"   (AI will only report issues/metrics with >{confidence_threshold}% confidence)\n")
     
     # Call Claude API
     client = anthropic.Anthropic(api_key=api_key)
@@ -249,8 +265,13 @@ def analyze_with_claude(service_path, code_files, api_key):
     progress_thread.start()
     
     try:
-        # Construct comprehensive prompt with context
+        # Construct comprehensive prompt with context and config
         prompt = f"""{system_prompt}
+
+CONFIGURATION:
+- **CONFIDENCE_THRESHOLD**: {confidence_threshold}%
+- You MUST have >{confidence_threshold}% confidence to report ANY issue or metric violation
+- If confidence is <={confidence_threshold}%, skip the metric entirely or mark as "✅ Compliant"
 
 CODEBASE OVERVIEW:
 Total Files: {context_summary['total_files']}
