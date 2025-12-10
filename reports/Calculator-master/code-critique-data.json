@@ -1,0 +1,715 @@
+{
+  "metadata": {
+    "service_name": "calculator",
+    "generated_at": "2025-12-09T21:57:00Z",
+    "framework": "Java Swing",
+    "language": "Java",
+    "files_scanned": 8
+  },
+  "summary": {
+    "critical_count": 3,
+    "warning_count": 8,
+    "info_count": 6,
+    "files_scanned": 8
+  },
+  "categories": [
+    {
+      "id": 1,
+      "name": "Code Quality",
+      "icon": "\u2728",
+      "metrics": [
+        {
+          "label": "Code Duplication",
+          "value": "\u274c 10 violations in 1 file",
+          "target": "0"
+        },
+        {
+          "label": "Method Length",
+          "value": "\u274c 2 violations in 1 file",
+          "target": "<50 lines"
+        },
+        {
+          "label": "Cyclomatic Complexity",
+          "value": "\u26a0\ufe0f 3 violations in 1 file",
+          "target": "<10"
+        },
+        {
+          "label": "Meaningful Names",
+          "value": "\u26a0\ufe0f 5 violations in 1 file",
+          "target": "100%"
+        },
+        {
+          "label": "Single Responsibility",
+          "value": "\u274c 1 violation in 1 file",
+          "target": "100%"
+        },
+        {
+          "label": "Code Formatting",
+          "value": "\u2705 Compliant",
+          "target": "100%"
+        },
+        {
+          "label": "Unused Dependencies",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Import Validation",
+          "value": "\u2705 Compliant",
+          "target": "100%"
+        }
+      ],
+      "items": [
+        {
+          "title": "Massive Code Duplication",
+          "assessment": "critical",
+          "description": "Number button handlers duplicated 10 times with identical logic"
+        },
+        {
+          "title": "God Class Anti-Pattern",
+          "assessment": "critical",
+          "description": "CalculatorUI handles UI, business logic, and state management"
+        },
+        {
+          "title": "Consistent Formatting",
+          "assessment": "compliant",
+          "description": "Code follows consistent Java formatting standards"
+        }
+      ],
+      "issues": [
+        {
+          "severity": "critical",
+          "title": "Massive Code Duplication in Number Buttons",
+          "description": "10 number buttons have identical logic duplicated",
+          "file_path": "src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java",
+          "code_snippet": "btn7.addActionListener(event -> {\n    if (addToDisplay) { if (Pattern.matches(\"[0]*\", inputScreen.getText())) ...",
+          "recommendation": "Extract common logic into a reusable method",
+          "fix_example": "private void handleNumberInput(String number) {\n    if (addToDisplay) { ... }\n}\nbtn7.addActionListener(e -> handleNumberInput(\"7\"));"
+        },
+        {
+          "severity": "warning",
+          "title": "Operator Button Logic Duplication",
+          "description": "Operator buttons (+, -, *, /, %) have nearly identical logic",
+          "file_path": "src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java",
+          "code_snippet": "btnAdd.addActionListener(event -> {\n    if (!Pattern.matches(DOUBLE_OR_NUMBER_REGEX, inputScreen.getText())) return;",
+          "recommendation": "Create handleOperatorInput(char operator) method",
+          "fix_example": "private void handleOperatorInput(char op) {\n    if (go) { typedValue = calculate(...); selectedOperator = op; }\n}"
+        },
+        {
+          "severity": "warning",
+          "title": "God Class Violation",
+          "description": "CalculatorUI handles UI creation, event handling, and calculation logic",
+          "file_path": "src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java",
+          "code_snippet": "public class CalculatorUI {\n    private final JFrame window; ... public double calculate(...) { ... }",
+          "recommendation": "Separate into CalculatorUI, CalculatorEngine, and CalculatorState",
+          "fix_example": "class CalculatorEngine {\n    double calculate(double a, double b, char op) { ... }\n}"
+        },
+        {
+          "severity": "warning",
+          "title": "Method Too Long",
+          "description": "initButtons method is 300+ lines, violates SRP",
+          "file_path": "src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java",
+          "code_snippet": "private void initButtons(int[] columns, int[] rows) {\n    btnC = createButton(\"C\", columns[0], rows[1]); ...",
+          "recommendation": "Split into initNumberButtons, initOperatorButtons, initFunctionButtons",
+          "fix_example": "private void initButtons(int[] cols, int[] rows) {\n    initNumberButtons(cols, rows);\n    initOperatorButtons(cols, rows);\n}"
+        },
+        {
+          "severity": "info",
+          "title": "Magic Numbers in UI Layout",
+          "description": "Hardcoded values like 90, 80, 100 used for positioning",
+          "file_path": "src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java",
+          "code_snippet": "int[] columns = {MARGIN_X, MARGIN_X + 90, MARGIN_X + 90 * 2, ...};",
+          "recommendation": "Extract to named constants",
+          "fix_example": "private static final int BUTTON_SPACING = 90;\nint[] columns = {MARGIN_X, MARGIN_X + BUTTON_SPACING, ...};"
+        },
+        {
+          "severity": "info",
+          "title": "Unclear Variable Names",
+          "description": "Variables 'go' and 'addToDisplay' have unclear purpose",
+          "file_path": "src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java",
+          "code_snippet": "private boolean go = true;\nprivate boolean addToDisplay = true;",
+          "recommendation": "Rename to describe intent",
+          "fix_example": "private boolean isReadyForNewOperation = true;\nprivate boolean shouldAppendToDisplay = true;"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Custom Critique",
+      "icon": "\ud83d\udd0d",
+      "metrics": [
+        {
+          "label": "Unit Test Coverage",
+          "value": "\u274c 0% - No tests found",
+          "target": ">80%"
+        },
+        {
+          "label": "Bugs Found",
+          "value": "\u274c 5 critical bugs",
+          "target": "0"
+        },
+        {
+          "label": "Production Risk Areas",
+          "value": "\u274c 4 identified",
+          "target": "0"
+        },
+        {
+          "label": "Missing Edge Cases",
+          "value": "\u274c 6 identified",
+          "target": "0"
+        },
+        {
+          "label": "Hallucinated Logic",
+          "value": "\u2705 None detected",
+          "target": "0"
+        },
+        {
+          "label": "API Misuse",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Over-Engineering",
+          "value": "\u2705 Minimal abstraction",
+          "target": "0"
+        },
+        {
+          "label": "Silent Failures",
+          "value": "\u26a0\ufe0f 2 violations in 1 file",
+          "target": "0"
+        }
+      ],
+      "items": [
+        {
+          "title": "No Unit Tests",
+          "assessment": "critical",
+          "description": "Zero test coverage for calculation logic"
+        },
+        {
+          "title": "Multiple Critical Bugs",
+          "assessment": "critical",
+          "description": "Division by zero, number overflow, decimal handling issues"
+        },
+        {
+          "title": "Missing Edge Case Handling",
+          "assessment": "warning",
+          "description": "No validation for extreme values, multiple decimals, invalid input"
+        }
+      ],
+      "issues": [
+        {
+          "severity": "critical",
+          "title": "Bug: Division by Zero Not Handled",
+          "description": "Dividing by zero will cause Infinity result without user feedback",
+          "file_path": "src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java",
+          "code_snippet": "case '/':\n    return firstNumber / secondNumber;",
+          "recommendation": "Add zero check and display error message",
+          "fix_example": "case '/':\n    if (secondNumber == 0) throw new ArithmeticException(\"Cannot divide by zero\");\n    return firstNumber / secondNumber;"
+        },
+        {
+          "severity": "critical",
+          "title": "Bug: Multiple Decimal Points Allowed",
+          "description": "User can enter multiple decimal points (e.g., 1.2.3.4)",
+          "file_path": "src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java",
+          "code_snippet": "btnPoint = createButton(\".\", columns[1], rows[5]);\n// No validation for existing decimal",
+          "recommendation": "Check if decimal already exists before adding",
+          "fix_example": "btnPoint.addActionListener(e -> {\n    if (!inputScreen.getText().contains(\".\")) inputScreen.setText(inputScreen.getText() + \".\");\n});"
+        },
+        {
+          "severity": "critical",
+          "title": "Bug: Number Overflow Not Handled",
+          "description": "Large calculations can overflow Double.MAX_VALUE without warning",
+          "file_path": "src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java",
+          "code_snippet": "typedValue = calculate(typedValue, Double.parseDouble(inputScreen.getText()), selectedOperator);",
+          "recommendation": "Check for infinity and display error",
+          "fix_example": "double result = calculate(...);\nif (Double.isInfinite(result) || Double.isNaN(result)) {\n    inputScreen.setText(\"Error\"); return;\n}"
+        },
+        {
+          "severity": "warning",
+          "title": "Missing Edge Case: Consecutive Operators",
+          "description": "Pressing multiple operators in sequence causes incorrect behavior",
+          "file_path": "src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java",
+          "code_snippet": "if (go) { typedValue = calculate(...); } else { selectedOperator = '/'; }",
+          "recommendation": "Allow operator change without recalculation",
+          "fix_example": "if (!go) { selectedOperator = newOp; return; }"
+        },
+        {
+          "severity": "warning",
+          "title": "Missing Edge Case: Leading Zeros",
+          "description": "Input like 007 is handled but inconsistently",
+          "file_path": "src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java",
+          "code_snippet": "if (Pattern.matches(\"[0]*\", inputScreen.getText())) { inputScreen.setText(\"7\"); }",
+          "recommendation": "Normalize display to remove leading zeros",
+          "fix_example": "String normalized = String.valueOf(Double.parseDouble(inputScreen.getText()));"
+        },
+        {
+          "severity": "info",
+          "title": "Production Risk: No Error Recovery",
+          "description": "If calculation fails, app state becomes inconsistent",
+          "file_path": "src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java",
+          "code_snippet": "typedValue = calculate(typedValue, Double.parseDouble(inputScreen.getText()), selectedOperator);",
+          "recommendation": "Wrap in try-catch and reset state on error",
+          "fix_example": "try { typedValue = calculate(...); } catch (Exception e) {\n    inputScreen.setText(\"Error\"); resetState();\n}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Security",
+      "icon": "\ud83d\udd12",
+      "metrics": [
+        {
+          "label": "Hardcoded Secrets",
+          "value": "\u2705 None found",
+          "target": "0"
+        },
+        {
+          "label": "SQL Injection Risks",
+          "value": "\u2705 N/A - No database",
+          "target": "0"
+        },
+        {
+          "label": "Input Validation",
+          "value": "\u26a0\ufe0f Partial validation",
+          "target": "100%"
+        },
+        {
+          "label": "Sensitive Data in Logs",
+          "value": "\u2705 No logging present",
+          "target": "0"
+        },
+        {
+          "label": "Unmasked PII",
+          "value": "\u2705 N/A - No PII",
+          "target": "0"
+        },
+        {
+          "label": "Insecure Defaults",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "External Call Timeouts",
+          "value": "\u2705 N/A - No external calls",
+          "target": "100%"
+        },
+        {
+          "label": "Environment Variables",
+          "value": "\u2705 N/A - Desktop app",
+          "target": "100%"
+        }
+      ],
+      "items": [
+        {
+          "title": "No Security Concerns",
+          "assessment": "compliant",
+          "description": "Desktop calculator app with no network or data storage"
+        },
+        {
+          "title": "Input Validation Present",
+          "assessment": "info",
+          "description": "Regex validation for numeric input exists but incomplete"
+        }
+      ],
+      "issues": [
+        {
+          "severity": "info",
+          "title": "Incomplete Input Validation",
+          "description": "Regex validation doesn't prevent all invalid states",
+          "file_path": "src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java",
+          "code_snippet": "if (!Pattern.matches(DOUBLE_OR_NUMBER_REGEX, inputScreen.getText())) return;",
+          "recommendation": "Add comprehensive validation for all edge cases",
+          "fix_example": "private boolean isValidNumber(String input) {\n    try { Double.parseDouble(input); return true; } catch (Exception e) { return false; }\n}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Error Handling",
+      "icon": "\ud83d\udee1\ufe0f",
+      "metrics": [
+        {
+          "label": "Uncaught Exceptions",
+          "value": "\u274c 5 potential exceptions",
+          "target": "0"
+        },
+        {
+          "label": "Proper Exception Handling",
+          "value": "\u274c 0% - No try-catch blocks",
+          "target": "100%"
+        },
+        {
+          "label": "Meaningful Error Messages",
+          "value": "\u274c No error messages",
+          "target": "100%"
+        },
+        {
+          "label": "Null Checks",
+          "value": "\u26a0\ufe0f Missing in 3 places",
+          "target": "100%"
+        },
+        {
+          "label": "Retry Logic",
+          "value": "\u2705 N/A - No external calls",
+          "target": "100%"
+        },
+        {
+          "label": "Fallback Mechanisms",
+          "value": "\u274c No fallbacks",
+          "target": "100%"
+        },
+        {
+          "label": "Defensive Coding",
+          "value": "\u26a0\ufe0f Minimal defensive checks",
+          "target": "100%"
+        }
+      ],
+      "items": [
+        {
+          "title": "No Exception Handling",
+          "assessment": "critical",
+          "description": "Zero try-catch blocks for arithmetic or parsing errors"
+        },
+        {
+          "title": "No User Error Feedback",
+          "assessment": "critical",
+          "description": "Errors fail silently or show technical exceptions"
+        }
+      ],
+      "issues": [
+        {
+          "severity": "critical",
+          "title": "No Exception Handling for Parsing",
+          "description": "Double.parseDouble can throw NumberFormatException",
+          "file_path": "src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java",
+          "code_snippet": "typedValue = calculate(typedValue, Double.parseDouble(inputScreen.getText()), selectedOperator);",
+          "recommendation": "Wrap in try-catch and display user-friendly error",
+          "fix_example": "try {\n    double val = Double.parseDouble(inputScreen.getText());\n} catch (NumberFormatException e) {\n    inputScreen.setText(\"Error\");\n}"
+        },
+        {
+          "severity": "warning",
+          "title": "No Null Checks on UI Components",
+          "description": "Theme loading could return null, causing NullPointerException",
+          "file_path": "src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java",
+          "code_snippet": "if (themesMap.entrySet().iterator().hasNext()) {\n    applyTheme(themesMap.entrySet().iterator().next().getValue());",
+          "recommendation": "Add null checks for theme values",
+          "fix_example": "Theme theme = themesMap.entrySet().iterator().next().getValue();\nif (theme != null) applyTheme(theme);"
+        },
+        {
+          "severity": "warning",
+          "title": "Silent Failure on Invalid Input",
+          "description": "Early returns in operators provide no user feedback",
+          "file_path": "src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java",
+          "code_snippet": "if (!Pattern.matches(DOUBLE_OR_NUMBER_REGEX, inputScreen.getText())) return;",
+          "recommendation": "Show error message or visual indicator",
+          "fix_example": "if (!isValid(inputScreen.getText())) {\n    inputScreen.setBackground(Color.RED);\n    return;\n}"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Architecture",
+      "icon": "\ud83c\udfd7\ufe0f",
+      "metrics": [
+        {
+          "label": "Unnecessary Abstraction",
+          "value": "\u2705 Minimal abstraction",
+          "target": "0"
+        },
+        {
+          "label": "Dependency Injection",
+          "value": "\u26a0\ufe0f Not used",
+          "target": "Where appropriate"
+        },
+        {
+          "label": "Interfaces Only When Needed",
+          "value": "\u2705 No unnecessary interfaces",
+          "target": "100%"
+        },
+        {
+          "label": "Invented Classes/Libraries",
+          "value": "\u2705 All classes exist",
+          "target": "0"
+        },
+        {
+          "label": "Separation of Concerns",
+          "value": "\u274c 1 major violation",
+          "target": "100%"
+        },
+        {
+          "label": "Layer Violations",
+          "value": "\u274c UI mixed with business logic",
+          "target": "0"
+        }
+      ],
+      "items": [
+        {
+          "title": "Poor Separation of Concerns",
+          "assessment": "critical",
+          "description": "UI, business logic, and state management all in one class"
+        },
+        {
+          "title": "No Over-Engineering",
+          "assessment": "compliant",
+          "description": "Simple architecture appropriate for calculator app"
+        }
+      ],
+      "issues": [
+        {
+          "severity": "critical",
+          "title": "Business Logic in UI Class",
+          "description": "Calculate method and state management mixed with Swing UI code",
+          "file_path": "src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java",
+          "code_snippet": "public double calculate(double firstNumber, double secondNumber, char operator) {\n    switch (operator) { case '+': return firstNumber + secondNumber; ...",
+          "recommendation": "Extract to separate CalculatorEngine class",
+          "fix_example": "class CalculatorEngine {\n    public double calculate(double a, double b, char op) { ... }\n}\nprivate final CalculatorEngine engine = new CalculatorEngine();"
+        },
+        {
+          "severity": "warning",
+          "title": "State Management in UI",
+          "description": "Calculator state (typedValue, selectedOperator, go) stored in UI class",
+          "file_path": "src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java",
+          "code_snippet": "private char selectedOperator = ' ';\nprivate boolean go = true;\nprivate double typedValue = 0;",
+          "recommendation": "Create CalculatorState class to manage state",
+          "fix_example": "class CalculatorState {\n    private double currentValue;\n    private char operator;\n    void reset() { ... }\n}"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Performance",
+      "icon": "\u26a1",
+      "metrics": [
+        {
+          "label": "Algorithmic Complexity",
+          "value": "\u2705 O(1) operations",
+          "target": "Optimal"
+        },
+        {
+          "label": "Memory Usage",
+          "value": "\u2705 Minimal allocations",
+          "target": "Optimal"
+        },
+        {
+          "label": "Async/Await Handling",
+          "value": "\u2705 N/A - Synchronous UI",
+          "target": "100%"
+        },
+        {
+          "label": "Unnecessary Object Creation",
+          "value": "\u26a0\ufe0f 2 violations in 1 file",
+          "target": "0"
+        },
+        {
+          "label": "String Concatenation",
+          "value": "\u26a0\ufe0f Multiple violations",
+          "target": "Use StringBuilder"
+        }
+      ],
+      "items": [
+        {
+          "title": "Efficient Calculations",
+          "assessment": "compliant",
+          "description": "All arithmetic operations are O(1)"
+        },
+        {
+          "title": "Minor String Inefficiencies",
+          "assessment": "info",
+          "description": "String concatenation in loops could use StringBuilder"
+        }
+      ],
+      "issues": [
+        {
+          "severity": "info",
+          "title": "Inefficient String Building",
+          "description": "String concatenation in btnBack handler creates multiple objects",
+          "file_path": "src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java",
+          "code_snippet": "StringBuilder str2 = new StringBuilder();\nfor (int i = 0; i < (str.length() - 1); i++) { str2.append(str.charAt(i)); }",
+          "recommendation": "Use substring instead of loop",
+          "fix_example": "String str = inputScreen.getText();\nif (str.length() > 1) inputScreen.setText(str.substring(0, str.length() - 1));"
+        },
+        {
+          "severity": "info",
+          "title": "Repeated Pattern Compilation",
+          "description": "Pattern.matches compiles regex on every call",
+          "file_path": "src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java",
+          "code_snippet": "if (!Pattern.matches(DOUBLE_OR_NUMBER_REGEX, inputScreen.getText())) return;",
+          "recommendation": "Compile pattern once as static field",
+          "fix_example": "private static final Pattern NUMBER_PATTERN = Pattern.compile(DOUBLE_OR_NUMBER_REGEX);\nif (!NUMBER_PATTERN.matcher(input).matches()) return;"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Logging",
+      "icon": "\ud83d\udcdd",
+      "metrics": [
+        {
+          "label": "System.out Usage",
+          "value": "\u2705 None found",
+          "target": "0"
+        },
+        {
+          "label": "Sensitive Data Logging",
+          "value": "\u2705 N/A - No logging",
+          "target": "0"
+        },
+        {
+          "label": "Structured Logging",
+          "value": "\u26a0\ufe0f No logging framework",
+          "target": "100%"
+        },
+        {
+          "label": "Trace/Correlation IDs",
+          "value": "\u2705 N/A - Desktop app",
+          "target": "100%"
+        },
+        {
+          "label": "Log Levels",
+          "value": "\u26a0\ufe0f No logging present",
+          "target": "Appropriate levels"
+        }
+      ],
+      "items": [
+        {
+          "title": "No Logging Present",
+          "assessment": "info",
+          "description": "No logging framework used - acceptable for simple desktop app"
+        }
+      ],
+      "issues": [
+        {
+          "severity": "info",
+          "title": "No Error Logging",
+          "description": "Errors and exceptions are not logged for debugging",
+          "file_path": "src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java",
+          "code_snippet": "// No logging framework configured",
+          "recommendation": "Add java.util.logging for error tracking",
+          "fix_example": "private static final Logger logger = Logger.getLogger(CalculatorUI.class.getName());\nlogger.log(Level.SEVERE, \"Calculation error\", e);"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Domain",
+      "icon": "\ud83c\udfaf",
+      "metrics": [
+        {
+          "label": "Domain-Specific Compliance",
+          "value": "\u2705 Calculator logic correct",
+          "target": "100%"
+        },
+        {
+          "label": "Business Rules",
+          "value": "\u2705 Standard arithmetic",
+          "target": "100%"
+        },
+        {
+          "label": "Domain Model Accuracy",
+          "value": "\u2705 Appropriate for domain",
+          "target": "100%"
+        }
+      ],
+      "items": [
+        {
+          "title": "Correct Calculator Behavior",
+          "assessment": "compliant",
+          "description": "Implements standard calculator operations correctly"
+        },
+        {
+          "title": "Scientific Functions",
+          "assessment": "compliant",
+          "description": "Power, root, and log functions use correct Math library methods"
+        }
+      ],
+      "issues": []
+    }
+  ],
+  "priority_actions": {
+    "critical": [
+      {
+        "title": "Add Exception Handling",
+        "description": "Wrap all arithmetic and parsing operations in try-catch blocks",
+        "category": "Error Handling"
+      },
+      {
+        "title": "Fix Division by Zero",
+        "description": "Add validation to prevent division by zero crashes",
+        "category": "Custom Critique"
+      },
+      {
+        "title": "Separate Business Logic from UI",
+        "description": "Extract calculate() and state management to separate classes",
+        "category": "Architecture"
+      }
+    ],
+    "warnings": [
+      {
+        "title": "Eliminate Code Duplication",
+        "description": "Refactor 10 duplicate number button handlers into single method",
+        "category": "Code Quality"
+      },
+      {
+        "title": "Split God Class",
+        "description": "Break CalculatorUI into UI, Engine, and State classes",
+        "category": "Code Quality"
+      },
+      {
+        "title": "Add Input Validation",
+        "description": "Prevent multiple decimal points and invalid number formats",
+        "category": "Custom Critique"
+      },
+      {
+        "title": "Refactor initButtons Method",
+        "description": "Split 300+ line method into smaller focused methods",
+        "category": "Code Quality"
+      },
+      {
+        "title": "Add Null Checks",
+        "description": "Validate theme loading and UI component initialization",
+        "category": "Error Handling"
+      }
+    ],
+    "suggestions": [
+      {
+        "title": "Add Unit Tests",
+        "description": "Create tests for calculate() method and edge cases",
+        "category": "Custom Critique"
+      },
+      {
+        "title": "Improve Variable Names",
+        "description": "Rename 'go' and 'addToDisplay' to descriptive names",
+        "category": "Code Quality"
+      },
+      {
+        "title": "Extract Magic Numbers",
+        "description": "Replace hardcoded layout values with named constants",
+        "category": "Code Quality"
+      },
+      {
+        "title": "Optimize String Operations",
+        "description": "Use substring instead of StringBuilder loop in btnBack",
+        "category": "Performance"
+      },
+      {
+        "title": "Compile Regex Pattern Once",
+        "description": "Create static Pattern field instead of compiling repeatedly",
+        "category": "Performance"
+      },
+      {
+        "title": "Add Basic Logging",
+        "description": "Implement java.util.logging for error tracking",
+        "category": "Logging"
+      }
+    ]
+  },
+  "final_assessment": {
+    "key_improvements": [
+      "Add comprehensive exception handling for arithmetic and parsing errors",
+      "Eliminate massive code duplication in number and operator button handlers",
+      "Separate business logic (calculate) from UI code into dedicated classes",
+      "Fix critical bugs: division by zero, multiple decimals, number overflow",
+      "Add unit tests for calculation logic and edge cases"
+    ]
+  }
+}

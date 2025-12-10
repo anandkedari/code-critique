@@ -1,0 +1,4715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Critique Report - calculator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.5;
+            color: #333333;
+            background: #f5f5f5;
+            font-size: 14px;
+        }
+        
+        .header {
+            background: #333333;
+            color: #ffffff;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-bottom: 3px solid #00c853;
+        }
+        
+        .header h1 { font-size: 1.8rem; margin-bottom: 0.3rem; font-weight: 600; }
+        
+        .header .metadata {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 0.75rem;
+            font-size: 0.8rem;
+            opacity: 0.85;
+        }
+        
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        
+        /* Section 1: Overall Summary */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card {
+            background: #ffffff;
+            border-radius: 3px;
+            padding: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border: 1px solid #e0e0e0;
+            transition: transform 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card:hover { transform: translateY(-2px); box-shadow: 0 3px 10px rgba(0,0,0,0.12); }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.6rem;
+        }
+        
+        .card-title {
+            font-size: 0.75rem;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .card-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+        
+        .badge-critical { background: #f44336; color: #ffffff; }
+        .badge-warning { background: #ff9800; color: #ffffff; }
+        .badge-info { background: #2196f3; color: #ffffff; }
+        .badge-success { background: #00c853; color: #ffffff; }
+        
+        /* Section 2: Category Status Table */
+        .categories-overview {
+            background: #ffffff;
+            border-radius: 3px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border: 1px solid #e0e0e0;
+        }
+        
+        .categories-overview h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        /* Category Summary Grid */
+        .category-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 0.75rem;
+        }
+        
+        .category-summary-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: #ead7c1;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+        
+        .category-summary-name {
+            flex: 1;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .category-summary-count {
+            color: #718096;
+            font-size: 0.8rem;
+            padding: 0.25rem 0.6rem;
+            background: #fff;
+            border-radius: 12px;
+        }
+        
+        /* Compact Status Grid */
+        .compact-status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 0.5rem;
+        }
+        
+        .compact-status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.6rem 0.75rem;
+            background: #dadada;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            border-left: 3px solid transparent;
+        }
+        
+        .compact-status-item.status-excellent { border-left-color: #059669; }
+        .compact-status-item.status-good { border-left-color: #2563eb; }
+        .compact-status-item.status-needs-work { border-left-color: #d97706; }
+        .compact-status-item.status-critical { border-left-color: #c53030; }
+        
+        .status-icon {
+            font-size: 1.1rem;
+        }
+        
+        .status-name {
+            flex: 1;
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.85rem;
+        }
+        
+        .status-badge-inline {
+            font-weight: 600;
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+        }
+        
+        .status-excellent .status-badge-inline { background: #d1fae5; color: #059669; }
+        .status-good .status-badge-inline { background: #dbeafe; color: #2563eb; }
+        .status-needs-work .status-badge-inline { background: #fef3c7; color: #d97706; }
+        .status-critical .status-badge-inline { background: #ffd4d4; color: #c53030; }
+        
+        .status-metrics {
+            color: #000000;
+            font-size: 0.75rem;
+        }
+        
+        /* Files Issues Grid */
+        .files-issues-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+        
+        .file-issues-item {
+            background: #ffffff;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            overflow: hidden;
+        }
+        
+        .file-issues-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            user-select: none;
+        }
+        
+        .file-issues-header:hover {
+            background: #f8f9fa;
+        }
+        
+        .expand-icon {
+            font-size: 0.8rem;
+            color: #718096;
+            transition: transform 0.2s;
+        }
+        
+        .file-issues-item.expanded .expand-icon {
+            transform: rotate(90deg);
+        }
+        
+        .file-icon {
+            font-size: 1.1rem;
+        }
+        
+        .file-name {
+            flex: 1;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .file-issues-count {
+            color: #718096;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.6rem;
+            background: #f0f0f0;
+            border-radius: 12px;
+        }
+        
+        .file-issues-content {
+            display: none;
+            padding: 0 0.75rem 0.75rem 0.75rem;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .file-issues-item.expanded .file-issues-content {
+            display: block;
+        }
+        
+        .file-issue-detail {
+            padding: 0.6rem;
+            margin-top: 0.5rem;
+            background: #f8f9fa;
+            border-left: 3px solid #ddd;
+            border-radius: 3px;
+            font-size: 0.8rem;
+        }
+        
+        .file-issue-detail.severity-critical {
+            border-left-color: #f44336;
+            background: #fff5f5;
+        }
+        
+        .file-issue-detail.severity-warning {
+            border-left-color: #ff9800;
+            background: #fffbf0;
+        }
+        
+        .file-issue-detail.severity-info {
+            border-left-color: #2196f3;
+            background: #f0f8ff;
+        }
+        
+        .file-issue-detail-title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.8rem;
+        }
+        
+        .file-issue-detail-desc {
+            color: #4a5568;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            margin-bottom: 0.4rem;
+        }
+        
+        .file-issue-category {
+            display: inline-block;
+            margin-top: 0.3rem;
+            padding: 0.15rem 0.4rem;
+            background: #ffffff;
+            border-radius: 8px;
+            font-size: 0.65rem;
+            color: #718096;
+        }
+        
+        .file-code-snippet {
+            background: #2d3748;
+            color: #f8f8f2;
+            padding: 0.4rem 0.5rem;
+            border-radius: 3px;
+            overflow-x: auto;
+            margin: 0.4rem 0;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.7rem;
+            line-height: 1.3;
+            white-space: pre-wrap;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        
+        .file-recommendation {
+            background: #e8f4f8;
+            padding: 0.4rem 0.5rem;
+            margin-top: 0.4rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            line-height: 1.4;
+        }
+        
+        .file-recommendation-label {
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 0.2rem;
+            font-size: 0.7rem;
+        }
+        
+        .file-fix-example {
+            background: #1e3a2e;
+            color: #90ee90;
+            padding: 0.4rem 0.5rem;
+            border-radius: 3px;
+            overflow-x: auto;
+            margin-top: 0.3rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.7rem;
+            line-height: 1.3;
+            white-space: pre-wrap;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        
+        /* Section 3: Detailed Category Analysis */
+        .category-section {
+            background: #ffffff;
+            border-radius: 3px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border: 1px solid #e0e0e0;
+        }
+        
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #f3e8dc;
+        }
+        
+        .category-title {
+            font-size: 1.1rem;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-weight: 600;
+        }
+        
+        .category-status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        
+        .category-status-excellent { background: #d1fae5; color: #059669; }
+        .category-status-good { background: #dbeafe; color: #2563eb; }
+        .category-status-needs-work { background: #fef3c7; color: #d97706; }
+        .category-status-critical { background: #ffd4d4; color: #c53030; }
+        
+        .category-icon { font-size: 1.3rem; }
+        
+        .compliance-badge {
+            padding: 0.35rem 1rem;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .compliance-compliant { background: #d1fae5; color: #059669; }
+        .compliance-needs-work { background: #fef3c7; color: #856404; }
+        .compliance-suggestion { background: #dbeafe; color: #1e40af; }
+        .compliance-inconsistency { background: #fce7f3; color: #9f1239; }
+        
+        /* Metrics List (2-Column Grid) */
+        .metrics-list {
+            margin-bottom: 1rem;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 0.4rem;
+        }
+        
+        .metric-row {
+            padding: 0.4rem 0.6rem;
+            background: #e8decf;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+        }
+        
+        .metric-name {
+            color: #2d3748;
+            font-weight: 500;
+            flex: 1;
+        }
+        
+        .metric-info {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .metric-value-display {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.75rem;
+        }
+        
+        .metric-target-display {
+            font-size: 0.7rem;
+            color: #718096;
+        }
+        
+        /* Items List - Inline Format */
+        .items-list {
+            margin-bottom: 1rem;
+        }
+        
+        .items-list h3 {
+            font-size: 0.95rem;
+            margin-bottom: 0.75rem;
+            color: #4a5568;
+            font-weight: 600;
+        }
+        
+        .item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.7rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            background: #fcf9f4;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            font-size: 0.8rem;
+        }
+        
+        .item-compliant { 
+            border-color: #d1fae5;
+            background: #f0fdf9;
+        }
+        .item-warning { 
+            border-color: #fef3c7;
+            background: #fffbeb;
+        }
+        .item-critical { 
+            border-color: #ffd4d4;
+            background: #fff5f5;
+        }
+        .item-info { 
+            border-color: #dbeafe;
+            background: #eff6ff;
+        }
+        
+        .item-icon {
+            font-size: 0.9rem;
+        }
+        
+        .item-content {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        .item-title {
+            font-weight: 500;
+            color: #2d3748;
+            font-size: 0.8rem;
+        }
+        
+        .item-description {
+            display: none;
+        }
+        
+        /* Issues */
+        .issues-list h3 {
+            font-size: 0.95rem;
+            margin-bottom: 0.75rem;
+            color: #4a5568;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .issues-list h3:hover {
+            color: #2d3748;
+        }
+        
+        .issues-list-toggle {
+            font-size: 0.8rem;
+            color: #718096;
+            transition: transform 0.2s;
+        }
+        
+        .issues-list.collapsed .issues-list-toggle {
+            transform: rotate(-90deg);
+        }
+        
+        .issues-list.collapsed .issues-list-content {
+            display: none;
+        }
+        
+        .issue {
+            background: #f2f2f299;
+            border-left: 3px solid #ddd;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+        
+        .issue-critical { border-left-color: #c53030; }
+        .issue-warning { border-left-color: #d97706; }
+        .issue-info { border-left-color: #2563eb; }
+        
+        .issue-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+        
+        .issue-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #2d3748;
+        }
+        
+        .issue-description {
+            color: #4a5568;
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+        
+        .file-path {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.75rem;
+            color: #718096;
+            background: #fff;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #f8f8f2;
+            padding: 0.75rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 0.5rem 0;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        
+        .code-label {
+            font-size: 0.75rem;
+            color: #718096;
+            margin-bottom: 0.2rem;
+            margin-top: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .recommendation {
+            background: #9fc15c3d;
+            border-left: 3px solid #2563eb;
+            padding: 0.75rem;
+            margin-top: 0.75rem;
+            border-radius: 4px;
+        }
+        
+        .recommendation-title {
+            font-weight: 600;
+            color: #046423;
+            margin-bottom: 0.35rem;
+            font-size: 0.85rem;
+        }
+        
+        /* Section 4: Priority Actions */
+        .priority-section {
+            background: #ffffff;
+            border-radius: 3px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border: 1px solid #e0e0e0;
+            border-left: 4px solid #ff9800;
+        }
+        
+        .priority-section h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        .priority-group {
+            margin-bottom: 1.25rem;
+        }
+        
+        .priority-group h3 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .priority-group.critical h3 { color: #c53030; }
+        .priority-group.warnings h3 { color: #d97706; }
+        .priority-group.suggestions h3 { color: #2563eb; }
+        
+        .priority-items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 0.75rem;
+        }
+        
+        .priority-item {
+            padding: 0.75rem;
+            background: #dadada;
+            border-radius: 6px;
+            border-left: 3px solid #ddd;
+            font-size: 0.85rem;
+        }
+        
+        .priority-item.critical { border-left-color: #c53030; }
+        .priority-item.warning { border-left-color: #d97706; }
+        .priority-item.info { border-left-color: #2563eb; }
+        
+        .priority-title {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            color: #2d3748;
+            font-size: 0.85rem;
+        }
+        
+        .priority-description {
+            color: #4a5568;
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+        
+        .priority-category {
+            display: inline-block;
+            margin-top: 0.35rem;
+            padding: 0.2rem 0.6rem;
+            background: #fff;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            color: #718096;
+        }
+        
+        /* Section 5: Final Assessment */
+        .final-assessment {
+            background: #e8f5e9;
+            border-radius: 3px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border: 1px solid #e0e0e0;
+            border-left: 4px solid #00c853;
+        }
+        
+        .final-assessment h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        .grade-display {
+            text-align: center;
+            padding: 2rem;
+            background: #00c853;
+            color: white;
+            border-radius: 3px;
+            margin-bottom: 2rem;
+        }
+        
+        .grade-value {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .grade-label {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .assessment-section {
+            margin-bottom: 0;
+        }
+        
+        .assessment-list {
+            list-style: none;
+        }
+        
+        .assessment-list li {
+            padding: 0.6rem;
+            margin-bottom: 0.4rem;
+            background: #f0fdf9;
+            border-radius: 6px;
+            padding-left: 2rem;
+            position: relative;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: #4a5568;
+        }
+        
+        .assessment-list.improvements li:before {
+            content: "⚠";
+            position: absolute;
+            left: 0.65rem;
+            color: #d97706;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: #718096;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 1.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .no-issues {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 500;
+            margin: 0.75rem 0;
+            font-size: 0.85rem;
+        }
+        
+        /* Issue Filter Section */
+        .issue-filter-section {
+            background: #ffffff;
+            border-radius: 3px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border: 1px solid #e0e0e0;
+            display: none;
+        }
+        
+        .issue-filter-section.active {
+            display: block;
+        }
+        
+        .issue-filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .issue-filter-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .close-filter {
+            background: #e0e0e0;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .close-filter:hover {
+            background: #d0d0d0;
+        }
+        
+        .filtered-issue-item {
+            background: #f8f9fa;
+            border-left: 3px solid #ddd;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        
+        .filtered-issue-item.severity-critical {
+            border-left-color: #c53030;
+        }
+        
+        .filtered-issue-item.severity-warning {
+            border-left-color: #d97706;
+        }
+        
+        .filtered-issue-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+        
+        .filtered-issue-title {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.9rem;
+        }
+        
+        .filtered-issue-category {
+            font-size: 0.75rem;
+            color: #718096;
+            background: #fff;
+            padding: 0.2rem 0.5rem;
+            border-radius: 8px;
+        }
+        
+        .filtered-issue-file {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.75rem;
+            color: #718096;
+            margin-bottom: 0.35rem;
+        }
+        
+        .filtered-issue-desc {
+            color: #4a5568;
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+        
+        .card.clickable {
+            cursor: pointer;
+        }
+        
+        /* Issues Bar Graph Section */
+        .bar-graph-section {
+            background: #ffffff;
+            border-radius: 3px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border: 1px solid #e0e0e0;
+        }
+        
+        .bar-graph-section h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        .bar-item {
+            margin-bottom: 0.75rem;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .bar-item.clickable {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .bar-item.clickable:hover {
+            background: #e9ecef;
+        }
+        
+        .bar-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.3rem;
+            font-size: 0.85rem;
+        }
+        
+        .bar-icon {
+            font-size: 1.1rem;
+        }
+        
+        .bar-label {
+            flex: 1;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .bar-count {
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+        }
+        
+        .bar-count.critical { background: #ffd4d4; color: #c53030; }
+        .bar-count.warning { background: #fef3c7; color: #d97706; }
+        .bar-count.mixed { background: #e0e0e0; color: #2d3748; }
+        
+        .bar-graph {
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+            font-size: 0.9rem;
+        }
+        
+        .bar-emoji {
+            display: inline-block;
+        }
+        
+        .bar-critical { color: #c53030; }
+        .bar-warning { color: #d97706; }
+        
+        @media print {
+            body { background: white; }
+            .card:hover { transform: none; }
+            .issue-filter-section { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>🔍 Code Critique Report</h1>
+        <div class="metadata">
+            <div><strong>Service:</strong> calculator</div>
+            <div><strong>Generated:</strong> 2025-12-09T21:57:00Z</div>
+            <div><strong>Framework:</strong> Java Swing</div>
+            <div><strong>Language:</strong> Java</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- SECTION 1: Overall Summary -->
+        <div class="summary-cards">
+            <div class="card">
+                <div class="card-title">Overall Status</div>
+                <span class="badge badge-warning">
+                    NEEDS WORK
+                    
+                </span>
+            </div>
+            
+            <div class="card clickable" onclick="showFilteredIssues('critical')">
+                <div class="card-title">Critical Issues</div>
+                <span class="badge badge-critical">3</span>
+            </div>
+            
+            <div class="card clickable" onclick="showFilteredIssues('warning')">
+                <div class="card-title">Warnings</div>
+                <span class="badge badge-warning">8</span>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Files Not Compliant</div>
+                
+                
+                    
+                        
+                            
+                                
+                                    
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                    
+                
+                    
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                    
+                
+                    
+                        
+                            
+                                
+                            
+                        
+                    
+                
+                    
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                    
+                
+                    
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                    
+                
+                    
+                        
+                            
+                                
+                            
+                        
+                            
+                                
+                            
+                        
+                    
+                
+                    
+                        
+                            
+                                
+                            
+                        
+                    
+                
+                    
+                
+                <span class="badge badge-warning">1</span>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Files Scanned</div>
+                <span class="badge badge-info">8</span>
+            </div>
+        </div>
+
+        <!-- SECTION 2: Assessment Status -->
+        <div class="categories-overview">
+            <h2>📋 Assessment Status</h2>
+            <div class="compact-status-grid">
+                
+                
+                
+                <div class="compact-status-item status-needs-work">
+                    <span class="status-icon">✨</span>
+                    <span class="status-name">Code Quality</span>
+                    <span class="status-badge-inline">
+                        ❌ 1 CRITICAL
+                    </span>
+                    <span class="status-metrics">6 issues</span>
+                </div>
+                
+                
+                
+                <div class="compact-status-item status-critical">
+                    <span class="status-icon">🔍</span>
+                    <span class="status-name">Custom Critique</span>
+                    <span class="status-badge-inline">
+                        ❌ 3 CRITICAL
+                    </span>
+                    <span class="status-metrics">6 issues</span>
+                </div>
+                
+                
+                
+                <div class="compact-status-item status-excellent">
+                    <span class="status-icon">🔒</span>
+                    <span class="status-name">Security</span>
+                    <span class="status-badge-inline">
+                        ✅ COMPLIANT
+                        
+                    </span>
+                    <span class="status-metrics">1 issue</span>
+                </div>
+                
+                
+                
+                <div class="compact-status-item status-needs-work">
+                    <span class="status-icon">🛡️</span>
+                    <span class="status-name">Error Handling</span>
+                    <span class="status-badge-inline">
+                        ❌ 1 CRITICAL
+                    </span>
+                    <span class="status-metrics">3 issues</span>
+                </div>
+                
+                
+                
+                <div class="compact-status-item status-needs-work">
+                    <span class="status-icon">🏗️</span>
+                    <span class="status-name">Architecture</span>
+                    <span class="status-badge-inline">
+                        ❌ 1 CRITICAL
+                    </span>
+                    <span class="status-metrics">2 issues</span>
+                </div>
+                
+                
+                
+                <div class="compact-status-item status-excellent">
+                    <span class="status-icon">⚡</span>
+                    <span class="status-name">Performance</span>
+                    <span class="status-badge-inline">
+                        ✅ COMPLIANT
+                        
+                    </span>
+                    <span class="status-metrics">2 issues</span>
+                </div>
+                
+                
+                
+                <div class="compact-status-item status-excellent">
+                    <span class="status-icon">📝</span>
+                    <span class="status-name">Logging</span>
+                    <span class="status-badge-inline">
+                        ✅ COMPLIANT
+                        
+                    </span>
+                    <span class="status-metrics">1 issue</span>
+                </div>
+                
+                
+                
+                <div class="compact-status-item status-excellent">
+                    <span class="status-icon">🎯</span>
+                    <span class="status-name">Domain</span>
+                    <span class="status-badge-inline">
+                        ✅ COMPLIANT
+                        
+                    </span>
+                    <span class="status-metrics">0 issues</span>
+                </div>
+                
+            </div>
+        </div>
+
+        <!-- SECTION 3: Issues by File -->
+        <div class="categories-overview">
+            <h2>📁 Issues by File</h2>
+            <div class="files-issues-grid">
+                
+                
+                    
+                        
+                            
+                                
+                                    
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                    
+                
+                    
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                    
+                
+                    
+                        
+                            
+                                
+                                
+                            
+                        
+                    
+                
+                    
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                    
+                
+                    
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                    
+                
+                    
+                        
+                            
+                                
+                                
+                            
+                        
+                            
+                                
+                                
+                            
+                        
+                    
+                
+                    
+                        
+                            
+                                
+                                
+                            
+                        
+                    
+                
+                    
+                
+                
+                
+                <div class="file-issues-item">
+                    <div class="file-issues-header" onclick="toggleFileIssues(this)">
+                        <span class="expand-icon">▶</span>
+                        <span class="file-icon">📄</span>
+                        <span class="file-name">src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java</span>
+                        <span class="file-issues-count">21 issues</span>
+                    </div>
+                    <div class="file-issues-content">
+                        
+                        <div class="file-issue-detail severity-critical">
+                            <div class="file-issue-detail-title">
+                                ❌
+                                
+                                Massive Code Duplication in Number Buttons
+                            </div>
+                            <div class="file-issue-detail-desc">10 number buttons have identical logic duplicated</div>
+                            <span class="file-issue-category">✨ Code Quality</span>
+                            
+                            
+                            <div class="file-code-snippet">btn7.addActionListener(event -> {
+    if (addToDisplay) { if (Pattern.matches("[0]*", inputScreen.getText())) ...</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Extract common logic into a reusable method</div>
+                                
+                                
+                                <div class="file-fix-example">private void handleNumberInput(String number) {
+    if (addToDisplay) { ... }
+}
+btn7.addActionListener(e -> handleNumberInput("7"));</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-warning">
+                            <div class="file-issue-detail-title">
+                                ⚠️
+                                
+                                Operator Button Logic Duplication
+                            </div>
+                            <div class="file-issue-detail-desc">Operator buttons (+, -, *, /, %) have nearly identical logic</div>
+                            <span class="file-issue-category">✨ Code Quality</span>
+                            
+                            
+                            <div class="file-code-snippet">btnAdd.addActionListener(event -> {
+    if (!Pattern.matches(DOUBLE_OR_NUMBER_REGEX, inputScreen.getText())) return;</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Create handleOperatorInput(char operator) method</div>
+                                
+                                
+                                <div class="file-fix-example">private void handleOperatorInput(char op) {
+    if (go) { typedValue = calculate(...); selectedOperator = op; }
+}</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-warning">
+                            <div class="file-issue-detail-title">
+                                ⚠️
+                                
+                                God Class Violation
+                            </div>
+                            <div class="file-issue-detail-desc">CalculatorUI handles UI creation, event handling, and calculation logic</div>
+                            <span class="file-issue-category">✨ Code Quality</span>
+                            
+                            
+                            <div class="file-code-snippet">public class CalculatorUI {
+    private final JFrame window; ... public double calculate(...) { ... }</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Separate into CalculatorUI, CalculatorEngine, and CalculatorState</div>
+                                
+                                
+                                <div class="file-fix-example">class CalculatorEngine {
+    double calculate(double a, double b, char op) { ... }
+}</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-warning">
+                            <div class="file-issue-detail-title">
+                                ⚠️
+                                
+                                Method Too Long
+                            </div>
+                            <div class="file-issue-detail-desc">initButtons method is 300+ lines, violates SRP</div>
+                            <span class="file-issue-category">✨ Code Quality</span>
+                            
+                            
+                            <div class="file-code-snippet">private void initButtons(int[] columns, int[] rows) {
+    btnC = createButton("C", columns[0], rows[1]); ...</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Split into initNumberButtons, initOperatorButtons, initFunctionButtons</div>
+                                
+                                
+                                <div class="file-fix-example">private void initButtons(int[] cols, int[] rows) {
+    initNumberButtons(cols, rows);
+    initOperatorButtons(cols, rows);
+}</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-info">
+                            <div class="file-issue-detail-title">
+                                ℹ️
+                                Magic Numbers in UI Layout
+                            </div>
+                            <div class="file-issue-detail-desc">Hardcoded values like 90, 80, 100 used for positioning</div>
+                            <span class="file-issue-category">✨ Code Quality</span>
+                            
+                            
+                            <div class="file-code-snippet">int[] columns = {MARGIN_X, MARGIN_X + 90, MARGIN_X + 90 * 2, ...};</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Extract to named constants</div>
+                                
+                                
+                                <div class="file-fix-example">private static final int BUTTON_SPACING = 90;
+int[] columns = {MARGIN_X, MARGIN_X + BUTTON_SPACING, ...};</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-info">
+                            <div class="file-issue-detail-title">
+                                ℹ️
+                                Unclear Variable Names
+                            </div>
+                            <div class="file-issue-detail-desc">Variables 'go' and 'addToDisplay' have unclear purpose</div>
+                            <span class="file-issue-category">✨ Code Quality</span>
+                            
+                            
+                            <div class="file-code-snippet">private boolean go = true;
+private boolean addToDisplay = true;</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Rename to describe intent</div>
+                                
+                                
+                                <div class="file-fix-example">private boolean isReadyForNewOperation = true;
+private boolean shouldAppendToDisplay = true;</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-critical">
+                            <div class="file-issue-detail-title">
+                                ❌
+                                
+                                Bug: Division by Zero Not Handled
+                            </div>
+                            <div class="file-issue-detail-desc">Dividing by zero will cause Infinity result without user feedback</div>
+                            <span class="file-issue-category">🔍 Custom Critique</span>
+                            
+                            
+                            <div class="file-code-snippet">case '/':
+    return firstNumber / secondNumber;</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Add zero check and display error message</div>
+                                
+                                
+                                <div class="file-fix-example">case '/':
+    if (secondNumber == 0) throw new ArithmeticException("Cannot divide by zero");
+    return firstNumber / secondNumber;</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-critical">
+                            <div class="file-issue-detail-title">
+                                ❌
+                                
+                                Bug: Multiple Decimal Points Allowed
+                            </div>
+                            <div class="file-issue-detail-desc">User can enter multiple decimal points (e.g., 1.2.3.4)</div>
+                            <span class="file-issue-category">🔍 Custom Critique</span>
+                            
+                            
+                            <div class="file-code-snippet">btnPoint = createButton(".", columns[1], rows[5]);
+// No validation for existing decimal</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Check if decimal already exists before adding</div>
+                                
+                                
+                                <div class="file-fix-example">btnPoint.addActionListener(e -> {
+    if (!inputScreen.getText().contains(".")) inputScreen.setText(inputScreen.getText() + ".");
+});</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-critical">
+                            <div class="file-issue-detail-title">
+                                ❌
+                                
+                                Bug: Number Overflow Not Handled
+                            </div>
+                            <div class="file-issue-detail-desc">Large calculations can overflow Double.MAX_VALUE without warning</div>
+                            <span class="file-issue-category">🔍 Custom Critique</span>
+                            
+                            
+                            <div class="file-code-snippet">typedValue = calculate(typedValue, Double.parseDouble(inputScreen.getText()), selectedOperator);</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Check for infinity and display error</div>
+                                
+                                
+                                <div class="file-fix-example">double result = calculate(...);
+if (Double.isInfinite(result) || Double.isNaN(result)) {
+    inputScreen.setText("Error"); return;
+}</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-warning">
+                            <div class="file-issue-detail-title">
+                                ⚠️
+                                
+                                Missing Edge Case: Consecutive Operators
+                            </div>
+                            <div class="file-issue-detail-desc">Pressing multiple operators in sequence causes incorrect behavior</div>
+                            <span class="file-issue-category">🔍 Custom Critique</span>
+                            
+                            
+                            <div class="file-code-snippet">if (go) { typedValue = calculate(...); } else { selectedOperator = '/'; }</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Allow operator change without recalculation</div>
+                                
+                                
+                                <div class="file-fix-example">if (!go) { selectedOperator = newOp; return; }</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-warning">
+                            <div class="file-issue-detail-title">
+                                ⚠️
+                                
+                                Missing Edge Case: Leading Zeros
+                            </div>
+                            <div class="file-issue-detail-desc">Input like 007 is handled but inconsistently</div>
+                            <span class="file-issue-category">🔍 Custom Critique</span>
+                            
+                            
+                            <div class="file-code-snippet">if (Pattern.matches("[0]*", inputScreen.getText())) { inputScreen.setText("7"); }</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Normalize display to remove leading zeros</div>
+                                
+                                
+                                <div class="file-fix-example">String normalized = String.valueOf(Double.parseDouble(inputScreen.getText()));</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-info">
+                            <div class="file-issue-detail-title">
+                                ℹ️
+                                Production Risk: No Error Recovery
+                            </div>
+                            <div class="file-issue-detail-desc">If calculation fails, app state becomes inconsistent</div>
+                            <span class="file-issue-category">🔍 Custom Critique</span>
+                            
+                            
+                            <div class="file-code-snippet">typedValue = calculate(typedValue, Double.parseDouble(inputScreen.getText()), selectedOperator);</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Wrap in try-catch and reset state on error</div>
+                                
+                                
+                                <div class="file-fix-example">try { typedValue = calculate(...); } catch (Exception e) {
+    inputScreen.setText("Error"); resetState();
+}</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-info">
+                            <div class="file-issue-detail-title">
+                                ℹ️
+                                Incomplete Input Validation
+                            </div>
+                            <div class="file-issue-detail-desc">Regex validation doesn't prevent all invalid states</div>
+                            <span class="file-issue-category">🔒 Security</span>
+                            
+                            
+                            <div class="file-code-snippet">if (!Pattern.matches(DOUBLE_OR_NUMBER_REGEX, inputScreen.getText())) return;</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Add comprehensive validation for all edge cases</div>
+                                
+                                
+                                <div class="file-fix-example">private boolean isValidNumber(String input) {
+    try { Double.parseDouble(input); return true; } catch (Exception e) { return false; }
+}</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-critical">
+                            <div class="file-issue-detail-title">
+                                ❌
+                                
+                                No Exception Handling for Parsing
+                            </div>
+                            <div class="file-issue-detail-desc">Double.parseDouble can throw NumberFormatException</div>
+                            <span class="file-issue-category">🛡️ Error Handling</span>
+                            
+                            
+                            <div class="file-code-snippet">typedValue = calculate(typedValue, Double.parseDouble(inputScreen.getText()), selectedOperator);</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Wrap in try-catch and display user-friendly error</div>
+                                
+                                
+                                <div class="file-fix-example">try {
+    double val = Double.parseDouble(inputScreen.getText());
+} catch (NumberFormatException e) {
+    inputScreen.setText("Error");
+}</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-warning">
+                            <div class="file-issue-detail-title">
+                                ⚠️
+                                
+                                No Null Checks on UI Components
+                            </div>
+                            <div class="file-issue-detail-desc">Theme loading could return null, causing NullPointerException</div>
+                            <span class="file-issue-category">🛡️ Error Handling</span>
+                            
+                            
+                            <div class="file-code-snippet">if (themesMap.entrySet().iterator().hasNext()) {
+    applyTheme(themesMap.entrySet().iterator().next().getValue());</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Add null checks for theme values</div>
+                                
+                                
+                                <div class="file-fix-example">Theme theme = themesMap.entrySet().iterator().next().getValue();
+if (theme != null) applyTheme(theme);</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-warning">
+                            <div class="file-issue-detail-title">
+                                ⚠️
+                                
+                                Silent Failure on Invalid Input
+                            </div>
+                            <div class="file-issue-detail-desc">Early returns in operators provide no user feedback</div>
+                            <span class="file-issue-category">🛡️ Error Handling</span>
+                            
+                            
+                            <div class="file-code-snippet">if (!Pattern.matches(DOUBLE_OR_NUMBER_REGEX, inputScreen.getText())) return;</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Show error message or visual indicator</div>
+                                
+                                
+                                <div class="file-fix-example">if (!isValid(inputScreen.getText())) {
+    inputScreen.setBackground(Color.RED);
+    return;
+}</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-critical">
+                            <div class="file-issue-detail-title">
+                                ❌
+                                
+                                Business Logic in UI Class
+                            </div>
+                            <div class="file-issue-detail-desc">Calculate method and state management mixed with Swing UI code</div>
+                            <span class="file-issue-category">🏗️ Architecture</span>
+                            
+                            
+                            <div class="file-code-snippet">public double calculate(double firstNumber, double secondNumber, char operator) {
+    switch (operator) { case '+': return firstNumber + secondNumber; ...</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Extract to separate CalculatorEngine class</div>
+                                
+                                
+                                <div class="file-fix-example">class CalculatorEngine {
+    public double calculate(double a, double b, char op) { ... }
+}
+private final CalculatorEngine engine = new CalculatorEngine();</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-warning">
+                            <div class="file-issue-detail-title">
+                                ⚠️
+                                
+                                State Management in UI
+                            </div>
+                            <div class="file-issue-detail-desc">Calculator state (typedValue, selectedOperator, go) stored in UI class</div>
+                            <span class="file-issue-category">🏗️ Architecture</span>
+                            
+                            
+                            <div class="file-code-snippet">private char selectedOperator = ' ';
+private boolean go = true;
+private double typedValue = 0;</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Create CalculatorState class to manage state</div>
+                                
+                                
+                                <div class="file-fix-example">class CalculatorState {
+    private double currentValue;
+    private char operator;
+    void reset() { ... }
+}</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-info">
+                            <div class="file-issue-detail-title">
+                                ℹ️
+                                Inefficient String Building
+                            </div>
+                            <div class="file-issue-detail-desc">String concatenation in btnBack handler creates multiple objects</div>
+                            <span class="file-issue-category">⚡ Performance</span>
+                            
+                            
+                            <div class="file-code-snippet">StringBuilder str2 = new StringBuilder();
+for (int i = 0; i < (str.length() - 1); i++) { str2.append(str.charAt(i)); }</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Use substring instead of loop</div>
+                                
+                                
+                                <div class="file-fix-example">String str = inputScreen.getText();
+if (str.length() > 1) inputScreen.setText(str.substring(0, str.length() - 1));</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-info">
+                            <div class="file-issue-detail-title">
+                                ℹ️
+                                Repeated Pattern Compilation
+                            </div>
+                            <div class="file-issue-detail-desc">Pattern.matches compiles regex on every call</div>
+                            <span class="file-issue-category">⚡ Performance</span>
+                            
+                            
+                            <div class="file-code-snippet">if (!Pattern.matches(DOUBLE_OR_NUMBER_REGEX, inputScreen.getText())) return;</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Compile pattern once as static field</div>
+                                
+                                
+                                <div class="file-fix-example">private static final Pattern NUMBER_PATTERN = Pattern.compile(DOUBLE_OR_NUMBER_REGEX);
+if (!NUMBER_PATTERN.matcher(input).matches()) return;</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-info">
+                            <div class="file-issue-detail-title">
+                                ℹ️
+                                No Error Logging
+                            </div>
+                            <div class="file-issue-detail-desc">Errors and exceptions are not logged for debugging</div>
+                            <span class="file-issue-category">📝 Logging</span>
+                            
+                            
+                            <div class="file-code-snippet">// No logging framework configured</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Add java.util.logging for error tracking</div>
+                                
+                                
+                                <div class="file-fix-example">private static final Logger logger = Logger.getLogger(CalculatorUI.class.getName());
+logger.log(Level.SEVERE, "Calculation error", e);</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+        <!-- SECTION 4: Top Issues -->
+        <div class="bar-graph-section">
+            <h2>📊 Top Issues</h2>
+            
+            <!-- Issue Details Section (Hidden by default) -->
+            <div id="filtered-issues-section" class="issue-filter-section">
+                <div class="issue-filter-header">
+                    <div class="issue-filter-title" id="filter-title">Issues</div>
+                    <button class="close-filter" onclick="closeFilteredIssues()">✕ Close</button>
+                </div>
+                <div id="filtered-issues-content"></div>
+            </div>
+            
+            
+                
+                    
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                    
+                
+            
+                
+                    
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                    
+                
+            
+                
+                    
+                        
+                        
+                            
+                        
+                    
+                
+            
+                
+                    
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                    
+                
+            
+                
+                    
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                    
+                
+            
+                
+                    
+                        
+                        
+                            
+                        
+                    
+                        
+                        
+                            
+                        
+                    
+                
+            
+                
+                    
+                        
+                        
+                            
+                        
+                    
+                
+            
+                
+            
+            
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+                
+                
+            
+            
+            
+            
+                <div id="top-issues-container">
+                    
+                    <div class="bar-item clickable" onclick="showIssueDetails('Massive Code Duplication in Number Buttons')">
+                        <div class="bar-header">
+                            <span class="bar-icon">✨</span>
+                            <span class="bar-label">Massive Code Duplication in Number Buttons</span>
+                            <span class="bar-count critical">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Code Quality</div>
+                    </div>
+                    
+                    <div class="bar-item clickable" onclick="showIssueDetails('Bug: Division by Zero Not Handled')">
+                        <div class="bar-header">
+                            <span class="bar-icon">🔍</span>
+                            <span class="bar-label">Bug: Division by Zero Not Handled</span>
+                            <span class="bar-count critical">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Custom Critique</div>
+                    </div>
+                    
+                    <div class="bar-item clickable" onclick="showIssueDetails('Bug: Multiple Decimal Points Allowed')">
+                        <div class="bar-header">
+                            <span class="bar-icon">🔍</span>
+                            <span class="bar-label">Bug: Multiple Decimal Points Allowed</span>
+                            <span class="bar-count critical">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Custom Critique</div>
+                    </div>
+                    
+                    <div class="bar-item clickable" onclick="showIssueDetails('Bug: Number Overflow Not Handled')">
+                        <div class="bar-header">
+                            <span class="bar-icon">🔍</span>
+                            <span class="bar-label">Bug: Number Overflow Not Handled</span>
+                            <span class="bar-count critical">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Custom Critique</div>
+                    </div>
+                    
+                    <div class="bar-item clickable" onclick="showIssueDetails('No Exception Handling for Parsing')">
+                        <div class="bar-header">
+                            <span class="bar-icon">🛡️</span>
+                            <span class="bar-label">No Exception Handling for Parsing</span>
+                            <span class="bar-count critical">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Error Handling</div>
+                    </div>
+                    
+                </div>
+                
+                
+                <div id="more-issues-container" style="display: none;">
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">🏗️</span>
+                            <span class="bar-label">Business Logic in UI Class</span>
+                            <span class="bar-count critical">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Architecture</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">✨</span>
+                            <span class="bar-label">Operator Button Logic Duplication</span>
+                            <span class="bar-count warning">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Code Quality</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">✨</span>
+                            <span class="bar-label">God Class Violation</span>
+                            <span class="bar-count warning">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Code Quality</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">✨</span>
+                            <span class="bar-label">Method Too Long</span>
+                            <span class="bar-count warning">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Code Quality</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">✨</span>
+                            <span class="bar-label">Magic Numbers in UI Layout</span>
+                            <span class="bar-count mixed">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Code Quality</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">✨</span>
+                            <span class="bar-label">Unclear Variable Names</span>
+                            <span class="bar-count mixed">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Code Quality</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">🔍</span>
+                            <span class="bar-label">Missing Edge Case: Consecutive Operators</span>
+                            <span class="bar-count warning">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Custom Critique</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">🔍</span>
+                            <span class="bar-label">Missing Edge Case: Leading Zeros</span>
+                            <span class="bar-count warning">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Custom Critique</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">🔍</span>
+                            <span class="bar-label">Production Risk: No Error Recovery</span>
+                            <span class="bar-count mixed">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Custom Critique</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">🔒</span>
+                            <span class="bar-label">Incomplete Input Validation</span>
+                            <span class="bar-count mixed">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Security</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">🛡️</span>
+                            <span class="bar-label">No Null Checks on UI Components</span>
+                            <span class="bar-count warning">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Error Handling</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">🛡️</span>
+                            <span class="bar-label">Silent Failure on Invalid Input</span>
+                            <span class="bar-count warning">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Error Handling</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">🏗️</span>
+                            <span class="bar-label">State Management in UI</span>
+                            <span class="bar-count warning">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Architecture</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">⚡</span>
+                            <span class="bar-label">Inefficient String Building</span>
+                            <span class="bar-count mixed">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Performance</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">⚡</span>
+                            <span class="bar-label">Repeated Pattern Compilation</span>
+                            <span class="bar-count mixed">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Performance</div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">📝</span>
+                            <span class="bar-label">No Error Logging</span>
+                            <span class="bar-count mixed">
+                                1 occurrence
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Logging</div>
+                    </div>
+                    
+                </div>
+                <button id="show-more-issues-btn" onclick="toggleMoreIssues()" style="margin-top: 0.75rem; padding: 0.5rem 1rem; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
+                    Show More (16 more)
+                </button>
+                
+            
+        </div>
+
+
+        <!-- SECTION 5: Detailed Category Analysis -->
+        
+        <div class="category-section">
+            <!-- 3.1 Category Name with Status -->
+            <div class="category-header">
+                <div class="category-title">
+                    <span class="category-icon">✨</span>
+                    1. Code Quality
+                </div>
+                
+                
+                <span class="category-status-badge category-status-needs-work">
+                    ❌ 1 CRITICAL
+                </span>
+            </div>
+
+            <!-- Metrics -->
+            
+            <div class="metrics-list">
+                <div class="metrics-grid">
+                
+                <div class="metric-row">
+                    <span class="metric-name">Code Duplication</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ 10 violations in 1 file</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Method Length</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ 2 violations in 1 file</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Cyclomatic Complexity</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">⚠️ 3 violations in 1 file</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Meaningful Names</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">⚠️ 5 violations in 1 file</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Single Responsibility</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ 1 violation in 1 file</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Code Formatting</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Unused Dependencies</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Import Validation</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
+            
+
+            <!-- 3.2 List of Items with Assessment -->
+            
+
+            <!-- 3.3 List of Issues -->
+            
+            <div class="issues-list collapsed">
+                <h3 onclick="toggleIssuesList(this)">
+                    <span class="issues-list-toggle">▼</span>
+                    Detailed Findings
+                </h3>
+                <div class="issues-list-content">
+                
+                <div class="issue issue-critical">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ❌
+                            
+                            Massive Code Duplication in Number Buttons
+                        </div>
+                        <span class="badge badge-critical">CRITICAL</span>
+                    </div>
+                    
+                    <div class="issue-description">10 number buttons have identical logic duplicated</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">btn7.addActionListener(event -> {
+    if (addToDisplay) { if (Pattern.matches("[0]*", inputScreen.getText())) ...</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Extract common logic into a reusable method</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">private void handleNumberInput(String number) {
+    if (addToDisplay) { ... }
+}
+btn7.addActionListener(e -> handleNumberInput("7"));</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                <div class="issue issue-warning">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ⚠️
+                            
+                            Operator Button Logic Duplication
+                        </div>
+                        <span class="badge badge-warning">WARNING</span>
+                    </div>
+                    
+                    <div class="issue-description">Operator buttons (+, -, *, /, %) have nearly identical logic</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">btnAdd.addActionListener(event -> {
+    if (!Pattern.matches(DOUBLE_OR_NUMBER_REGEX, inputScreen.getText())) return;</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Create handleOperatorInput(char operator) method</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">private void handleOperatorInput(char op) {
+    if (go) { typedValue = calculate(...); selectedOperator = op; }
+}</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                <div class="issue issue-warning">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ⚠️
+                            
+                            God Class Violation
+                        </div>
+                        <span class="badge badge-warning">WARNING</span>
+                    </div>
+                    
+                    <div class="issue-description">CalculatorUI handles UI creation, event handling, and calculation logic</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">public class CalculatorUI {
+    private final JFrame window; ... public double calculate(...) { ... }</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Separate into CalculatorUI, CalculatorEngine, and CalculatorState</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">class CalculatorEngine {
+    double calculate(double a, double b, char op) { ... }
+}</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                <div class="issue issue-warning">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ⚠️
+                            
+                            Method Too Long
+                        </div>
+                        <span class="badge badge-warning">WARNING</span>
+                    </div>
+                    
+                    <div class="issue-description">initButtons method is 300+ lines, violates SRP</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">private void initButtons(int[] columns, int[] rows) {
+    btnC = createButton("C", columns[0], rows[1]); ...</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Split into initNumberButtons, initOperatorButtons, initFunctionButtons</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">private void initButtons(int[] cols, int[] rows) {
+    initNumberButtons(cols, rows);
+    initOperatorButtons(cols, rows);
+}</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                <div class="issue issue-info">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ℹ️
+                            Magic Numbers in UI Layout
+                        </div>
+                        <span class="badge badge-info">INFO</span>
+                    </div>
+                    
+                    <div class="issue-description">Hardcoded values like 90, 80, 100 used for positioning</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">int[] columns = {MARGIN_X, MARGIN_X + 90, MARGIN_X + 90 * 2, ...};</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Extract to named constants</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">private static final int BUTTON_SPACING = 90;
+int[] columns = {MARGIN_X, MARGIN_X + BUTTON_SPACING, ...};</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                <div class="issue issue-info">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ℹ️
+                            Unclear Variable Names
+                        </div>
+                        <span class="badge badge-info">INFO</span>
+                    </div>
+                    
+                    <div class="issue-description">Variables 'go' and 'addToDisplay' have unclear purpose</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">private boolean go = true;
+private boolean addToDisplay = true;</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Rename to describe intent</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">private boolean isReadyForNewOperation = true;
+private boolean shouldAppendToDisplay = true;</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="category-section">
+            <!-- 3.1 Category Name with Status -->
+            <div class="category-header">
+                <div class="category-title">
+                    <span class="category-icon">🔍</span>
+                    2. Custom Critique
+                </div>
+                
+                
+                <span class="category-status-badge category-status-critical">
+                    ❌ 3 CRITICAL
+                </span>
+            </div>
+
+            <!-- Metrics -->
+            
+            <div class="metrics-list">
+                <div class="metrics-grid">
+                
+                <div class="metric-row">
+                    <span class="metric-name">Unit Test Coverage</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ 0% - No tests found</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Bugs Found</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ 5 critical bugs</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Production Risk Areas</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ 4 identified</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Missing Edge Cases</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ 6 identified</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Hallucinated Logic</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ None detected</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">API Misuse</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Over-Engineering</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Minimal abstraction</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Silent Failures</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">⚠️ 2 violations in 1 file</span>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
+            
+
+            <!-- 3.2 List of Items with Assessment -->
+            
+
+            <!-- 3.3 List of Issues -->
+            
+            <div class="issues-list collapsed">
+                <h3 onclick="toggleIssuesList(this)">
+                    <span class="issues-list-toggle">▼</span>
+                    Detailed Findings
+                </h3>
+                <div class="issues-list-content">
+                
+                <div class="issue issue-critical">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ❌
+                            
+                            Bug: Division by Zero Not Handled
+                        </div>
+                        <span class="badge badge-critical">CRITICAL</span>
+                    </div>
+                    
+                    <div class="issue-description">Dividing by zero will cause Infinity result without user feedback</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">case '/':
+    return firstNumber / secondNumber;</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Add zero check and display error message</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">case '/':
+    if (secondNumber == 0) throw new ArithmeticException("Cannot divide by zero");
+    return firstNumber / secondNumber;</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                <div class="issue issue-critical">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ❌
+                            
+                            Bug: Multiple Decimal Points Allowed
+                        </div>
+                        <span class="badge badge-critical">CRITICAL</span>
+                    </div>
+                    
+                    <div class="issue-description">User can enter multiple decimal points (e.g., 1.2.3.4)</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">btnPoint = createButton(".", columns[1], rows[5]);
+// No validation for existing decimal</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Check if decimal already exists before adding</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">btnPoint.addActionListener(e -> {
+    if (!inputScreen.getText().contains(".")) inputScreen.setText(inputScreen.getText() + ".");
+});</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                <div class="issue issue-critical">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ❌
+                            
+                            Bug: Number Overflow Not Handled
+                        </div>
+                        <span class="badge badge-critical">CRITICAL</span>
+                    </div>
+                    
+                    <div class="issue-description">Large calculations can overflow Double.MAX_VALUE without warning</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">typedValue = calculate(typedValue, Double.parseDouble(inputScreen.getText()), selectedOperator);</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Check for infinity and display error</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">double result = calculate(...);
+if (Double.isInfinite(result) || Double.isNaN(result)) {
+    inputScreen.setText("Error"); return;
+}</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                <div class="issue issue-warning">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ⚠️
+                            
+                            Missing Edge Case: Consecutive Operators
+                        </div>
+                        <span class="badge badge-warning">WARNING</span>
+                    </div>
+                    
+                    <div class="issue-description">Pressing multiple operators in sequence causes incorrect behavior</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">if (go) { typedValue = calculate(...); } else { selectedOperator = '/'; }</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Allow operator change without recalculation</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">if (!go) { selectedOperator = newOp; return; }</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                <div class="issue issue-warning">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ⚠️
+                            
+                            Missing Edge Case: Leading Zeros
+                        </div>
+                        <span class="badge badge-warning">WARNING</span>
+                    </div>
+                    
+                    <div class="issue-description">Input like 007 is handled but inconsistently</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">if (Pattern.matches("[0]*", inputScreen.getText())) { inputScreen.setText("7"); }</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Normalize display to remove leading zeros</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">String normalized = String.valueOf(Double.parseDouble(inputScreen.getText()));</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                <div class="issue issue-info">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ℹ️
+                            Production Risk: No Error Recovery
+                        </div>
+                        <span class="badge badge-info">INFO</span>
+                    </div>
+                    
+                    <div class="issue-description">If calculation fails, app state becomes inconsistent</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">typedValue = calculate(typedValue, Double.parseDouble(inputScreen.getText()), selectedOperator);</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Wrap in try-catch and reset state on error</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">try { typedValue = calculate(...); } catch (Exception e) {
+    inputScreen.setText("Error"); resetState();
+}</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="category-section">
+            <!-- 3.1 Category Name with Status -->
+            <div class="category-header">
+                <div class="category-title">
+                    <span class="category-icon">🔒</span>
+                    3. Security
+                </div>
+                
+                
+                <span class="category-status-badge category-status-excellent">
+                    ✅ COMPLIANT
+                    
+                </span>
+            </div>
+
+            <!-- Metrics -->
+            
+            <div class="metrics-list">
+                <div class="metrics-grid">
+                
+                <div class="metric-row">
+                    <span class="metric-name">Hardcoded Secrets</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ None found</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">SQL Injection Risks</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ N/A - No database</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Input Validation</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">⚠️ Partial validation</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Sensitive Data in Logs</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ No logging present</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Unmasked PII</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ N/A - No PII</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Insecure Defaults</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Compliant</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">External Call Timeouts</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ N/A - No external calls</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Environment Variables</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ N/A - Desktop app</span>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
+            
+
+            <!-- 3.2 List of Items with Assessment -->
+            
+
+            <!-- 3.3 List of Issues -->
+            
+            <div class="issues-list collapsed">
+                <h3 onclick="toggleIssuesList(this)">
+                    <span class="issues-list-toggle">▼</span>
+                    Detailed Findings
+                </h3>
+                <div class="issues-list-content">
+                
+                <div class="issue issue-info">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ℹ️
+                            Incomplete Input Validation
+                        </div>
+                        <span class="badge badge-info">INFO</span>
+                    </div>
+                    
+                    <div class="issue-description">Regex validation doesn't prevent all invalid states</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">if (!Pattern.matches(DOUBLE_OR_NUMBER_REGEX, inputScreen.getText())) return;</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Add comprehensive validation for all edge cases</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">private boolean isValidNumber(String input) {
+    try { Double.parseDouble(input); return true; } catch (Exception e) { return false; }
+}</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="category-section">
+            <!-- 3.1 Category Name with Status -->
+            <div class="category-header">
+                <div class="category-title">
+                    <span class="category-icon">🛡️</span>
+                    4. Error Handling
+                </div>
+                
+                
+                <span class="category-status-badge category-status-needs-work">
+                    ❌ 1 CRITICAL
+                </span>
+            </div>
+
+            <!-- Metrics -->
+            
+            <div class="metrics-list">
+                <div class="metrics-grid">
+                
+                <div class="metric-row">
+                    <span class="metric-name">Uncaught Exceptions</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ 5 potential exceptions</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Proper Exception Handling</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ 0% - No try-catch blocks</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Meaningful Error Messages</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ No error messages</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Null Checks</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">⚠️ Missing in 3 places</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Retry Logic</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ N/A - No external calls</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Fallback Mechanisms</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ No fallbacks</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Defensive Coding</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">⚠️ Minimal defensive checks</span>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
+            
+
+            <!-- 3.2 List of Items with Assessment -->
+            
+
+            <!-- 3.3 List of Issues -->
+            
+            <div class="issues-list collapsed">
+                <h3 onclick="toggleIssuesList(this)">
+                    <span class="issues-list-toggle">▼</span>
+                    Detailed Findings
+                </h3>
+                <div class="issues-list-content">
+                
+                <div class="issue issue-critical">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ❌
+                            
+                            No Exception Handling for Parsing
+                        </div>
+                        <span class="badge badge-critical">CRITICAL</span>
+                    </div>
+                    
+                    <div class="issue-description">Double.parseDouble can throw NumberFormatException</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">typedValue = calculate(typedValue, Double.parseDouble(inputScreen.getText()), selectedOperator);</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Wrap in try-catch and display user-friendly error</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">try {
+    double val = Double.parseDouble(inputScreen.getText());
+} catch (NumberFormatException e) {
+    inputScreen.setText("Error");
+}</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                <div class="issue issue-warning">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ⚠️
+                            
+                            No Null Checks on UI Components
+                        </div>
+                        <span class="badge badge-warning">WARNING</span>
+                    </div>
+                    
+                    <div class="issue-description">Theme loading could return null, causing NullPointerException</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">if (themesMap.entrySet().iterator().hasNext()) {
+    applyTheme(themesMap.entrySet().iterator().next().getValue());</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Add null checks for theme values</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">Theme theme = themesMap.entrySet().iterator().next().getValue();
+if (theme != null) applyTheme(theme);</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                <div class="issue issue-warning">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ⚠️
+                            
+                            Silent Failure on Invalid Input
+                        </div>
+                        <span class="badge badge-warning">WARNING</span>
+                    </div>
+                    
+                    <div class="issue-description">Early returns in operators provide no user feedback</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">if (!Pattern.matches(DOUBLE_OR_NUMBER_REGEX, inputScreen.getText())) return;</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Show error message or visual indicator</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">if (!isValid(inputScreen.getText())) {
+    inputScreen.setBackground(Color.RED);
+    return;
+}</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="category-section">
+            <!-- 3.1 Category Name with Status -->
+            <div class="category-header">
+                <div class="category-title">
+                    <span class="category-icon">🏗️</span>
+                    5. Architecture
+                </div>
+                
+                
+                <span class="category-status-badge category-status-needs-work">
+                    ❌ 1 CRITICAL
+                </span>
+            </div>
+
+            <!-- Metrics -->
+            
+            <div class="metrics-list">
+                <div class="metrics-grid">
+                
+                <div class="metric-row">
+                    <span class="metric-name">Unnecessary Abstraction</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Minimal abstraction</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Dependency Injection</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">⚠️ Not used</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Interfaces Only When Needed</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ No unnecessary interfaces</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Invented Classes/Libraries</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ All classes exist</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Separation of Concerns</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ 1 major violation</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Layer Violations</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ UI mixed with business logic</span>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
+            
+
+            <!-- 3.2 List of Items with Assessment -->
+            
+
+            <!-- 3.3 List of Issues -->
+            
+            <div class="issues-list collapsed">
+                <h3 onclick="toggleIssuesList(this)">
+                    <span class="issues-list-toggle">▼</span>
+                    Detailed Findings
+                </h3>
+                <div class="issues-list-content">
+                
+                <div class="issue issue-critical">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ❌
+                            
+                            Business Logic in UI Class
+                        </div>
+                        <span class="badge badge-critical">CRITICAL</span>
+                    </div>
+                    
+                    <div class="issue-description">Calculate method and state management mixed with Swing UI code</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">public double calculate(double firstNumber, double secondNumber, char operator) {
+    switch (operator) { case '+': return firstNumber + secondNumber; ...</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Extract to separate CalculatorEngine class</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">class CalculatorEngine {
+    public double calculate(double a, double b, char op) { ... }
+}
+private final CalculatorEngine engine = new CalculatorEngine();</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                <div class="issue issue-warning">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ⚠️
+                            
+                            State Management in UI
+                        </div>
+                        <span class="badge badge-warning">WARNING</span>
+                    </div>
+                    
+                    <div class="issue-description">Calculator state (typedValue, selectedOperator, go) stored in UI class</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">private char selectedOperator = ' ';
+private boolean go = true;
+private double typedValue = 0;</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Create CalculatorState class to manage state</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">class CalculatorState {
+    private double currentValue;
+    private char operator;
+    void reset() { ... }
+}</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="category-section">
+            <!-- 3.1 Category Name with Status -->
+            <div class="category-header">
+                <div class="category-title">
+                    <span class="category-icon">⚡</span>
+                    6. Performance
+                </div>
+                
+                
+                <span class="category-status-badge category-status-excellent">
+                    ✅ COMPLIANT
+                    
+                </span>
+            </div>
+
+            <!-- Metrics -->
+            
+            <div class="metrics-list">
+                <div class="metrics-grid">
+                
+                <div class="metric-row">
+                    <span class="metric-name">Algorithmic Complexity</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ O(1) operations</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Memory Usage</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Minimal allocations</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Async/Await Handling</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ N/A - Synchronous UI</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Unnecessary Object Creation</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">⚠️ 2 violations in 1 file</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">String Concatenation</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">⚠️ Multiple violations</span>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
+            
+
+            <!-- 3.2 List of Items with Assessment -->
+            
+
+            <!-- 3.3 List of Issues -->
+            
+            <div class="issues-list collapsed">
+                <h3 onclick="toggleIssuesList(this)">
+                    <span class="issues-list-toggle">▼</span>
+                    Detailed Findings
+                </h3>
+                <div class="issues-list-content">
+                
+                <div class="issue issue-info">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ℹ️
+                            Inefficient String Building
+                        </div>
+                        <span class="badge badge-info">INFO</span>
+                    </div>
+                    
+                    <div class="issue-description">String concatenation in btnBack handler creates multiple objects</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">StringBuilder str2 = new StringBuilder();
+for (int i = 0; i < (str.length() - 1); i++) { str2.append(str.charAt(i)); }</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Use substring instead of loop</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">String str = inputScreen.getText();
+if (str.length() > 1) inputScreen.setText(str.substring(0, str.length() - 1));</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                <div class="issue issue-info">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ℹ️
+                            Repeated Pattern Compilation
+                        </div>
+                        <span class="badge badge-info">INFO</span>
+                    </div>
+                    
+                    <div class="issue-description">Pattern.matches compiles regex on every call</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">if (!Pattern.matches(DOUBLE_OR_NUMBER_REGEX, inputScreen.getText())) return;</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Compile pattern once as static field</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">private static final Pattern NUMBER_PATTERN = Pattern.compile(DOUBLE_OR_NUMBER_REGEX);
+if (!NUMBER_PATTERN.matcher(input).matches()) return;</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="category-section">
+            <!-- 3.1 Category Name with Status -->
+            <div class="category-header">
+                <div class="category-title">
+                    <span class="category-icon">📝</span>
+                    7. Logging
+                </div>
+                
+                
+                <span class="category-status-badge category-status-excellent">
+                    ✅ COMPLIANT
+                    
+                </span>
+            </div>
+
+            <!-- Metrics -->
+            
+            <div class="metrics-list">
+                <div class="metrics-grid">
+                
+                <div class="metric-row">
+                    <span class="metric-name">System.out Usage</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ None found</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Sensitive Data Logging</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ N/A - No logging</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Structured Logging</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">⚠️ No logging framework</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Trace/Correlation IDs</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ N/A - Desktop app</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Log Levels</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">⚠️ No logging present</span>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
+            
+
+            <!-- 3.2 List of Items with Assessment -->
+            
+
+            <!-- 3.3 List of Issues -->
+            
+            <div class="issues-list collapsed">
+                <h3 onclick="toggleIssuesList(this)">
+                    <span class="issues-list-toggle">▼</span>
+                    Detailed Findings
+                </h3>
+                <div class="issues-list-content">
+                
+                <div class="issue issue-info">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ℹ️
+                            No Error Logging
+                        </div>
+                        <span class="badge badge-info">INFO</span>
+                    </div>
+                    
+                    <div class="issue-description">Errors and exceptions are not logged for debugging</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">// No logging framework configured</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Add java.util.logging for error tracking</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">private static final Logger logger = Logger.getLogger(CalculatorUI.class.getName());
+logger.log(Level.SEVERE, "Calculation error", e);</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="category-section">
+            <!-- 3.1 Category Name with Status -->
+            <div class="category-header">
+                <div class="category-title">
+                    <span class="category-icon">🎯</span>
+                    8. Domain
+                </div>
+                
+                
+                <span class="category-status-badge category-status-excellent">
+                    ✅ COMPLIANT
+                    
+                </span>
+            </div>
+
+            <!-- Metrics -->
+            
+            <div class="metrics-list">
+                <div class="metrics-grid">
+                
+                <div class="metric-row">
+                    <span class="metric-name">Domain-Specific Compliance</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Calculator logic correct</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Business Rules</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Standard arithmetic</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Domain Model Accuracy</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">✅ Appropriate for domain</span>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
+            
+
+            <!-- 3.2 List of Items with Assessment -->
+            
+
+            <!-- 3.3 List of Issues -->
+            
+            <div class="no-issues">✅ No issues found in this category</div>
+            
+        </div>
+        
+
+        <!-- SECTION 6: Priority Actions -->
+        <div class="priority-section">
+            <h2>🎯 Priority Actions</h2>
+            
+            
+            <div class="priority-group critical">
+                <h3>🔴 Critical (Fix Immediately)</h3>
+                <div class="priority-items-grid">
+                    
+                    <div class="priority-item critical">
+                        <div class="priority-title">Add Exception Handling</div>
+                        <div class="priority-description">Wrap all arithmetic and parsing operations in try-catch blocks</div>
+                        <div class="priority-category">Error Handling</div>
+                    </div>
+                    
+                    <div class="priority-item critical">
+                        <div class="priority-title">Fix Division by Zero</div>
+                        <div class="priority-description">Add validation to prevent division by zero crashes</div>
+                        <div class="priority-category">Custom Critique</div>
+                    </div>
+                    
+                    <div class="priority-item critical">
+                        <div class="priority-title">Separate Business Logic from UI</div>
+                        <div class="priority-description">Extract calculate() and state management to separate classes</div>
+                        <div class="priority-category">Architecture</div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            
+            
+            <div class="priority-group warnings">
+                <h3>🟡 Warnings (Address Soon)</h3>
+                <div class="priority-items-grid">
+                    
+                    <div class="priority-item warning">
+                        <div class="priority-title">Eliminate Code Duplication</div>
+                        <div class="priority-description">Refactor 10 duplicate number button handlers into single method</div>
+                        <div class="priority-category">Code Quality</div>
+                    </div>
+                    
+                    <div class="priority-item warning">
+                        <div class="priority-title">Split God Class</div>
+                        <div class="priority-description">Break CalculatorUI into UI, Engine, and State classes</div>
+                        <div class="priority-category">Code Quality</div>
+                    </div>
+                    
+                    <div class="priority-item warning">
+                        <div class="priority-title">Add Input Validation</div>
+                        <div class="priority-description">Prevent multiple decimal points and invalid number formats</div>
+                        <div class="priority-category">Custom Critique</div>
+                    </div>
+                    
+                    <div class="priority-item warning">
+                        <div class="priority-title">Refactor initButtons Method</div>
+                        <div class="priority-description">Split 300+ line method into smaller focused methods</div>
+                        <div class="priority-category">Code Quality</div>
+                    </div>
+                    
+                    <div class="priority-item warning">
+                        <div class="priority-title">Add Null Checks</div>
+                        <div class="priority-description">Validate theme loading and UI component initialization</div>
+                        <div class="priority-category">Error Handling</div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            
+            
+            <div class="priority-group suggestions">
+                <h3>🔵 Suggestions (Nice to Have)</h3>
+                <div class="priority-items-grid">
+                    
+                    <div class="priority-item info">
+                        <div class="priority-title">Add Unit Tests</div>
+                        <div class="priority-description">Create tests for calculate() method and edge cases</div>
+                        <div class="priority-category">Custom Critique</div>
+                    </div>
+                    
+                    <div class="priority-item info">
+                        <div class="priority-title">Improve Variable Names</div>
+                        <div class="priority-description">Rename 'go' and 'addToDisplay' to descriptive names</div>
+                        <div class="priority-category">Code Quality</div>
+                    </div>
+                    
+                    <div class="priority-item info">
+                        <div class="priority-title">Extract Magic Numbers</div>
+                        <div class="priority-description">Replace hardcoded layout values with named constants</div>
+                        <div class="priority-category">Code Quality</div>
+                    </div>
+                    
+                    <div class="priority-item info">
+                        <div class="priority-title">Optimize String Operations</div>
+                        <div class="priority-description">Use substring instead of StringBuilder loop in btnBack</div>
+                        <div class="priority-category">Performance</div>
+                    </div>
+                    
+                    <div class="priority-item info">
+                        <div class="priority-title">Compile Regex Pattern Once</div>
+                        <div class="priority-description">Create static Pattern field instead of compiling repeatedly</div>
+                        <div class="priority-category">Performance</div>
+                    </div>
+                    
+                    <div class="priority-item info">
+                        <div class="priority-title">Add Basic Logging</div>
+                        <div class="priority-description">Implement java.util.logging for error tracking</div>
+                        <div class="priority-category">Logging</div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- SECTION 7: Key Improvements -->
+        
+        <div class="final-assessment">
+            <h2>⚠️ Key Improvements</h2>
+            
+            <div class="assessment-section">
+                <ul class="assessment-list improvements">
+                    
+                    <li>Add comprehensive exception handling for arithmetic and parsing errors</li>
+                    
+                    <li>Eliminate massive code duplication in number and operator button handlers</li>
+                    
+                    <li>Separate business logic (calculate) from UI code into dedicated classes</li>
+                    
+                    <li>Fix critical bugs: division by zero, multiple decimals, number overflow</li>
+                    
+                    <li>Add unit tests for calculation logic and edge cases</li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Generated by Sentinel Code Critique Framework</strong></p>
+            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Based on industry best practices and security standards</p>
+            <p style="font-size: 0.85rem; margin-top: 1rem; color: #999;">
+                Report Date: 2025-12-09T21:57:00Z | Version: 1.0.0
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        function toggleFileIssues(header) {
+            const item = header.parentElement;
+            item.classList.toggle('expanded');
+        }
+        
+        function toggleIssuesList(header) {
+            const issuesList = header.parentElement;
+            issuesList.classList.toggle('collapsed');
+        }
+        
+        function showFilteredIssues(severity) {
+            const section = document.getElementById('filtered-issues-section');
+            const title = document.getElementById('filter-title');
+            const content = document.getElementById('filtered-issues-content');
+            
+            // Collect all issues of this severity
+            const allIssues = [
+            
+                
+                    
+                {
+                    severity: 'critical',
+                    title: "Massive Code Duplication in Number Buttons",
+                    description: "10 number buttons have identical logic duplicated",
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    category: 'Code Quality',
+                    icon: '✨'
+                },
+                    
+                {
+                    severity: 'warning',
+                    title: "Operator Button Logic Duplication",
+                    description: "Operator buttons (+, -, *, /, %) have nearly identical logic",
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    category: 'Code Quality',
+                    icon: '✨'
+                },
+                    
+                {
+                    severity: 'warning',
+                    title: "God Class Violation",
+                    description: "CalculatorUI handles UI creation, event handling, and calculation logic",
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    category: 'Code Quality',
+                    icon: '✨'
+                },
+                    
+                {
+                    severity: 'warning',
+                    title: "Method Too Long",
+                    description: "initButtons method is 300+ lines, violates SRP",
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    category: 'Code Quality',
+                    icon: '✨'
+                },
+                    
+                {
+                    severity: 'info',
+                    title: "Magic Numbers in UI Layout",
+                    description: "Hardcoded values like 90, 80, 100 used for positioning",
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    category: 'Code Quality',
+                    icon: '✨'
+                },
+                    
+                {
+                    severity: 'info',
+                    title: "Unclear Variable Names",
+                    description: "Variables \u0027go\u0027 and \u0027addToDisplay\u0027 have unclear purpose",
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    category: 'Code Quality',
+                    icon: '✨'
+                },
+                    
+                
+            
+                
+                    
+                {
+                    severity: 'critical',
+                    title: "Bug: Division by Zero Not Handled",
+                    description: "Dividing by zero will cause Infinity result without user feedback",
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    category: 'Custom Critique',
+                    icon: '🔍'
+                },
+                    
+                {
+                    severity: 'critical',
+                    title: "Bug: Multiple Decimal Points Allowed",
+                    description: "User can enter multiple decimal points (e.g., 1.2.3.4)",
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    category: 'Custom Critique',
+                    icon: '🔍'
+                },
+                    
+                {
+                    severity: 'critical',
+                    title: "Bug: Number Overflow Not Handled",
+                    description: "Large calculations can overflow Double.MAX_VALUE without warning",
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    category: 'Custom Critique',
+                    icon: '🔍'
+                },
+                    
+                {
+                    severity: 'warning',
+                    title: "Missing Edge Case: Consecutive Operators",
+                    description: "Pressing multiple operators in sequence causes incorrect behavior",
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    category: 'Custom Critique',
+                    icon: '🔍'
+                },
+                    
+                {
+                    severity: 'warning',
+                    title: "Missing Edge Case: Leading Zeros",
+                    description: "Input like 007 is handled but inconsistently",
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    category: 'Custom Critique',
+                    icon: '🔍'
+                },
+                    
+                {
+                    severity: 'info',
+                    title: "Production Risk: No Error Recovery",
+                    description: "If calculation fails, app state becomes inconsistent",
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    category: 'Custom Critique',
+                    icon: '🔍'
+                },
+                    
+                
+            
+                
+                    
+                {
+                    severity: 'info',
+                    title: "Incomplete Input Validation",
+                    description: "Regex validation doesn\u0027t prevent all invalid states",
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    category: 'Security',
+                    icon: '🔒'
+                },
+                    
+                
+            
+                
+                    
+                {
+                    severity: 'critical',
+                    title: "No Exception Handling for Parsing",
+                    description: "Double.parseDouble can throw NumberFormatException",
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    category: 'Error Handling',
+                    icon: '🛡️'
+                },
+                    
+                {
+                    severity: 'warning',
+                    title: "No Null Checks on UI Components",
+                    description: "Theme loading could return null, causing NullPointerException",
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    category: 'Error Handling',
+                    icon: '🛡️'
+                },
+                    
+                {
+                    severity: 'warning',
+                    title: "Silent Failure on Invalid Input",
+                    description: "Early returns in operators provide no user feedback",
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    category: 'Error Handling',
+                    icon: '🛡️'
+                },
+                    
+                
+            
+                
+                    
+                {
+                    severity: 'critical',
+                    title: "Business Logic in UI Class",
+                    description: "Calculate method and state management mixed with Swing UI code",
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    category: 'Architecture',
+                    icon: '🏗️'
+                },
+                    
+                {
+                    severity: 'warning',
+                    title: "State Management in UI",
+                    description: "Calculator state (typedValue, selectedOperator, go) stored in UI class",
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    category: 'Architecture',
+                    icon: '🏗️'
+                },
+                    
+                
+            
+                
+                    
+                {
+                    severity: 'info',
+                    title: "Inefficient String Building",
+                    description: "String concatenation in btnBack handler creates multiple objects",
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    category: 'Performance',
+                    icon: '⚡'
+                },
+                    
+                {
+                    severity: 'info',
+                    title: "Repeated Pattern Compilation",
+                    description: "Pattern.matches compiles regex on every call",
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    category: 'Performance',
+                    icon: '⚡'
+                },
+                    
+                
+            
+                
+                    
+                {
+                    severity: 'info',
+                    title: "No Error Logging",
+                    description: "Errors and exceptions are not logged for debugging",
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    category: 'Logging',
+                    icon: '📝'
+                },
+                    
+                
+            
+                
+            
+            ];
+            
+            const filteredIssues = allIssues.filter(issue => issue.severity === severity);
+            
+            // Update title
+            if (severity === 'critical') {
+                title.textContent = `🔴 Critical Issues (${filteredIssues.length})`;
+            } else if (severity === 'warning') {
+                title.textContent = `⚠️ Warnings (${filteredIssues.length})`;
+            }
+            
+            // Generate HTML
+            if (filteredIssues.length === 0) {
+                content.innerHTML = '<div class="no-issues">✅ No issues found</div>';
+            } else {
+                content.innerHTML = filteredIssues.map(issue => `
+                    <div class="filtered-issue-item severity-${issue.severity}">
+                        <div class="filtered-issue-header">
+                            <div class="filtered-issue-title">
+                                ${issue.severity === 'critical' ? '❌' : '⚠️'} ${issue.title}
+                            </div>
+                            <div class="filtered-issue-category">${issue.icon} ${issue.category}</div>
+                        </div>
+                        ${issue.file_path ? `<div class="filtered-issue-file">📄 ${issue.file_path}</div>` : ''}
+                        <div class="filtered-issue-desc">${issue.description}</div>
+                    </div>
+                `).join('');
+            }
+            
+            // Show section and scroll to it
+            section.classList.add('active');
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        function closeFilteredIssues() {
+            const section = document.getElementById('filtered-issues-section');
+            section.classList.remove('active');
+        }
+        
+        function toggleMoreIssues() {
+            const moreContainer = document.getElementById('more-issues-container');
+            const btn = document.getElementById('show-more-issues-btn');
+            
+            if (moreContainer.style.display === 'none') {
+                moreContainer.style.display = 'block';
+                btn.textContent = 'Show Less';
+            } else {
+                moreContainer.style.display = 'none';
+                const hiddenCount = moreContainer.children.length;
+                btn.textContent = `Show More (${hiddenCount} more)`;
+            }
+        }
+        
+        function showIssueDetails(issueTitle) {
+            const allIssuesData = [
+            
+                
+                    
+                {
+                    title: "Massive Code Duplication in Number Buttons",
+                    description: "10 number buttons have identical logic duplicated",
+                    severity: 'critical',
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    line_number: '',
+                    category: 'Code Quality',
+                    icon: '✨',
+                    code_snippet: "btn7.addActionListener(event -\u003e {\n    if (addToDisplay) { if (Pattern.matches(\"[0]*\", inputScreen.getText())) ...",
+                    recommendation: "Extract common logic into a reusable method",
+                    fix_example: "private void handleNumberInput(String number) {\n    if (addToDisplay) { ... }\n}\nbtn7.addActionListener(e -\u003e handleNumberInput(\"7\"));"
+                },
+                    
+                {
+                    title: "Operator Button Logic Duplication",
+                    description: "Operator buttons (+, -, *, /, %) have nearly identical logic",
+                    severity: 'warning',
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    line_number: '',
+                    category: 'Code Quality',
+                    icon: '✨',
+                    code_snippet: "btnAdd.addActionListener(event -\u003e {\n    if (!Pattern.matches(DOUBLE_OR_NUMBER_REGEX, inputScreen.getText())) return;",
+                    recommendation: "Create handleOperatorInput(char operator) method",
+                    fix_example: "private void handleOperatorInput(char op) {\n    if (go) { typedValue = calculate(...); selectedOperator = op; }\n}"
+                },
+                    
+                {
+                    title: "God Class Violation",
+                    description: "CalculatorUI handles UI creation, event handling, and calculation logic",
+                    severity: 'warning',
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    line_number: '',
+                    category: 'Code Quality',
+                    icon: '✨',
+                    code_snippet: "public class CalculatorUI {\n    private final JFrame window; ... public double calculate(...) { ... }",
+                    recommendation: "Separate into CalculatorUI, CalculatorEngine, and CalculatorState",
+                    fix_example: "class CalculatorEngine {\n    double calculate(double a, double b, char op) { ... }\n}"
+                },
+                    
+                {
+                    title: "Method Too Long",
+                    description: "initButtons method is 300+ lines, violates SRP",
+                    severity: 'warning',
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    line_number: '',
+                    category: 'Code Quality',
+                    icon: '✨',
+                    code_snippet: "private void initButtons(int[] columns, int[] rows) {\n    btnC = createButton(\"C\", columns[0], rows[1]); ...",
+                    recommendation: "Split into initNumberButtons, initOperatorButtons, initFunctionButtons",
+                    fix_example: "private void initButtons(int[] cols, int[] rows) {\n    initNumberButtons(cols, rows);\n    initOperatorButtons(cols, rows);\n}"
+                },
+                    
+                {
+                    title: "Magic Numbers in UI Layout",
+                    description: "Hardcoded values like 90, 80, 100 used for positioning",
+                    severity: 'info',
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    line_number: '',
+                    category: 'Code Quality',
+                    icon: '✨',
+                    code_snippet: "int[] columns = {MARGIN_X, MARGIN_X + 90, MARGIN_X + 90 * 2, ...};",
+                    recommendation: "Extract to named constants",
+                    fix_example: "private static final int BUTTON_SPACING = 90;\nint[] columns = {MARGIN_X, MARGIN_X + BUTTON_SPACING, ...};"
+                },
+                    
+                {
+                    title: "Unclear Variable Names",
+                    description: "Variables \u0027go\u0027 and \u0027addToDisplay\u0027 have unclear purpose",
+                    severity: 'info',
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    line_number: '',
+                    category: 'Code Quality',
+                    icon: '✨',
+                    code_snippet: "private boolean go = true;\nprivate boolean addToDisplay = true;",
+                    recommendation: "Rename to describe intent",
+                    fix_example: "private boolean isReadyForNewOperation = true;\nprivate boolean shouldAppendToDisplay = true;"
+                },
+                    
+                
+            
+                
+                    
+                {
+                    title: "Bug: Division by Zero Not Handled",
+                    description: "Dividing by zero will cause Infinity result without user feedback",
+                    severity: 'critical',
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    line_number: '',
+                    category: 'Custom Critique',
+                    icon: '🔍',
+                    code_snippet: "case \u0027/\u0027:\n    return firstNumber / secondNumber;",
+                    recommendation: "Add zero check and display error message",
+                    fix_example: "case \u0027/\u0027:\n    if (secondNumber == 0) throw new ArithmeticException(\"Cannot divide by zero\");\n    return firstNumber / secondNumber;"
+                },
+                    
+                {
+                    title: "Bug: Multiple Decimal Points Allowed",
+                    description: "User can enter multiple decimal points (e.g., 1.2.3.4)",
+                    severity: 'critical',
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    line_number: '',
+                    category: 'Custom Critique',
+                    icon: '🔍',
+                    code_snippet: "btnPoint = createButton(\".\", columns[1], rows[5]);\n// No validation for existing decimal",
+                    recommendation: "Check if decimal already exists before adding",
+                    fix_example: "btnPoint.addActionListener(e -\u003e {\n    if (!inputScreen.getText().contains(\".\")) inputScreen.setText(inputScreen.getText() + \".\");\n});"
+                },
+                    
+                {
+                    title: "Bug: Number Overflow Not Handled",
+                    description: "Large calculations can overflow Double.MAX_VALUE without warning",
+                    severity: 'critical',
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    line_number: '',
+                    category: 'Custom Critique',
+                    icon: '🔍',
+                    code_snippet: "typedValue = calculate(typedValue, Double.parseDouble(inputScreen.getText()), selectedOperator);",
+                    recommendation: "Check for infinity and display error",
+                    fix_example: "double result = calculate(...);\nif (Double.isInfinite(result) || Double.isNaN(result)) {\n    inputScreen.setText(\"Error\"); return;\n}"
+                },
+                    
+                {
+                    title: "Missing Edge Case: Consecutive Operators",
+                    description: "Pressing multiple operators in sequence causes incorrect behavior",
+                    severity: 'warning',
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    line_number: '',
+                    category: 'Custom Critique',
+                    icon: '🔍',
+                    code_snippet: "if (go) { typedValue = calculate(...); } else { selectedOperator = \u0027/\u0027; }",
+                    recommendation: "Allow operator change without recalculation",
+                    fix_example: "if (!go) { selectedOperator = newOp; return; }"
+                },
+                    
+                {
+                    title: "Missing Edge Case: Leading Zeros",
+                    description: "Input like 007 is handled but inconsistently",
+                    severity: 'warning',
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    line_number: '',
+                    category: 'Custom Critique',
+                    icon: '🔍',
+                    code_snippet: "if (Pattern.matches(\"[0]*\", inputScreen.getText())) { inputScreen.setText(\"7\"); }",
+                    recommendation: "Normalize display to remove leading zeros",
+                    fix_example: "String normalized = String.valueOf(Double.parseDouble(inputScreen.getText()));"
+                },
+                    
+                {
+                    title: "Production Risk: No Error Recovery",
+                    description: "If calculation fails, app state becomes inconsistent",
+                    severity: 'info',
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    line_number: '',
+                    category: 'Custom Critique',
+                    icon: '🔍',
+                    code_snippet: "typedValue = calculate(typedValue, Double.parseDouble(inputScreen.getText()), selectedOperator);",
+                    recommendation: "Wrap in try-catch and reset state on error",
+                    fix_example: "try { typedValue = calculate(...); } catch (Exception e) {\n    inputScreen.setText(\"Error\"); resetState();\n}"
+                },
+                    
+                
+            
+                
+                    
+                {
+                    title: "Incomplete Input Validation",
+                    description: "Regex validation doesn\u0027t prevent all invalid states",
+                    severity: 'info',
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    line_number: '',
+                    category: 'Security',
+                    icon: '🔒',
+                    code_snippet: "if (!Pattern.matches(DOUBLE_OR_NUMBER_REGEX, inputScreen.getText())) return;",
+                    recommendation: "Add comprehensive validation for all edge cases",
+                    fix_example: "private boolean isValidNumber(String input) {\n    try { Double.parseDouble(input); return true; } catch (Exception e) { return false; }\n}"
+                },
+                    
+                
+            
+                
+                    
+                {
+                    title: "No Exception Handling for Parsing",
+                    description: "Double.parseDouble can throw NumberFormatException",
+                    severity: 'critical',
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    line_number: '',
+                    category: 'Error Handling',
+                    icon: '🛡️',
+                    code_snippet: "typedValue = calculate(typedValue, Double.parseDouble(inputScreen.getText()), selectedOperator);",
+                    recommendation: "Wrap in try-catch and display user-friendly error",
+                    fix_example: "try {\n    double val = Double.parseDouble(inputScreen.getText());\n} catch (NumberFormatException e) {\n    inputScreen.setText(\"Error\");\n}"
+                },
+                    
+                {
+                    title: "No Null Checks on UI Components",
+                    description: "Theme loading could return null, causing NullPointerException",
+                    severity: 'warning',
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    line_number: '',
+                    category: 'Error Handling',
+                    icon: '🛡️',
+                    code_snippet: "if (themesMap.entrySet().iterator().hasNext()) {\n    applyTheme(themesMap.entrySet().iterator().next().getValue());",
+                    recommendation: "Add null checks for theme values",
+                    fix_example: "Theme theme = themesMap.entrySet().iterator().next().getValue();\nif (theme != null) applyTheme(theme);"
+                },
+                    
+                {
+                    title: "Silent Failure on Invalid Input",
+                    description: "Early returns in operators provide no user feedback",
+                    severity: 'warning',
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    line_number: '',
+                    category: 'Error Handling',
+                    icon: '🛡️',
+                    code_snippet: "if (!Pattern.matches(DOUBLE_OR_NUMBER_REGEX, inputScreen.getText())) return;",
+                    recommendation: "Show error message or visual indicator",
+                    fix_example: "if (!isValid(inputScreen.getText())) {\n    inputScreen.setBackground(Color.RED);\n    return;\n}"
+                },
+                    
+                
+            
+                
+                    
+                {
+                    title: "Business Logic in UI Class",
+                    description: "Calculate method and state management mixed with Swing UI code",
+                    severity: 'critical',
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    line_number: '',
+                    category: 'Architecture',
+                    icon: '🏗️',
+                    code_snippet: "public double calculate(double firstNumber, double secondNumber, char operator) {\n    switch (operator) { case \u0027+\u0027: return firstNumber + secondNumber; ...",
+                    recommendation: "Extract to separate CalculatorEngine class",
+                    fix_example: "class CalculatorEngine {\n    public double calculate(double a, double b, char op) { ... }\n}\nprivate final CalculatorEngine engine = new CalculatorEngine();"
+                },
+                    
+                {
+                    title: "State Management in UI",
+                    description: "Calculator state (typedValue, selectedOperator, go) stored in UI class",
+                    severity: 'warning',
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    line_number: '',
+                    category: 'Architecture',
+                    icon: '🏗️',
+                    code_snippet: "private char selectedOperator = \u0027 \u0027;\nprivate boolean go = true;\nprivate double typedValue = 0;",
+                    recommendation: "Create CalculatorState class to manage state",
+                    fix_example: "class CalculatorState {\n    private double currentValue;\n    private char operator;\n    void reset() { ... }\n}"
+                },
+                    
+                
+            
+                
+                    
+                {
+                    title: "Inefficient String Building",
+                    description: "String concatenation in btnBack handler creates multiple objects",
+                    severity: 'info',
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    line_number: '',
+                    category: 'Performance',
+                    icon: '⚡',
+                    code_snippet: "StringBuilder str2 = new StringBuilder();\nfor (int i = 0; i \u003c (str.length() - 1); i++) { str2.append(str.charAt(i)); }",
+                    recommendation: "Use substring instead of loop",
+                    fix_example: "String str = inputScreen.getText();\nif (str.length() \u003e 1) inputScreen.setText(str.substring(0, str.length() - 1));"
+                },
+                    
+                {
+                    title: "Repeated Pattern Compilation",
+                    description: "Pattern.matches compiles regex on every call",
+                    severity: 'info',
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    line_number: '',
+                    category: 'Performance',
+                    icon: '⚡',
+                    code_snippet: "if (!Pattern.matches(DOUBLE_OR_NUMBER_REGEX, inputScreen.getText())) return;",
+                    recommendation: "Compile pattern once as static field",
+                    fix_example: "private static final Pattern NUMBER_PATTERN = Pattern.compile(DOUBLE_OR_NUMBER_REGEX);\nif (!NUMBER_PATTERN.matcher(input).matches()) return;"
+                },
+                    
+                
+            
+                
+                    
+                {
+                    title: "No Error Logging",
+                    description: "Errors and exceptions are not logged for debugging",
+                    severity: 'info',
+                    file_path: 'src/main/java/com/houarizegai/calculator/ui/CalculatorUI.java',
+                    line_number: '',
+                    category: 'Logging',
+                    icon: '📝',
+                    code_snippet: "// No logging framework configured",
+                    recommendation: "Add java.util.logging for error tracking",
+                    fix_example: "private static final Logger logger = Logger.getLogger(CalculatorUI.class.getName());\nlogger.log(Level.SEVERE, \"Calculation error\", e);"
+                },
+                    
+                
+            
+                
+            
+            ];
+            
+            const matchingIssues = allIssuesData.filter(issue => issue.title === issueTitle);
+            
+            const section = document.getElementById('filtered-issues-section');
+            const title = document.getElementById('filter-title');
+            const content = document.getElementById('filtered-issues-content');
+            
+            title.textContent = `🔍 ${issueTitle} (${matchingIssues.length} occurrence${matchingIssues.length !== 1 ? 's' : ''})`;
+            
+            content.innerHTML = matchingIssues.map((issue, index) => `
+                <div class="filtered-issue-item severity-${issue.severity}" style="margin-bottom: 1rem;">
+                    <div class="filtered-issue-header">
+                        <div class="filtered-issue-title">
+                            ${issue.severity === 'critical' ? '❌' : issue.severity === 'warning' ? '⚠️' : 'ℹ️'} Occurrence ${index + 1}
+                        </div>
+                        <div class="filtered-issue-category">${issue.icon} ${issue.category}</div>
+                    </div>
+                    ${issue.file_path ? `<div class="filtered-issue-file">📄 ${issue.file_path}${issue.line_number ? ' : Line ' + issue.line_number : ''}</div>` : ''}
+                    <div class="filtered-issue-desc" style="margin-top: 0.5rem;">${issue.description}</div>
+                    ${issue.code_snippet ? `
+                        <div style="margin-top: 0.75rem;">
+                            <div style="font-size: 0.75rem; color: #718096; margin-bottom: 0.3rem; font-weight: 600;">❌ Current Code:</div>
+                            <div class="file-code-snippet">${issue.code_snippet}</div>
+                        </div>
+                    ` : ''}
+                    ${issue.recommendation || issue.fix_example ? `
+                        <div class="file-recommendation" style="margin-top: 0.75rem;">
+                            ${issue.recommendation ? `
+                                <div class="file-recommendation-label">💡 Recommendation:</div>
+                                <div style="margin-bottom: 0.5rem;">${issue.recommendation}</div>
+                            ` : ''}
+                            ${issue.fix_example ? `
+                                <div style="font-size: 0.75rem; color: #1e40af; margin-bottom: 0.3rem; font-weight: 600;">✅ Recommended Fix:</div>
+                                <div class="file-fix-example">${issue.fix_example}</div>
+                            ` : ''}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+            
+            section.classList.add('active');
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    </script>
+</body>
+</html>

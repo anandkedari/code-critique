@@ -1,0 +1,150 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Code Critique Report Schema",
+  "description": "Standardized schema for code critique analysis output",
+  "type": "object",
+  "required": ["metadata", "summary", "categories", "priority_actions", "final_assessment"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["service_name", "generated_at", "framework", "language"],
+      "properties": {
+        "service_name": {"type": "string"},
+        "generated_at": {"type": "string", "format": "date-time"},
+        "framework": {"type": "string"},
+        "language": {"type": "string"},
+        "files_scanned": {"type": "integer", "minimum": 0}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["overall_score", "critical_count", "warning_count", "info_count", "files_scanned"],
+      "properties": {
+        "overall_score": {"type": "integer", "minimum": 0, "maximum": 100},
+        "critical_count": {"type": "integer", "minimum": 0},
+        "warning_count": {"type": "integer", "minimum": 0},
+        "info_count": {"type": "integer", "minimum": 0},
+        "success_count": {"type": "integer", "minimum": 0},
+        "files_scanned": {"type": "integer", "minimum": 0}
+      }
+    },
+    "categories": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "icon", "score", "status", "metrics", "assessment_items", "issues"],
+        "properties": {
+          "id": {"type": "integer", "minimum": 1, "maximum": 8},
+          "name": {"type": "string"},
+          "icon": {"type": "string"},
+          "score": {"type": "integer", "minimum": 0, "maximum": 100},
+          "status": {"type": "string", "enum": ["excellent", "good", "fair", "poor"]},
+          "metrics": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["label", "value", "target"],
+              "properties": {
+                "label": {"type": "string"},
+                "value": {"type": "string"},
+                "target": {"type": "string"}
+              }
+            }
+          },
+          "assessment_items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["title", "assessment"],
+              "properties": {
+                "title": {"type": "string"},
+                "assessment": {"type": "string", "enum": ["compliant", "warning", "critical", "info"]},
+                "description": {"type": "string"}
+              }
+            }
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["severity", "title", "description"],
+              "properties": {
+                "severity": {"type": "string", "enum": ["critical", "warning", "info"]},
+                "title": {"type": "string"},
+                "description": {"type": "string"},
+                "file_path": {"type": "string"},
+                "line_number": {"type": "integer"},
+                "code_snippet": {"type": "string"},
+                "recommendation": {"type": "string"},
+                "fix_example": {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "priority_actions": {
+      "type": "object",
+      "required": ["critical", "warnings", "suggestions"],
+      "properties": {
+        "critical": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["title", "description", "category"],
+            "properties": {
+              "title": {"type": "string"},
+              "description": {"type": "string"},
+              "category": {"type": "string"}
+            }
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["title", "description", "category"],
+            "properties": {
+              "title": {"type": "string"},
+              "description": {"type": "string"},
+              "category": {"type": "string"}
+            }
+          }
+        },
+        "suggestions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["title", "description", "category"],
+            "properties": {
+              "title": {"type": "string"},
+              "description": {"type": "string"},
+              "category": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "final_assessment": {
+      "type": "object",
+      "required": ["grade", "strengths", "key_improvements"],
+      "properties": {
+        "grade": {"type": "string", "enum": ["Excellent", "Good", "Fair", "Poor"]},
+        "strengths": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "key_improvements": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "next_steps": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Critique Report - {{ metadata.service_name }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.5;
+            color: #333333;
+            background: #f5f5f5;
+            font-size: 14px;
+        }
+        
+        .header {
+            background: #333333;
+            color: #ffffff;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-bottom: 3px solid #00c853;
+        }
+        
+        .header h1 { font-size: 1.8rem; margin-bottom: 0.3rem; font-weight: 600; }
+        
+        .header .metadata {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 0.75rem;
+            font-size: 0.8rem;
+            opacity: 0.85;
+        }
+        
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        
+        /* Section 1: Overall Summary */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card {
+            background: #ffffff;
+            border-radius: 3px;
+            padding: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border: 1px solid #e0e0e0;
+            transition: transform 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card:hover { transform: translateY(-2px); box-shadow: 0 3px 10px rgba(0,0,0,0.12); }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.6rem;
+        }
+        
+        .card-title {
+            font-size: 0.75rem;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .card-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+        
+        .badge-critical { background: #f44336; color: #ffffff; }
+        .badge-warning { background: #ff9800; color: #ffffff; }
+        .badge-info { background: #2196f3; color: #ffffff; }
+        .badge-success { background: #00c853; color: #ffffff; }
+        
+        /* Section 2: Category Status Table */
+        .categories-overview {
+            background: #ffffff;
+            border-radius: 3px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border: 1px solid #e0e0e0;
+        }
+        
+        .categories-overview h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        /* Category Summary Grid */
+        .category-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 0.75rem;
+        }
+        
+        .category-summary-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: #ead7c1;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+        
+        .category-summary-name {
+            flex: 1;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .category-summary-count {
+            color: #718096;
+            font-size: 0.8rem;
+            padding: 0.25rem 0.6rem;
+            background: #fff;
+            border-radius: 12px;
+        }
+        
+        /* Compact Status Grid */
+        .compact-status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 0.5rem;
+        }
+        
+        .compact-status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.6rem 0.75rem;
+            background: #dadada;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            border-left: 3px solid transparent;
+        }
+        
+        .compact-status-item.status-excellent { border-left-color: #059669; }
+        .compact-status-item.status-good { border-left-color: #2563eb; }
+        .compact-status-item.status-needs-work { border-left-color: #d97706; }
+        .compact-status-item.status-critical { border-left-color: #c53030; }
+        
+        .status-icon {
+            font-size: 1.1rem;
+        }
+        
+        .status-name {
+            flex: 1;
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.85rem;
+        }
+        
+        .status-badge-inline {
+            font-weight: 600;
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+        }
+        
+        .status-excellent .status-badge-inline { background: #d1fae5; color: #059669; }
+        .status-good .status-badge-inline { background: #dbeafe; color: #2563eb; }
+        .status-needs-work .status-badge-inline { background: #fef3c7; color: #d97706; }
+        .status-critical .status-badge-inline { background: #ffd4d4; color: #c53030; }
+        
+        .status-metrics {
+            color: #000000;
+            font-size: 0.75rem;
+        }
+        
+        /* Files Issues Grid */
+        .files-issues-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+        
+        .file-issues-item {
+            background: #ffffff;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            overflow: hidden;
+        }
+        
+        .file-issues-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            user-select: none;
+        }
+        
+        .file-issues-header:hover {
+            background: #f8f9fa;
+        }
+        
+        .expand-icon {
+            font-size: 0.8rem;
+            color: #718096;
+            transition: transform 0.2s;
+        }
+        
+        .file-issues-item.expanded .expand-icon {
+            transform: rotate(90deg);
+        }
+        
+        .file-icon {
+            font-size: 1.1rem;
+        }
+        
+        .file-name {
+            flex: 1;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .file-issues-count {
+            color: #718096;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.6rem;
+            background: #f0f0f0;
+            border-radius: 12px;
+        }
+        
+        .file-issues-content {
+            display: none;
+            padding: 0 0.75rem 0.75rem 0.75rem;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .file-issues-item.expanded .file-issues-content {
+            display: block;
+        }
+        
+        .file-issue-detail {
+            padding: 0.6rem;
+            margin-top: 0.5rem;
+            background: #f8f9fa;
+            border-left: 3px solid #ddd;
+            border-radius: 3px;
+            font-size: 0.8rem;
+        }
+        
+        .file-issue-detail.severity-critical {
+            border-left-color: #f44336;
+            background: #fff5f5;
+        }
+        
+        .file-issue-detail.severity-warning {
+            border-left-color: #ff9800;
+            background: #fffbf0;
+        }
+        
+        .file-issue-detail.severity-info {
+            border-left-color: #2196f3;
+            background: #f0f8ff;
+        }
+        
+        .file-issue-detail-title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.8rem;
+        }
+        
+        .file-issue-detail-desc {
+            color: #4a5568;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            margin-bottom: 0.4rem;
+        }
+        
+        .file-issue-category {
+            display: inline-block;
+            margin-top: 0.3rem;
+            padding: 0.15rem 0.4rem;
+            background: #ffffff;
+            border-radius: 8px;
+            font-size: 0.65rem;
+            color: #718096;
+        }
+        
+        .file-code-snippet {
+            background: #2d3748;
+            color: #f8f8f2;
+            padding: 0.4rem 0.5rem;
+            border-radius: 3px;
+            overflow-x: auto;
+            margin: 0.4rem 0;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.7rem;
+            line-height: 1.3;
+            white-space: pre-wrap;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        
+        .file-recommendation {
+            background: #e8f4f8;
+            padding: 0.4rem 0.5rem;
+            margin-top: 0.4rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            line-height: 1.4;
+        }
+        
+        .file-recommendation-label {
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 0.2rem;
+            font-size: 0.7rem;
+        }
+        
+        .file-fix-example {
+            background: #1e3a2e;
+            color: #90ee90;
+            padding: 0.4rem 0.5rem;
+            border-radius: 3px;
+            overflow-x: auto;
+            margin-top: 0.3rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.7rem;
+            line-height: 1.3;
+            white-space: pre-wrap;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        
+        /* Section 3: Detailed Category Analysis */
+        .category-section {
+            background: #ffffff;
+            border-radius: 3px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border: 1px solid #e0e0e0;
+        }
+        
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #f3e8dc;
+        }
+        
+        .category-title {
+            font-size: 1.1rem;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-weight: 600;
+        }
+        
+        .category-status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        
+        .category-status-excellent { background: #d1fae5; color: #059669; }
+        .category-status-good { background: #dbeafe; color: #2563eb; }
+        .category-status-needs-work { background: #fef3c7; color: #d97706; }
+        .category-status-critical { background: #ffd4d4; color: #c53030; }
+        
+        .category-icon { font-size: 1.3rem; }
+        
+        .compliance-badge {
+            padding: 0.35rem 1rem;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .compliance-compliant { background: #d1fae5; color: #059669; }
+        .compliance-needs-work { background: #fef3c7; color: #856404; }
+        .compliance-suggestion { background: #dbeafe; color: #1e40af; }
+        .compliance-inconsistency { background: #fce7f3; color: #9f1239; }
+        
+        /* Metrics List (2-Column Grid) */
+        .metrics-list {
+            margin-bottom: 1rem;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 0.4rem;
+        }
+        
+        .metric-row {
+            padding: 0.4rem 0.6rem;
+            background: #e8decf;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+        }
+        
+        .metric-name {
+            color: #2d3748;
+            font-weight: 500;
+            flex: 1;
+        }
+        
+        .metric-info {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .metric-value-display {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.75rem;
+        }
+        
+        .metric-target-display {
+            font-size: 0.7rem;
+            color: #718096;
+        }
+        
+        /* Items List - Inline Format */
+        .items-list {
+            margin-bottom: 1rem;
+        }
+        
+        .items-list h3 {
+            font-size: 0.95rem;
+            margin-bottom: 0.75rem;
+            color: #4a5568;
+            font-weight: 600;
+        }
+        
+        .item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.7rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            background: #fcf9f4;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            font-size: 0.8rem;
+        }
+        
+        .item-compliant { 
+            border-color: #d1fae5;
+            background: #f0fdf9;
+        }
+        .item-warning { 
+            border-color: #fef3c7;
+            background: #fffbeb;
+        }
+        .item-critical { 
+            border-color: #ffd4d4;
+            background: #fff5f5;
+        }
+        .item-info { 
+            border-color: #dbeafe;
+            background: #eff6ff;
+        }
+        
+        .item-icon {
+            font-size: 0.9rem;
+        }
+        
+        .item-content {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        .item-title {
+            font-weight: 500;
+            color: #2d3748;
+            font-size: 0.8rem;
+        }
+        
+        .item-description {
+            display: none;
+        }
+        
+        /* Issues */
+        .issues-list h3 {
+            font-size: 0.95rem;
+            margin-bottom: 0.75rem;
+            color: #4a5568;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .issues-list h3:hover {
+            color: #2d3748;
+        }
+        
+        .issues-list-toggle {
+            font-size: 0.8rem;
+            color: #718096;
+            transition: transform 0.2s;
+        }
+        
+        .issues-list.collapsed .issues-list-toggle {
+            transform: rotate(-90deg);
+        }
+        
+        .issues-list.collapsed .issues-list-content {
+            display: none;
+        }
+        
+        .issue {
+            background: #f2f2f299;
+            border-left: 3px solid #ddd;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+        
+        .issue-critical { border-left-color: #c53030; }
+        .issue-warning { border-left-color: #d97706; }
+        .issue-info { border-left-color: #2563eb; }
+        
+        .issue-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+        
+        .issue-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #2d3748;
+        }
+        
+        .issue-description {
+            color: #4a5568;
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+        
+        .file-path {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.75rem;
+            color: #718096;
+            background: #fff;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #f8f8f2;
+            padding: 0.75rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 0.5rem 0;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        
+        .code-label {
+            font-size: 0.75rem;
+            color: #718096;
+            margin-bottom: 0.2rem;
+            margin-top: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .recommendation {
+            background: #9fc15c3d;
+            border-left: 3px solid #2563eb;
+            padding: 0.75rem;
+            margin-top: 0.75rem;
+            border-radius: 4px;
+        }
+        
+        .recommendation-title {
+            font-weight: 600;
+            color: #046423;
+            margin-bottom: 0.35rem;
+            font-size: 0.85rem;
+        }
+        
+        /* Section 4: Priority Actions */
+        .priority-section {
+            background: #ffffff;
+            border-radius: 3px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border: 1px solid #e0e0e0;
+            border-left: 4px solid #ff9800;
+        }
+        
+        .priority-section h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        .priority-group {
+            margin-bottom: 1.25rem;
+        }
+        
+        .priority-group h3 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .priority-group.critical h3 { color: #c53030; }
+        .priority-group.warnings h3 { color: #d97706; }
+        .priority-group.suggestions h3 { color: #2563eb; }
+        
+        .priority-items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 0.75rem;
+        }
+        
+        .priority-item {
+            padding: 0.75rem;
+            background: #dadada;
+            border-radius: 6px;
+            border-left: 3px solid #ddd;
+            font-size: 0.85rem;
+        }
+        
+        .priority-item.critical { border-left-color: #c53030; }
+        .priority-item.warning { border-left-color: #d97706; }
+        .priority-item.info { border-left-color: #2563eb; }
+        
+        .priority-title {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            color: #2d3748;
+            font-size: 0.85rem;
+        }
+        
+        .priority-description {
+            color: #4a5568;
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+        
+        .priority-category {
+            display: inline-block;
+            margin-top: 0.35rem;
+            padding: 0.2rem 0.6rem;
+            background: #fff;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            color: #718096;
+        }
+        
+        /* Section 5: Final Assessment */
+        .final-assessment {
+            background: #e8f5e9;
+            border-radius: 3px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border: 1px solid #e0e0e0;
+            border-left: 4px solid #00c853;
+        }
+        
+        .final-assessment h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        .grade-display {
+            text-align: center;
+            padding: 2rem;
+            background: #00c853;
+            color: white;
+            border-radius: 3px;
+            margin-bottom: 2rem;
+        }
+        
+        .grade-value {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .grade-label {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .assessment-section {
+            margin-bottom: 0;
+        }
+        
+        .assessment-list {
+            list-style: none;
+        }
+        
+        .assessment-list li {
+            padding: 0.6rem;
+            margin-bottom: 0.4rem;
+            background: #f0fdf9;
+            border-radius: 6px;
+            padding-left: 2rem;
+            position: relative;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: #4a5568;
+        }
+        
+        .assessment-list.improvements li:before {
+            content: "⚠";
+            position: absolute;
+            left: 0.65rem;
+            color: #d97706;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: #718096;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 1.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .no-issues {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 500;
+            margin: 0.75rem 0;
+            font-size: 0.85rem;
+        }
+        
+        /* Issue Filter Section */
+        .issue-filter-section {
+            background: #ffffff;
+            border-radius: 3px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border: 1px solid #e0e0e0;
+            display: none;
+        }
+        
+        .issue-filter-section.active {
+            display: block;
+        }
+        
+        .issue-filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .issue-filter-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .close-filter {
+            background: #e0e0e0;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .close-filter:hover {
+            background: #d0d0d0;
+        }
+        
+        .filtered-issue-item {
+            background: #f8f9fa;
+            border-left: 3px solid #ddd;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        
+        .filtered-issue-item.severity-critical {
+            border-left-color: #c53030;
+        }
+        
+        .filtered-issue-item.severity-warning {
+            border-left-color: #d97706;
+        }
+        
+        .filtered-issue-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+        
+        .filtered-issue-title {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.9rem;
+        }
+        
+        .filtered-issue-category {
+            font-size: 0.75rem;
+            color: #718096;
+            background: #fff;
+            padding: 0.2rem 0.5rem;
+            border-radius: 8px;
+        }
+        
+        .filtered-issue-file {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.75rem;
+            color: #718096;
+            margin-bottom: 0.35rem;
+        }
+        
+        .filtered-issue-desc {
+            color: #4a5568;
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+        
+        .card.clickable {
+            cursor: pointer;
+        }
+        
+        /* Issues Bar Graph Section */
+        .bar-graph-section {
+            background: #ffffff;
+            border-radius: 3px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border: 1px solid #e0e0e0;
+        }
+        
+        .bar-graph-section h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        .bar-item {
+            margin-bottom: 0.75rem;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .bar-item.clickable {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .bar-item.clickable:hover {
+            background: #e9ecef;
+        }
+        
+        .bar-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.3rem;
+            font-size: 0.85rem;
+        }
+        
+        .bar-icon {
+            font-size: 1.1rem;
+        }
+        
+        .bar-label {
+            flex: 1;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .bar-count {
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+        }
+        
+        .bar-count.critical { background: #ffd4d4; color: #c53030; }
+        .bar-count.warning { background: #fef3c7; color: #d97706; }
+        .bar-count.mixed { background: #e0e0e0; color: #2d3748; }
+        
+        .bar-graph {
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+            font-size: 0.9rem;
+        }
+        
+        .bar-emoji {
+            display: inline-block;
+        }
+        
+        .bar-critical { color: #c53030; }
+        .bar-warning { color: #d97706; }
+        
+        @media print {
+            body { background: white; }
+            .card:hover { transform: none; }
+            .issue-filter-section { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>🔍 Code Critique Report</h1>
+        <div class="metadata">
+            <div><strong>Service:</strong> {{ metadata.service_name }}</div>
+            <div><strong>Generated:</strong> {{ metadata.generated_at }}</div>
+            <div><strong>Framework:</strong> {{ metadata.framework }}</div>
+            <div><strong>Language:</strong> {{ metadata.language }}</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- SECTION 1: Overall Summary -->
+        <div class="summary-cards">
+            <div class="card">
+                <div class="card-title">Overall Status</div>
+                <span class="badge {% if summary.critical_count == 0 and summary.warning_count == 0 %}badge-success{% elif summary.critical_count == 0 %}badge-info{% elif summary.critical_count <= 3 %}badge-warning{% else %}badge-critical{% endif %}">
+                    {% if summary.critical_count == 0 and summary.warning_count == 0 %}EXCELLENT
+                    {% elif summary.critical_count == 0 %}GOOD
+                    {% elif summary.critical_count <= 3 %}NEEDS WORK
+                    {% else %}CRITICAL{% endif %}
+                </span>
+            </div>
+            
+            <div class="card clickable" onclick="showFilteredIssues('critical')">
+                <div class="card-title">Critical Issues</div>
+                <span class="badge badge-critical">{{ summary.critical_count }}</span>
+            </div>
+            
+            <div class="card clickable" onclick="showFilteredIssues('warning')">
+                <div class="card-title">Warnings</div>
+                <span class="badge badge-warning">{{ summary.warning_count }}</span>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Files Not Compliant</div>
+                {% set ns = namespace(file_issues={}) %}
+                {% for category in categories %}
+                    {% if category.issues %}
+                        {% for issue in category.issues %}
+                            {% if issue.file_path %}
+                                {% if issue.file_path not in ns.file_issues %}
+                                    {% set _ = ns.file_issues.update({issue.file_path: 1}) %}
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+                <span class="badge badge-warning">{{ ns.file_issues|length }}</span>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Files Scanned</div>
+                <span class="badge badge-info">{{ summary.files_scanned }}</span>
+            </div>
+        </div>
+
+        <!-- SECTION 2: Assessment Status -->
+        <div class="categories-overview">
+            <h2>📋 Assessment Status</h2>
+            <div class="compact-status-grid">
+                {% for category in categories %}
+                {% set category_critical = category.issues|selectattr('severity', 'equalto', 'critical')|list|length if category.issues else 0 %}
+                {% set category_warning = category.issues|selectattr('severity', 'equalto', 'warning')|list|length if category.issues else 0 %}
+                <div class="compact-status-item {% if category_critical == 0 and category_warning == 0 %}status-excellent{% elif category_critical == 0 %}status-good{% elif category_critical <= 2 %}status-needs-work{% else %}status-critical{% endif %}">
+                    <span class="status-icon">{{ category.icon }}</span>
+                    <span class="status-name">{{ category.name }}</span>
+                    <span class="status-badge-inline">
+                        {% if category_critical == 0 and category_warning == 0 %}✅ COMPLIANT
+                        {% elif category_critical == 0 %}⚠️ {{ category_warning }} WARNING{{ 's' if category_warning != 1 else '' }}
+                        {% else %}❌ {{ category_critical }} CRITICAL{% endif %}
+                    </span>
+                    <span class="status-metrics">{{ category.issues|length if category.issues else 0 }} issue{{ 's' if (category.issues|length if category.issues else 0) != 1 else '' }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- SECTION 3: Issues by File -->
+        <div class="categories-overview">
+            <h2>📁 Issues by File</h2>
+            <div class="files-issues-grid">
+                {% set ns = namespace(file_issues={}) %}
+                {% for category in categories %}
+                    {% if category.issues %}
+                        {% for issue in category.issues %}
+                            {% if issue.file_path %}
+                                {% if issue.file_path not in ns.file_issues %}
+                                    {% set _ = ns.file_issues.update({issue.file_path: []}) %}
+                                {% endif %}
+                                {% set _ = ns.file_issues[issue.file_path].append({
+                                    'title': issue.title,
+                                    'description': issue.description,
+                                    'severity': issue.severity,
+                                    'category': category.name,
+                                    'icon': category.icon,
+                                    'code_snippet': issue.code_snippet if issue.code_snippet else None,
+                                    'recommendation': issue.recommendation if issue.recommendation else None,
+                                    'fix_example': issue.fix_example if issue.fix_example else None
+                                }) %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+                
+                {% for file_path, issues in ns.file_issues.items() %}
+                <div class="file-issues-item">
+                    <div class="file-issues-header" onclick="toggleFileIssues(this)">
+                        <span class="expand-icon">▶</span>
+                        <span class="file-icon">📄</span>
+                        <span class="file-name">{{ file_path }}</span>
+                        <span class="file-issues-count">{{ issues|length }} issue{{ 's' if issues|length != 1 else '' }}</span>
+                    </div>
+                    <div class="file-issues-content">
+                        {% for issue in issues %}
+                        <div class="file-issue-detail severity-{{ issue.severity }}">
+                            <div class="file-issue-detail-title">
+                                {% if issue.severity == 'critical' %}❌
+                                {% elif issue.severity == 'warning' %}⚠️
+                                {% else %}ℹ️{% endif %}
+                                {{ issue.title }}
+                            </div>
+                            <div class="file-issue-detail-desc">{{ issue.description }}</div>
+                            <span class="file-issue-category">{{ issue.icon }} {{ issue.category }}</span>
+                            
+                            {% if issue.code_snippet %}
+                            <div class="file-code-snippet">{{ issue.code_snippet }}</div>
+                            {% endif %}
+                            
+                            {% if issue.recommendation or issue.fix_example %}
+                            <div class="file-recommendation">
+                                {% if issue.recommendation %}
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>{{ issue.recommendation }}</div>
+                                {% endif %}
+                                {% if issue.fix_example %}
+                                <div class="file-fix-example">{{ issue.fix_example }}</div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- SECTION 4: Top Issues -->
+        <div class="bar-graph-section">
+            <h2>📊 Top Issues</h2>
+            
+            <!-- Issue Details Section (Hidden by default) -->
+            <div id="filtered-issues-section" class="issue-filter-section">
+                <div class="issue-filter-header">
+                    <div class="issue-filter-title" id="filter-title">Issues</div>
+                    <button class="close-filter" onclick="closeFilteredIssues()">✕ Close</button>
+                </div>
+                <div id="filtered-issues-content"></div>
+            </div>
+            {% set issue_counts = {} %}
+            {% for category in categories %}
+                {% if category.issues %}
+                    {% for issue in category.issues %}
+                        {% set issue_key = issue.title %}
+                        {% if issue_key in issue_counts %}
+                            {% set _ = issue_counts.update({issue_key: {
+                                'count': issue_counts[issue_key]['count'] + 1,
+                                'severity': issue.severity,
+                                'category': category.name,
+                                'icon': category.icon
+                            }}) %}
+                        {% else %}
+                            {% set _ = issue_counts.update({issue_key: {
+                                'count': 1,
+                                'severity': issue.severity,
+                                'category': category.name,
+                                'icon': category.icon
+                            }}) %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+            {% set sorted_issues_list = [] %}
+            {% for issue_title, issue_data in issue_counts.items() %}
+                {% set severity_rank = 0 if issue_data.severity == 'critical' else 1 %}
+                {% set _ = sorted_issues_list.append((issue_title, issue_data, severity_rank)) %}
+            {% endfor %}
+            {% set sorted_issues = sorted_issues_list|sort(attribute='2')|sort(attribute='1.count', reverse=True) %}
+            
+            {% if sorted_issues %}
+                <div id="top-issues-container">
+                    {% for issue_title, issue_data, severity_rank in sorted_issues[:5] %}
+                    <div class="bar-item clickable" onclick="showIssueDetails('{{ issue_title|replace("'", "\\'") }}')">
+                        <div class="bar-header">
+                            <span class="bar-icon">{{ issue_data.icon }}</span>
+                            <span class="bar-label">{{ issue_title }}</span>
+                            <span class="bar-count {% if issue_data.severity == 'critical' %}critical{% elif issue_data.severity == 'warning' %}warning{% else %}mixed{% endif %}">
+                                {{ issue_data.count }} occurrence{{ 's' if issue_data.count != 1 else '' }}
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">{{ issue_data.category }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                {% if sorted_issues|length > 5 %}
+                <div id="more-issues-container" style="display: none;">
+                    {% for issue_title, issue_data, severity_rank in sorted_issues[5:] %}
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-icon">{{ issue_data.icon }}</span>
+                            <span class="bar-label">{{ issue_title }}</span>
+                            <span class="bar-count {% if issue_data.severity == 'critical' %}critical{% elif issue_data.severity == 'warning' %}warning{% else %}mixed{% endif %}">
+                                {{ issue_data.count }} occurrence{{ 's' if issue_data.count != 1 else '' }}
+                            </span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">{{ issue_data.category }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button id="show-more-issues-btn" onclick="toggleMoreIssues()" style="margin-top: 0.75rem; padding: 0.5rem 1rem; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
+                    Show More ({{ sorted_issues|length - 5 }} more)
+                </button>
+                {% endif %}
+            {% else %}
+                <div class="no-issues">✅ No issues found across all categories</div>
+            {% endif %}
+        </div>
+
+
+        <!-- SECTION 5: Detailed Category Analysis -->
+        {% for category in categories %}
+        <div class="category-section">
+            <!-- 3.1 Category Name with Status -->
+            <div class="category-header">
+                <div class="category-title">
+                    <span class="category-icon">{{ category.icon }}</span>
+                    {{ category.id }}. {{ category.name }}
+                </div>
+                {% set category_critical = category.issues|selectattr('severity', 'equalto', 'critical')|list|length if category.issues else 0 %}
+                {% set category_warning = category.issues|selectattr('severity', 'equalto', 'warning')|list|length if category.issues else 0 %}
+                <span class="category-status-badge {% if category_critical == 0 and category_warning == 0 %}category-status-excellent{% elif category_critical == 0 %}category-status-good{% elif category_critical <= 2 %}category-status-needs-work{% else %}category-status-critical{% endif %}">
+                    {% if category_critical == 0 and category_warning == 0 %}✅ COMPLIANT
+                    {% elif category_critical == 0 %}⚠️ {{ category_warning }} WARNING{{ 's' if category_warning != 1 else '' }}
+                    {% else %}❌ {{ category_critical }} CRITICAL{% endif %}
+                </span>
+            </div>
+
+            <!-- Metrics -->
+            {% if category.metrics %}
+            <div class="metrics-list">
+                <div class="metrics-grid">
+                {% for metric in category.metrics %}
+                <div class="metric-row">
+                    <span class="metric-name">{{ metric.label }}</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">{{ metric.value }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- 3.2 List of Items with Assessment -->
+            {% if category.assessment_items %}
+            <div class="items-list">
+                <h3>Assessment Items</h3>
+                {% for item in category.assessment_items %}
+                <div class="item item-{{ item.assessment }}">
+                    <div class="item-icon">
+                        {% if item.assessment == 'compliant' %}✅
+                        {% elif item.assessment == 'warning' %}⚠️
+                        {% elif item.assessment == 'critical' %}❌
+                        {% else %}ℹ️{% endif %}
+                    </div>
+                    <div class="item-content">
+                        <div class="item-title">{{ item.title }}</div>
+                        {% if item.description %}
+                        <div class="item-description">{{ item.description }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- 3.3 List of Issues -->
+            {% if category.issues %}
+            <div class="issues-list collapsed">
+                <h3 onclick="toggleIssuesList(this)">
+                    <span class="issues-list-toggle">▼</span>
+                    Detailed Findings
+                </h3>
+                <div class="issues-list-content">
+                {% for issue in category.issues %}
+                <div class="issue issue-{{ issue.severity }}">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            {% if issue.severity == 'critical' %}❌
+                            {% elif issue.severity == 'warning' %}⚠️
+                            {% else %}ℹ️{% endif %}
+                            {{ issue.title }}
+                        </div>
+                        <span class="badge badge-{{ issue.severity }}">{{ issue.severity|upper }}</span>
+                    </div>
+                    
+                    <div class="issue-description">{{ issue.description }}</div>
+                    
+                    {% if issue.file_path %}
+                    <div class="file-path">📄 {{ issue.file_path }}{% if issue.line_number %} : Line {{ issue.line_number }}{% endif %}</div>
+                    {% endif %}
+                    
+                    {% if issue.code_snippet %}
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">{{ issue.code_snippet }}</div>
+                    {% endif %}
+                    
+                    {% if issue.recommendation or issue.fix_example %}
+                    <div class="recommendation">
+                        {% if issue.recommendation %}
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>{{ issue.recommendation }}</div>
+                        {% endif %}
+                        
+                        {% if issue.fix_example %}
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">{{ issue.fix_example }}</div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="no-issues">✅ No issues found in this category</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <!-- SECTION 6: Priority Actions -->
+        <div class="priority-section">
+            <h2>🎯 Priority Actions</h2>
+            
+            {% if priority_actions.critical %}
+            <div class="priority-group critical">
+                <h3>🔴 Critical (Fix Immediately)</h3>
+                <div class="priority-items-grid">
+                    {% for action in priority_actions.critical %}
+                    <div class="priority-item critical">
+                        <div class="priority-title">{{ action.title }}</div>
+                        <div class="priority-description">{{ action.description }}</div>
+                        <div class="priority-category">{{ action.category }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if priority_actions.warnings %}
+            <div class="priority-group warnings">
+                <h3>🟡 Warnings (Address Soon)</h3>
+                <div class="priority-items-grid">
+                    {% for action in priority_actions.warnings %}
+                    <div class="priority-item warning">
+                        <div class="priority-title">{{ action.title }}</div>
+                        <div class="priority-description">{{ action.description }}</div>
+                        <div class="priority-category">{{ action.category }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if priority_actions.suggestions %}
+            <div class="priority-group suggestions">
+                <h3>🔵 Suggestions (Nice to Have)</h3>
+                <div class="priority-items-grid">
+                    {% for action in priority_actions.suggestions %}
+                    <div class="priority-item info">
+                        <div class="priority-title">{{ action.title }}</div>
+                        <div class="priority-description">{{ action.description }}</div>
+                        <div class="priority-category">{{ action.category }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- SECTION 7: Key Improvements -->
+        {% if final_assessment.key_improvements %}
+        <div class="final-assessment">
+            <h2>⚠️ Key Improvements</h2>
+            
+            <div class="assessment-section">
+                <ul class="assessment-list improvements">
+                    {% for improvement in final_assessment.key_improvements %}
+                    <li>{{ improvement }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Generated by Sentinel Code Critique Framework</strong></p>
+            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Based on industry best practices and security standards</p>
+            <p style="font-size: 0.85rem; margin-top: 1rem; color: #999;">
+                Report Date: {{ metadata.generated_at }} | Version: 1.0.0
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        function toggleFileIssues(header) {
+            const item = header.parentElement;
+            item.classList.toggle('expanded');
+        }
+        
+        function toggleIssuesList(header) {
+            const issuesList = header.parentElement;
+            issuesList.classList.toggle('collapsed');
+        }
+        
+        function showFilteredIssues(severity) {
+            const section = document.getElementById('filtered-issues-section');
+            const title = document.getElementById('filter-title');
+            const content = document.getElementById('filtered-issues-content');
+            
+            // Collect all issues of this severity
+            const allIssues = [
+            {% for category in categories %}
+                {% if category.issues %}
+                    {% for issue in category.issues %}
+                {
+                    severity: '{{ issue.severity }}',
+                    title: {{ issue.title|tojson }},
+                    description: {{ issue.description|tojson }},
+                    file_path: '{{ issue.file_path if issue.file_path else "" }}',
+                    category: '{{ category.name }}',
+                    icon: '{{ category.icon }}'
+                },
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+            ];
+            
+            const filteredIssues = allIssues.filter(issue => issue.severity === severity);
+            
+            // Update title
+            if (severity === 'critical') {
+                title.textContent = `🔴 Critical Issues (${filteredIssues.length})`;
+            } else if (severity === 'warning') {
+                title.textContent = `⚠️ Warnings (${filteredIssues.length})`;
+            }
+            
+            // Generate HTML
+            if (filteredIssues.length === 0) {
+                content.innerHTML = '<div class="no-issues">✅ No issues found</div>';
+            } else {
+                content.innerHTML = filteredIssues.map(issue => `
+                    <div class="filtered-issue-item severity-${issue.severity}">
+                        <div class="filtered-issue-header">
+                            <div class="filtered-issue-title">
+                                ${issue.severity === 'critical' ? '❌' : '⚠️'} ${issue.title}
+                            </div>
+                            <div class="filtered-issue-category">${issue.icon} ${issue.category}</div>
+                        </div>
+                        ${issue.file_path ? `<div class="filtered-issue-file">📄 ${issue.file_path}</div>` : ''}
+                        <div class="filtered-issue-desc">${issue.description}</div>
+                    </div>
+                `).join('');
+            }
+            
+            // Show section and scroll to it
+            section.classList.add('active');
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        function closeFilteredIssues() {
+            const section = document.getElementById('filtered-issues-section');
+            section.classList.remove('active');
+        }
+        
+        function toggleMoreIssues() {
+            const moreContainer = document.getElementById('more-issues-container');
+            const btn = document.getElementById('show-more-issues-btn');
+            
+            if (moreContainer.style.display === 'none') {
+                moreContainer.style.display = 'block';
+                btn.textContent = 'Show Less';
+            } else {
+                moreContainer.style.display = 'none';
+                const hiddenCount = moreContainer.children.length;
+                btn.textContent = `Show More (${hiddenCount} more)`;
+            }
+        }
+        
+        function showIssueDetails(issueTitle) {
+            const allIssuesData = [
+            {% for category in categories %}
+                {% if category.issues %}
+                    {% for issue in category.issues %}
+                {
+                    title: {{ issue.title|tojson }},
+                    description: {{ issue.description|tojson }},
+                    severity: '{{ issue.severity }}',
+                    file_path: '{{ issue.file_path if issue.file_path else "" }}',
+                    line_number: '{{ issue.line_number if issue.line_number else "" }}',
+                    category: '{{ category.name }}',
+                    icon: '{{ category.icon }}',
+                    code_snippet: {{ issue.code_snippet|tojson if issue.code_snippet else 'null' }},
+                    recommendation: {{ issue.recommendation|tojson if issue.recommendation else 'null' }},
+                    fix_example: {{ issue.fix_example|tojson if issue.fix_example else 'null' }}
+                },
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+            ];
+            
+            const matchingIssues = allIssuesData.filter(issue => issue.title === issueTitle);
+            
+            const section = document.getElementById('filtered-issues-section');
+            const title = document.getElementById('filter-title');
+            const content = document.getElementById('filtered-issues-content');
+            
+            title.textContent = `🔍 ${issueTitle} (${matchingIssues.length} occurrence${matchingIssues.length !== 1 ? 's' : ''})`;
+            
+            content.innerHTML = matchingIssues.map((issue, index) => `
+                <div class="filtered-issue-item severity-${issue.severity}" style="margin-bottom: 1rem;">
+                    <div class="filtered-issue-header">
+                        <div class="filtered-issue-title">
+                            ${issue.severity === 'critical' ? '❌' : issue.severity === 'warning' ? '⚠️' : 'ℹ️'} Occurrence ${index + 1}
+                        </div>
+                        <div class="filtered-issue-category">${issue.icon} ${issue.category}</div>
+                    </div>
+                    ${issue.file_path ? `<div class="filtered-issue-file">📄 ${issue.file_path}${issue.line_number ? ' : Line ' + issue.line_number : ''}</div>` : ''}
+                    <div class="filtered-issue-desc" style="margin-top: 0.5rem;">${issue.description}</div>
+                    ${issue.code_snippet ? `
+                        <div style="margin-top: 0.75rem;">
+                            <div style="font-size: 0.75rem; color: #718096; margin-bottom: 0.3rem; font-weight: 600;">❌ Current Code:</div>
+                            <div class="file-code-snippet">${issue.code_snippet}</div>
+                        </div>
+                    ` : ''}
+                    ${issue.recommendation || issue.fix_example ? `
+                        <div class="file-recommendation" style="margin-top: 0.75rem;">
+                            ${issue.recommendation ? `
+                                <div class="file-recommendation-label">💡 Recommendation:</div>
+                                <div style="margin-bottom: 0.5rem;">${issue.recommendation}</div>
+                            ` : ''}
+                            ${issue.fix_example ? `
+                                <div style="font-size: 0.75rem; color: #1e40af; margin-bottom: 0.3rem; font-weight: 600;">✅ Recommended Fix:</div>
+                                <div class="file-fix-example">${issue.fix_example}</div>
+                            ` : ''}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+            
+            section.classList.add('active');
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    </script>
+</body>
+</html>
