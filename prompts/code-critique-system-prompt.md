@@ -23,31 +23,6 @@ You MUST output ONLY valid JSON that exactly matches the schema in `sentinel/sch
 4. **Severity**: Must be one of: "critical", "warning", "info"
 5. **Assessment**: Must be one of: "compliant", "warning", "critical", "info"
 
-## IMPORTANT: Build Pipeline Integration
-
-**SKIP the following metrics** as they are covered by linting tools (SonarQube, ESLint, Checkstyle) and Checkmarx in the build pipeline:
-
-### Code Quality - SKIP:
-- Code Formatting (handled by linters)
-- Import Validation (handled by linters)
-- Cyclomatic Complexity (handled by SonarQube)
-- Code Duplication (handled by SonarQube)
-- Unused Dependencies (handled by dependency analyzers)
-- Circular Imports (handled by linters)
-
-### Security - SKIP:
-- SQL Injection Risks (handled by Checkmarx)
-- Hardcoded Secrets (handled by Checkmarx)
-- Input Validation - basic checks (handled by Checkmarx)
-- Insecure Defaults (handled by Checkmarx)
-
-**FOCUS ON** unique insights that linters/Checkmarx don't provide:
-- Production risks and edge cases
-- PII handling and masking
-- Business logic bugs
-- Performance and architectural issues
-- Correlation IDs and observability gaps
-
 ## Analysis Instructions
 
 For each category from `code_critique.md`, you must provide:
@@ -72,21 +47,20 @@ For each metric, provide compliance status, violation count, and files impacted:
 10. SOLID Principles - No violations of SOLID
 11. Over-engineered Layers - No unnecessary complexity
 
-**Security Metrics (ANALYZE THESE - Checkmarx covers basic security):**
-1. Sensitive Data in Logs - No PII/secrets in logs (business logic level)
-2. Unmasked PII - PII properly masked in responses (application level)
+**Security Metrics (ALL REQUIRED):**
+1. Sensitive Data in Logs - No PII/secrets in logs
+2. Unmasked PII - PII properly masked in responses
 3. External Call Timeouts - Timeout + circuit breaker for external calls
-4. Environment Variables - Secrets from env vars, not hardcoded (configuration level)
+4. Environment Variables - Secrets from env vars, not hardcoded
 
-
-**Code Quality Metrics (ANALYZE THESE):**
-1. Code Verbosity - Overly verbose or repetitive code (LLMs often duplicate blocks)
+**Code Quality Metrics (ALL REQUIRED):**
+1. Code Verbosity - Overly verbose or repetitive code
 2. Meaningful Names - Variable and method names are descriptive
 3. Single Responsibility - Code modularity with SRP
 4. Method Length - Functions not too large
 5. Factual Comments - Comments are accurate, not invented assumptions
 6. HTTP Status Codes - Correct status codes used
-7. Dependency Validation - All dependencies actually exist (AI may invent them)
+7. Dependency Validation - All dependencies actually exist
 8. Unimplemented Comments - No comments describing behavior not implemented
 9. Race Conditions - No race condition risks
 10. Deadlock Risks - No potential deadlocks
@@ -94,7 +68,7 @@ For each metric, provide compliance status, violation count, and files impacted:
 12. Missing Default Values - All defaults configured
 13. Config Separation - Proper dev/staging/prod config separation
 14. Valid Config Keys - application.yml/properties keys are valid
-15. Code Smells - Business logic issues and anti-patterns (NOT formatting/complexity covered by linters)
+15. Code Smells - Business logic issues and anti-patterns
 
 **Performance Metrics (ALL REQUIRED):**
 1. Algorithmic Complexity - Optimal algorithm complexity
@@ -115,10 +89,9 @@ For each metric, provide compliance status, violation count, and files impacted:
 
 **Logging Metrics (ALL REQUIRED):**
 1. System.out Usage - No System.out.println usage
-2. Sensitive Data in Logs - No sensitive info logged
-3. Trace/Correlation IDs - Correlation IDs present
-4. Structured Logging - Proper structured logging format
-5. Tracing Spans - Distributed tracing spans added
+2. Trace/Correlation IDs - Correlation IDs present
+3. Structured Logging - Proper structured logging format
+4. Tracing Spans - Distributed tracing spans added
 
 
 **Custom Critique Metrics (ALL REQUIRED):**
@@ -128,10 +101,9 @@ For each metric, provide compliance status, violation count, and files impacted:
 4. Missing Edge Cases - Edge cases not handled
 5. Hallucinated Logic - No logic not in requirements
 6. API Misuse - Language-specific APIs used correctly
-7. Unimplemented Comments - No comments for unimplemented behavior
-8. Concurrency Primitives - Correct locks/channels/threads usage
-9. Over-Engineering - No unnecessary patterns (repositories, factories)
-10. Silent Failures - No empty catch blocks
+7. Concurrency Primitives - Correct locks/channels/threads usage
+8. Over-Engineering - No unnecessary patterns (repositories, factories)
+9. Silent Failures - No empty catch blocks
 
 **LLM as a Judge Metrics (ALL REQUIRED):**
 1. Hallucinated Functions - No invented functions or methods that don't exist

@@ -1048,7 +1048,7 @@
                 <span class="badge badge-warning">{{ ns.file_issues|length }}</span>
             </div>
             
-            <div class="card">
+            <div class="card clickable" onclick="showScannedFiles()">
                 <div class="card-title">Files Scanned</div>
                 <span class="badge badge-info">{{ summary.files_scanned }}</span>
             </div>
@@ -1063,13 +1063,14 @@
             <div id="filtered-issues-content"></div>
         </div>
 
-        <!-- SECTION 2: Assessment Status -->
+        <!-- SECTION 2: Assessment Status (Only show non-compliant categories) -->
         <div class="categories-overview">
             <h2>📋 Assessment Status</h2>
             <div class="compact-status-grid">
                 {% for category in categories %}
                 {% set category_critical = category.issues|selectattr('severity', 'equalto', 'critical')|list|length if category.issues else 0 %}
                 {% set category_warning = category.issues|selectattr('severity', 'equalto', 'warning')|list|length if category.issues else 0 %}
+                {% if category_critical > 0 or category_warning > 0 %}
                 <div class="compact-status-item {% if category_critical == 0 and category_warning == 0 %}status-excellent{% elif category_critical == 0 %}status-good{% elif category_critical <= 2 %}status-needs-work{% else %}status-critical{% endif %}">
                     <span class="status-icon">{{ category.icon }}</span>
                     <span class="status-name">{{ category.name }}</span>
@@ -1080,6 +1081,7 @@
                     </span>
                     <span class="status-metrics">{{ category.issues|length if category.issues else 0 }} issue{{ 's' if (category.issues|length if category.issues else 0) != 1 else '' }}</span>
                 </div>
+                {% endif %}
                 {% endfor %}
             </div>
         </div>
@@ -1291,8 +1293,11 @@
         </div>
 
 
-        <!-- SECTION 5: Detailed Category Analysis -->
+        <!-- SECTION 5: Detailed Category Analysis (Only show non-compliant categories) -->
         {% for category in categories %}
+        {% set category_critical = category.issues|selectattr('severity', 'equalto', 'critical')|list|length if category.issues else 0 %}
+        {% set category_warning = category.issues|selectattr('severity', 'equalto', 'warning')|list|length if category.issues else 0 %}
+        {% if category_critical > 0 or category_warning > 0 %}
         <div class="category-section">
             <!-- 3.1 Category Name with Status -->
             <div class="category-header">
@@ -1309,11 +1314,18 @@
                 </span>
             </div>
 
-            <!-- Metrics -->
+            <!-- Metrics (Only show violations, hide compliant) -->
             {% if category.metrics %}
+            {% set non_compliant_metrics = [] %}
+            {% for metric in category.metrics %}
+                {% if '❌' in metric.value or '⚠️' in metric.value %}
+                    {% set _ = non_compliant_metrics.append(metric) %}
+                {% endif %}
+            {% endfor %}
+            {% if non_compliant_metrics %}
             <div class="metrics-list">
                 <div class="metrics-grid">
-                {% for metric in category.metrics %}
+                {% for metric in non_compliant_metrics %}
                 <div class="metric-row">
                     <span class="metric-name">{{ metric.label }}</span>
                     <div class="metric-info">
@@ -1324,12 +1336,15 @@
                 </div>
             </div>
             {% endif %}
+            {% endif %}
 
-            <!-- 3.2 List of Items with Assessment -->
+            <!-- 3.2 List of Items with Assessment (Only show non-compliant) -->
             {% if category.assessment_items %}
+            {% set non_compliant_items = category.assessment_items|rejectattr('assessment', 'equalto', 'compliant')|list %}
+            {% if non_compliant_items %}
             <div class="items-list">
                 <h3>Assessment Items</h3>
-                {% for item in category.assessment_items %}
+                {% for item in non_compliant_items %}
                 <div class="item item-{{ item.assessment }}">
                     <div class="item-icon">
                         {% if item.assessment == 'compliant' %}✅
@@ -1346,6 +1361,7 @@
                 </div>
                 {% endfor %}
             </div>
+            {% endif %}
             {% endif %}
 
             <!-- 3.3 List of Issues -->
@@ -1400,6 +1416,7 @@
             <div class="no-issues">✅ No issues found in this category</div>
             {% endif %}
         </div>
+        {% endif %}
         {% endfor %}
 
         <!-- SECTION 6: Priority Actions -->
