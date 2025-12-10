@@ -233,6 +233,18 @@ def validate_and_correct_counts(data):
     """Validate AI counts match actual issues and correct if needed."""
     print("\n🔍 Validating issue counts...")
     
+    # Check for metric-issue mismatches
+    print("\n🔍 Checking metric-issue alignment...")
+    for category in data.get('categories', []):
+        category_name = category.get('name', 'Unknown')
+        issue_count = len(category.get('issues', []))
+        
+        # Check if metrics reference violations but issues are missing
+        for metric in category.get('metrics', []):
+            metric_value = metric.get('value', '')
+            if 'violation' in metric_value.lower() and issue_count == 0:
+                print(f"   ⚠️  {category_name}: Metric '{metric.get('label')}' shows violations but no issues found")
+    
     # Count actual issues by severity across all categories
     actual_critical = 0
     actual_warning = 0
