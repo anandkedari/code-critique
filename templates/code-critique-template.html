@@ -1036,6 +1036,15 @@
             </div>
         </div>
 
+        <!-- Filtered Issues Section (Below summary cards) -->
+        <div id="filtered-issues-section" class="issue-filter-section">
+            <div class="issue-filter-header">
+                <div class="issue-filter-title" id="filter-title">Issues</div>
+                <button class="close-filter" onclick="closeFilteredIssues()">✕ Close</button>
+            </div>
+            <div id="filtered-issues-content"></div>
+        </div>
+
         <!-- SECTION 2: Assessment Status -->
         <div class="categories-overview">
             <h2>📋 Assessment Status</h2>
@@ -1184,15 +1193,6 @@
                 </button>
                 {% endif %}
             </div>
-        </div>
-
-        <!-- Filtered Issues Section (Separate from Top Issues) -->
-        <div id="filtered-issues-section" class="issue-filter-section">
-            <div class="issue-filter-header">
-                <div class="issue-filter-title" id="filter-title">Issues</div>
-                <button class="close-filter" onclick="closeFilteredIssues()">✕ Close</button>
-            </div>
-            <div id="filtered-issues-content"></div>
         </div>
 
         <!-- SECTION 4: Top Issues -->
@@ -1516,9 +1516,8 @@
                 `).join('');
             }
             
-            // Show section and scroll to it
+            // Show section (no scroll)
             section.classList.add('active');
-            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
         
         function closeFilteredIssues() {
@@ -1616,7 +1615,6 @@
             `).join('');
             
             section.classList.add('active');
-            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     </script>
 </body>
