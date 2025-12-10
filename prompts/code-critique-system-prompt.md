@@ -23,6 +23,31 @@ You MUST output ONLY valid JSON that exactly matches the schema in `sentinel/sch
 4. **Severity**: Must be one of: "critical", "warning", "info"
 5. **Assessment**: Must be one of: "compliant", "warning", "critical", "info"
 
+## IMPORTANT: Build Pipeline Integration
+
+**SKIP the following metrics** as they are covered by linting tools (SonarQube, ESLint, Checkstyle) and Checkmarx in the build pipeline:
+
+### Code Quality - SKIP:
+- Code Formatting (handled by linters)
+- Import Validation (handled by linters)
+- Cyclomatic Complexity (handled by SonarQube)
+- Code Duplication (handled by SonarQube)
+- Unused Dependencies (handled by dependency analyzers)
+- Circular Imports (handled by linters)
+
+### Security - SKIP:
+- SQL Injection Risks (handled by Checkmarx)
+- Hardcoded Secrets (handled by Checkmarx)
+- Input Validation - basic checks (handled by Checkmarx)
+- Insecure Defaults (handled by Checkmarx)
+
+**FOCUS ON** unique insights that linters/Checkmarx don't provide:
+- Production risks and edge cases
+- PII handling and masking
+- Business logic bugs
+- Performance and architectural issues
+- Correlation IDs and observability gaps
+
 ## Analysis Instructions
 
 For each category from `code_critique.md`, you must provide:
@@ -47,39 +72,29 @@ For each metric, provide compliance status, violation count, and files impacted:
 10. SOLID Principles - No violations of SOLID
 11. Over-engineered Layers - No unnecessary complexity
 
-**Security Metrics (ALL REQUIRED):**
-1. Sensitive Data in Logs - No PII/secrets in logs
-2. Unmasked PII - PII properly masked in responses
-3. SQL Injection Risks - Parameterized queries used
-4. Hardcoded Secrets - No tokens/credentials in code
-5. Input Validation - All inputs validated
-6. Insecure Defaults - No insecure default configurations
-7. External Call Timeouts - Timeout + circuit breaker for external calls
-8. Environment Variables - Secrets from env vars, not hardcoded
+**Security Metrics (ANALYZE THESE - Checkmarx covers basic security):**
+1. Sensitive Data in Logs - No PII/secrets in logs (business logic level)
+2. Unmasked PII - PII properly masked in responses (application level)
+3. External Call Timeouts - Timeout + circuit breaker for external calls
+4. Environment Variables - Secrets from env vars, not hardcoded (configuration level)
 
 
-**Code Quality Metrics (ALL REQUIRED):**
+**Code Quality Metrics (ANALYZE THESE):**
 1. Code Verbosity - Overly verbose or repetitive code (LLMs often duplicate blocks)
 2. Meaningful Names - Variable and method names are descriptive
 3. Single Responsibility - Code modularity with SRP
 4. Method Length - Functions not too large
-5. Code Formatting - Consistent formatting throughout
-6. Factual Comments - Comments are accurate, not invented assumptions
-7. Cyclomatic Complexity - Complexity per method
-8. Code Duplication - No duplicate code blocks
-9. HTTP Status Codes - Correct status codes used
-10. Dependency Validation - All dependencies actually exist (AI may invent them)
-11. Import Validation - All imports are valid
-12. Unused Dependencies - No unused dependencies
-13. Unimplemented Comments - No comments describing behavior not implemented
-14. Race Conditions - No race condition risks
-15. Deadlock Risks - No potential deadlocks
-16. Unbounded Resources - No unbounded goroutines/threads/tasks
-17. Missing Default Values - All defaults configured
-18. Config Separation - Proper dev/staging/prod config separation
-19. Valid Config Keys - application.yml/properties keys are valid
-20. Circular Imports - No circular import dependencies
-21. Code Smells - Static analysis issues
+5. Factual Comments - Comments are accurate, not invented assumptions
+6. HTTP Status Codes - Correct status codes used
+7. Dependency Validation - All dependencies actually exist (AI may invent them)
+8. Unimplemented Comments - No comments describing behavior not implemented
+9. Race Conditions - No race condition risks
+10. Deadlock Risks - No potential deadlocks
+11. Unbounded Resources - No unbounded goroutines/threads/tasks
+12. Missing Default Values - All defaults configured
+13. Config Separation - Proper dev/staging/prod config separation
+14. Valid Config Keys - application.yml/properties keys are valid
+15. Code Smells - Business logic issues and anti-patterns (NOT formatting/complexity covered by linters)
 
 **Performance Metrics (ALL REQUIRED):**
 1. Algorithmic Complexity - Optimal algorithm complexity
