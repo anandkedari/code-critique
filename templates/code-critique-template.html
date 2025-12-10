@@ -1186,18 +1186,18 @@
             </div>
         </div>
 
+        <!-- Filtered Issues Section (Separate from Top Issues) -->
+        <div id="filtered-issues-section" class="issue-filter-section">
+            <div class="issue-filter-header">
+                <div class="issue-filter-title" id="filter-title">Issues</div>
+                <button class="close-filter" onclick="closeFilteredIssues()">✕ Close</button>
+            </div>
+            <div id="filtered-issues-content"></div>
+        </div>
+
         <!-- SECTION 4: Top Issues -->
         <div class="bar-graph-section">
             <h2>📊 Top Issues</h2>
-            
-            <!-- Issue Details Section (Hidden by default) -->
-            <div id="filtered-issues-section" class="issue-filter-section">
-                <div class="issue-filter-header">
-                    <div class="issue-filter-title" id="filter-title">Issues</div>
-                    <button class="close-filter" onclick="closeFilteredIssues()">✕ Close</button>
-                </div>
-                <div id="filtered-issues-content"></div>
-            </div>
             {% set issue_counts = {} %}
             {% for category in categories %}
                 {% if category.issues %}
