@@ -432,7 +432,7 @@
             align-items: center;
             font-size: 0.8rem;
             gap: 0.5rem;
-            white-space: nowrap;
+            flex-wrap: wrap;
         }
         
         .metric-name {
@@ -441,8 +441,6 @@
             flex: 1 1 auto;
             min-width: fit-content;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
         
         .metric-info {
@@ -451,6 +449,7 @@
             align-items: center;
             flex-shrink: 0;
             white-space: nowrap;
+            flex-wrap: nowrap;
         }
         
         .metric-value-display {
