@@ -1080,13 +1080,13 @@
                 {# Sort files by issue count (descending) #}
                 {% set sorted_files = [] %}
                 {% for file_path, issues in ns.file_issues.items() %}
-                    {% set _ = sorted_files.append((file_path, issues)) %}
+                    {% set _ = sorted_files.append((file_path, issues, issues|length)) %}
                 {% endfor %}
-                {% set sorted_files = sorted_files|sort(attribute='1', reverse=True)|sort(attribute='1|length', reverse=True) %}
+                {% set sorted_files = sorted_files|sort(attribute='2', reverse=True) %}
                 
                 {# Show top 5 files #}
                 <div id="top-files-container">
-                {% for file_path, issues in sorted_files[:5] %}
+                {% for file_path, issues, count in sorted_files[:5] %}
                 <div class="file-issues-item">
                     <div class="file-issues-header" onclick="toggleFileIssues(this)">
                         <span class="expand-icon">▶</span>
@@ -1131,7 +1131,7 @@
                 {# Show remaining files (hidden by default) #}
                 {% if sorted_files|length > 5 %}
                 <div id="more-files-container" style="display: none;">
-                {% for file_path, issues in sorted_files[5:] %}
+                {% for file_path, issues, count in sorted_files[5:] %}
                 <div class="file-issues-item">
                     <div class="file-issues-header" onclick="toggleFileIssues(this)">
                         <span class="expand-icon">▶</span>
