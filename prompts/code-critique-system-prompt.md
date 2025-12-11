@@ -121,14 +121,15 @@ DO NOT analyze: hardcoded secrets, injection vulnerabilities, crypto issues, aut
 6. HTTP Status Codes - Correct status codes used
 7. Dependency Validation - All dependencies actually exist
 8. Unimplemented Comments - No comments describing behavior not implemented
-9. Race Conditions - No race condition risks
-10. Deadlock Risks - No potential deadlocks
-11. Unbounded Resources - No unbounded goroutines/threads/tasks
-12. Missing Default Values - All defaults configured
-13. Config Separation - Proper dev/staging/prod config separation
-14. Valid Config Keys - application.yml/properties keys are valid
-15. Code Smells - Business logic issues and anti-patterns
-16. Dead Code - No unused methods, classes, imports, or variables
+9. Deadlock Risks - No potential deadlocks
+10. Unbounded Resources - No unbounded goroutines/threads/tasks
+11. Missing Default Values - All defaults configured
+12. Config Separation - Proper dev/staging/prod config separation
+13. Valid Config Keys - application.yml/properties keys are valid
+14. Code Smells - Business logic issues and anti-patterns
+15. Dead Code - No unused methods, classes, imports, or variables
+
+**NOTE:** Race Conditions are evaluated ONLY in Custom Critique "Bugs Identified" metric - NOT here
 
 **Performance Metrics (ALL REQUIRED):**
 1. Algorithmic Complexity - Optimal algorithm complexity
