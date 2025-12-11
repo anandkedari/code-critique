@@ -60,6 +60,10 @@ def load_code_files(service_path):
                 print(f"   ✗ Error: {file_path}: {e}")
     
     print(f"   Total: {len(code_files)} files loaded\n")
+    
+    # CRITICAL: Sort files by path to ensure deterministic order
+    code_files.sort(key=lambda x: x['path'])
+    
     return code_files
 
 def load_config():
@@ -241,6 +245,10 @@ def analyze_with_claude(service_path, code_files, api_key):
             priority_files.append(file_info)
         else:
             other_files.append(file_info)
+    
+    # Sort both lists to ensure deterministic order
+    priority_files.sort(key=lambda x: x['path'])
+    other_files.sort(key=lambda x: x['path'])
     
     # Build detailed content string
     detailed_content = "PRIORITY FILES (Full Content):\n" + "="*70 + "\n\n"
