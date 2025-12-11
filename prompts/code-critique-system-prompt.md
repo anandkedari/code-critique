@@ -110,6 +110,11 @@ DO NOT analyze: hardcoded secrets, injection vulnerabilities, crypto issues, aut
 4. Unnecessary Conversions - No redundant object creation
 5. Dead Code - No unused methods, classes, imports, or variables
 
+**IMPORTANT - DO NOT ANALYZE:**
+- Pagination issues (e.g., "Missing Pagination", "Should use Page<>") - Skip entirely
+- N+1 query problems related to pagination - Skip entirely
+- Any pagination-related concerns - These are handled separately
+
 
 **Error Handling Metrics (ALL REQUIRED):**
 1. Exception Handling - Exceptions properly caught and handled
