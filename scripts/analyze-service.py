@@ -215,10 +215,20 @@ def analyze_with_claude(service_path, code_files, api_key):
     # Load configuration and prompts
     config = load_config()
     confidence_threshold = config.get('confidence_threshold', 70)
+    
+    # Load Claude API configuration
+    api_config = config.get('claude_api', {})
+    model = api_config.get('model', 'claude-sonnet-4-5-20250929')
+    max_tokens = api_config.get('max_tokens', 20000)
+    temperature = api_config.get('temperature', 0)
+    timeout = api_config.get('timeout', 180.0)
+    
     system_prompt = load_system_prompt()
     guidelines = load_guidelines()
     
     print(f"   📊 Confidence Threshold: {confidence_threshold}%")
+    print(f"   🤖 Model: {model}")
+    print(f"   🎯 Max Tokens: {max_tokens:,}")
     print(f"   (AI will only report issues/metrics with >{confidence_threshold}% confidence)\n")
     
     # Call Claude API
@@ -322,10 +332,10 @@ GRADE VALUES for final_assessment (use ONE of these):
 Begin JSON:"""
 
         response = client.messages.create(
-            model="claude-sonnet-4-5-20250929",
-            max_tokens=20000,  # Maximum for complete response
-            temperature=0,
-            timeout=180.0,
+            model=model,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            timeout=timeout,
             messages=[{
                 "role": "user",
                 "content": prompt

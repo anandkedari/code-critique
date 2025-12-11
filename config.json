@@ -5,5 +5,12 @@
     "strict": 80,
     "balanced": 70,
     "comprehensive": 60
+  },
+  "claude_api": {
+    "model": "claude-sonnet-4-5-20250929",
+    "max_tokens": 20000,
+    "temperature": 0,
+    "timeout": 180.0,
+    "description": "Claude API configuration settings"
   }
 }
