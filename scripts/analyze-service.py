@@ -34,7 +34,7 @@ def load_code_files(service_path):
     
     print(f"📁 Loading code files from: {service_path.name}")
     
-    include_patterns = ['**/*.java', '**/*.py', '**/*.js', '**/*.ts', '**/*.go', '**/*.json', '**/*.yaml', '**/*.xml', '**/*.properties', '**/*.config']
+    include_patterns = ['**/*.java', '**/*.py', '**/*.js', '**/*.ts', '**/*.go']
     exclude_dirs = ['build', 'target', 'node_modules', '.git', 'venv', 'dist', 'gradle']
     
     for pattern in include_patterns:
