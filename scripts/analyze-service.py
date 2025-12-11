@@ -23,6 +23,7 @@ import time
 import threading
 from pathlib import Path
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from jinja2 import Environment, FileSystemLoader
 import jsonschema
 
@@ -332,6 +333,10 @@ Begin JSON:"""
         
         # Parse JSON
         analysis_data = json.loads(json_text)
+        
+        # Update timestamp to current time in IST
+        ist_now = datetime.now(ZoneInfo('Asia/Kolkata'))
+        analysis_data['metadata']['generated_at'] = ist_now.strftime('%Y-%m-%d %H:%M:%S IST')
         
         # Ensure files_scanned is accurate
         analysis_data['metadata']['files_scanned'] = len(code_files)
