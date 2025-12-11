@@ -181,6 +181,43 @@ These metrics identify PROBLEMS in the code. The logic is OPPOSITE to other cate
 
 In other words: Finding results for these metrics means there ARE problems to report.
 
+**CRITICAL - "Bugs Identified" Mandatory Checks:**
+For the "Bugs Identified" metric, you MUST check for these specific bug patterns:
+
+1. **Race Conditions (Check-Then-Act)**
+   - Pattern: `if (repo.existsById(id)) { ... } repo.deleteById(id);`
+   - Pattern: `if (cache.get(key) == null) { cache.put(key, value); }`
+   - Risk: Non-atomic operations causing data inconsistency
+
+2. **Validation Bypass**
+   - Pattern: DTO has `@Min/@Max/@NotNull` but `@RequestParam` or `@PathVariable` has no validation
+   - Pattern: Different validation rules between Create/Update/Query operations
+   - Pattern: Query parameters used for filtering bypass business rule constraints
+   - Example: DTO has `@Min(18)` on age, but `@RequestParam Integer age` accepts any value
+   - Risk: Business rules circumvented via query parameters
+
+3. **Unbounded Resource Usage**
+   - Pattern: `repository.findAll()` without pagination in service layer
+   - Pattern: `List.of()` or `new ArrayList<>()` in loops without size limit
+   - Risk: OutOfMemoryError with large datasets (10k+ records)
+   - **Note:** Report this as "Memory Risk" even though pagination metrics are excluded
+
+4. **Missing Duplicate Prevention**
+   - Pattern: `repository.save(entity)` without checking for existing records
+   - Pattern: No unique constraints or duplicate checks before creation
+   - Risk: Data integrity issues, multiple identical records
+
+5. **Transaction Isolation Not Specified**
+   - Pattern: `@Transactional` without `isolation = Isolation.XXX`
+   - Risk: Dirty reads, lost updates, phantom reads in concurrent scenarios
+   - Critical for: UPDATE operations, financial transactions, high-concurrency endpoints
+
+**How to Report These:**
+- Each bug found should be reported as a separate issue in Custom Critique category
+- Use severity "critical" for race conditions and unbounded resources
+- Use severity "warning" for validation bypass and missing duplicate checks
+- Use severity "info" for transaction isolation (unless financial/critical data)
+
 **LLM as a Judge Metrics (ALL REQUIRED):**
 1. Hallucinated Functions - No invented functions or methods that don't exist
 2. Non-existent Libraries - All imported libraries actually exist

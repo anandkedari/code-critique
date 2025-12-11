@@ -1078,7 +1078,47 @@
             <div id="filtered-issues-content"></div>
         </div>
 
-        <!-- SECTION 2: Assessment Status (Only show non-compliant categories) -->
+        <!-- SECTION 2: Mandatory Bug Checks -->
+        <div class="categories-overview">
+            <h2>🔍 Mandatory Bug Pattern Checks</h2>
+            <p style="font-size: 0.85rem; color: #4a5568; margin-bottom: 1rem;">
+                The AI performs mandatory checks for these specific bug patterns in the <strong>Custom Critique</strong> category:
+            </p>
+            <div class="metrics-grid" style="gap: 0.75rem; margin-bottom: 1.5rem;">
+                <div class="metric-row" style="background: #fff3cd; border: 1px solid #ffc107;">
+                    <span class="metric-name">1️⃣ Race Conditions</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display" style="color: #856404;">Check-Then-Act patterns</span>
+                    </div>
+                </div>
+                <div class="metric-row" style="background: #fff3cd; border: 1px solid #ffc107;">
+                    <span class="metric-name">2️⃣ Validation Bypass</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display" style="color: #856404;">DTO rules not enforced on query params</span>
+                    </div>
+                </div>
+                <div class="metric-row" style="background: #fff3cd; border: 1px solid #ffc107;">
+                    <span class="metric-name">3️⃣ Unbounded Resources</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display" style="color: #856404;">findAll() without pagination</span>
+                    </div>
+                </div>
+                <div class="metric-row" style="background: #fff3cd; border: 1px solid #ffc107;">
+                    <span class="metric-name">4️⃣ Missing Duplicate Check</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display" style="color: #856404;">No uniqueness validation</span>
+                    </div>
+                </div>
+                <div class="metric-row" style="background: #fff3cd; border: 1px solid #ffc107;">
+                    <span class="metric-name">5️⃣ Transaction Isolation</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display" style="color: #856404;">@Transactional without isolation level</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 3: Assessment Status (Only show non-compliant categories) -->
         <div class="categories-overview">
             <h2>📋 Assessment Status</h2>
             <div class="compact-status-grid">
