@@ -45,6 +45,33 @@ The confidence threshold will be provided in the prompt. You MUST meet this conf
 ✅ System.out.println in production code (visible)
 ✅ Empty catch block swallowing exceptions (visible)
 
+**Race Conditions (Check-Then-Act):**
+✅ `if (!repo.existsById(id)) { ... } repo.deleteById(id);` - Non-atomic check and action
+✅ `if (cache.get(key) == null) { cache.put(key, value); }` - Cache race condition
+✅ Double-checked locking without volatile - Synchronization bug
+
+**Validation Bypass:**
+✅ DTO has @Min/@Max but @RequestParam has none - Query param bypasses validation
+✅ @PathVariable without @Pattern or constraints - Accepts invalid input
+✅ Different validation between Create/Update/Query - Inconsistent rules
+✅ @RequestHeader or @CookieValue without validation - Unvalidated headers
+✅ Optional query param bypasses required DTO field - `@RequestParam(required=false)` vs `@NotNull`
+
+**Transaction Issues:**
+✅ @Transactional without isolation level - Risk of dirty reads
+✅ Long-running transaction with external API calls - Holding locks too long
+✅ Missing @Transactional on write operations - Data inconsistency risk
+
+**Resource Management:**
+✅ No pagination on findAll() - Memory exhaustion with large datasets
+✅ Unbounded list/collection creation in loop - Memory leak potential
+✅ Stream not closed (files, connections) - Resource leak
+
+**Concurrency Issues:**
+✅ Mutable static fields without synchronization - Thread-safety violation
+✅ SimpleDateFormat in multi-threaded code - Not thread-safe
+✅ Lazy initialization without synchronization - Race condition
+
 ### Low Confidence Examples (SKIP THESE - Mark as Compliant):
 ❌ "Might not have pagination" - Can't see full implementation
 ❌ "Could have SQL injection" - No actual vulnerable query visible
