@@ -390,7 +390,7 @@ curl http://localhost:11434/api/tags
 
 ## 📚 Documentation
 
-- **`code_critique.md`** - Complete analysis guidelines
+- **`prompts/code-critique-system-prompt.md`** - Complete analysis guidelines and AI instructions
 - **`config.json`** - Configuration reference
 - **`schemas/code-critique-schema.json`** - JSON structure
 

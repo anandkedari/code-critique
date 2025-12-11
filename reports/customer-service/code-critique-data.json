@@ -1,7 +1,7 @@
 {
   "metadata": {
     "service_name": "customer-service",
-    "generated_at": "2025-12-11 15:53:38 IST",
+    "generated_at": "2025-12-11 16:16:09 IST",
     "framework": "Spring Boot 3.2.1",
     "language": "Java 21",
     "files_scanned": 13
@@ -11,7 +11,7 @@
     "warning_count": 3,
     "info_count": 2,
     "files_scanned": 13,
-    "success_count": 24
+    "success_count": 22
   },
   "categories": [
     {
@@ -93,23 +93,28 @@
           "label": "Code Smells",
           "value": "\u2705 Compliant",
           "target": "0"
+        },
+        {
+          "label": "Dead Code",
+          "value": "\u2705 Compliant",
+          "target": "0"
         }
       ],
       "items": [
         {
-          "title": "Clean Code Structure",
+          "title": "Clean Layer Separation",
           "assessment": "compliant",
-          "description": "Well-organized packages with clear separation of concerns"
+          "description": "Controller \u2192 Service \u2192 Repository pattern properly implemented"
         },
         {
-          "title": "Meaningful Naming",
+          "title": "Meaningful Naming Conventions",
           "assessment": "compliant",
           "description": "Classes, methods, and variables have descriptive names"
         },
         {
-          "title": "Proper HTTP Status Codes",
+          "title": "Single Responsibility Principle",
           "assessment": "compliant",
-          "description": "Correct status codes used (201 for creation, 204 for deletion)"
+          "description": "Each class has a clear, focused responsibility"
         }
       ],
       "issues": [
@@ -118,9 +123,9 @@
           "title": "Consider Using Java Records for DTOs",
           "description": "DTOs could be immutable using Java 17+ Records",
           "file_path": "src/main/java/com/pulse/customerservice/dto/CustomerRequest.java",
-          "code_snippet": "@Data\npublic class CustomerRequest {",
+          "code_snippet": "@Data\npublic class CustomerRequest { ... }",
           "recommendation": "Use Java Records for immutable DTOs to reduce boilerplate",
-          "fix_example": "public record CustomerRequest(@NotBlank String firstName, ...) {}"
+          "fix_example": "public record CustomerRequest(\n    @NotBlank String firstName, ...) {}"
         }
       ]
     },
@@ -131,17 +136,17 @@
       "metrics": [
         {
           "label": "Unit Test Coverage",
-          "value": "\u274c 1 violation in 1 file",
+          "value": "\u274c No test files found",
           "target": ">80%"
         },
         {
           "label": "Bugs Identified",
-          "value": "\u2705 Compliant",
+          "value": "\u274c 2 potential bugs",
           "target": "0"
         },
         {
           "label": "Production Risks",
-          "value": "\u274c 1 violation in 1 file",
+          "value": "\u274c 1 production risk",
           "target": "0"
         },
         {
@@ -177,35 +182,39 @@
       ],
       "items": [
         {
-          "title": "No Unit Tests Present",
+          "title": "Test Coverage",
           "assessment": "critical",
-          "description": "No test files found in codebase"
+          "description": "No unit tests found in codebase"
         },
         {
-          "title": "Clean Service Layer",
+          "title": "Edge Case Handling",
           "assessment": "compliant",
-          "description": "Service implementation follows best practices"
-        },
-        {
-          "title": "Proper Exception Handling",
-          "assessment": "compliant",
-          "description": "Custom exceptions with global handler implemented"
+          "description": "Validation and error handling cover common edge cases"
         }
       ],
       "issues": [
         {
           "severity": "critical",
-          "title": "Missing Unit Tests",
-          "description": "No test coverage for service, controller, or repository layers",
-          "file_path": "src/test/",
-          "code_snippet": "// No test files found",
-          "recommendation": "Add unit tests for all layers with minimum 80% coverage",
+          "title": "No Unit Tests Found",
+          "description": "No test files present for service, controller, or repository layers",
+          "file_path": "src/main/java/com/pulse/customerservice/service/impl/CustomerServiceImpl.java",
+          "code_snippet": "public class CustomerServiceImpl implements CustomerService {",
+          "recommendation": "Add comprehensive unit tests for all layers using JUnit 5 and Mockito",
           "fix_example": "@Test\nvoid createCustomer_ShouldReturnCustomerResponse() { ... }"
         },
         {
           "severity": "warning",
-          "title": "No Pagination for getAllCustomers",
-          "description": "getAllCustomers returns all records without pagination",
+          "title": "Potential Duplicate Customer Creation",
+          "description": "No check prevents creating duplicate customers with same name",
+          "file_path": "src/main/java/com/pulse/customerservice/service/impl/CustomerServiceImpl.java",
+          "code_snippet": "Customer customer = customerMapper.toEntity(request);\ncustomer.setCreatedAt(LocalDateTime.now());",
+          "recommendation": "Check if customer exists before creation using repository method",
+          "fix_example": "if (customerRepository.existsByFirstNameAndLastName(...)) {\n    throw new DuplicateCustomerException(); }"
+        },
+        {
+          "severity": "warning",
+          "title": "Unbounded List Return in getAllCustomers",
+          "description": "Returns all customers without pagination - risk with large datasets",
           "file_path": "src/main/java/com/pulse/customerservice/service/impl/CustomerServiceImpl.java",
           "code_snippet": "List<Customer> customers = customerRepository.findAll();",
           "recommendation": "Implement pagination using Spring Data Pageable",
@@ -236,9 +245,9 @@
           "description": "Service does not make external HTTP calls"
         },
         {
-          "title": "No PII in Logs",
+          "title": "PII Logging",
           "assessment": "compliant",
-          "description": "Logs contain only IDs and non-sensitive data"
+          "description": "Logs contain customer names but no sensitive data like SSN/credit cards"
         }
       ],
       "issues": []
@@ -288,17 +297,17 @@
         {
           "title": "Global Exception Handler",
           "assessment": "compliant",
-          "description": "Comprehensive exception handling with GlobalExceptionHandler"
+          "description": "GlobalExceptionHandler catches all exceptions properly"
         },
         {
           "title": "Custom Exceptions",
           "assessment": "compliant",
-          "description": "CustomerNotFoundException properly defined and used"
+          "description": "CustomerNotFoundException provides meaningful error context"
         },
         {
           "title": "Validation Error Handling",
           "assessment": "compliant",
-          "description": "MethodArgumentNotValidException handled with field-level errors"
+          "description": "Bean validation errors properly mapped to user-friendly responses"
         }
       ],
       "issues": []
@@ -366,24 +375,19 @@
       ],
       "items": [
         {
-          "title": "Clean Layered Architecture",
+          "title": "Layered Architecture",
           "assessment": "compliant",
-          "description": "Controller \u2192 Service \u2192 Repository pattern properly implemented"
+          "description": "Clean separation: Controller \u2192 Service \u2192 Repository"
         },
         {
-          "title": "Proper Dependency Injection",
+          "title": "Dependency Injection",
           "assessment": "compliant",
-          "description": "Constructor injection with @RequiredArgsConstructor used consistently"
+          "description": "Constructor injection used consistently with @RequiredArgsConstructor"
         },
         {
-          "title": "Appropriate Interface Usage",
+          "title": "Interface Segregation",
           "assessment": "compliant",
-          "description": "CustomerService interface with single implementation"
-        },
-        {
-          "title": "MapStruct Integration",
-          "assessment": "compliant",
-          "description": "Proper mapper interface for DTO/Entity conversion"
+          "description": "CustomerService interface appropriately defines contract"
         }
       ],
       "issues": []
@@ -400,7 +404,7 @@
         },
         {
           "label": "Memory Usage",
-          "value": "\u274c 1 violation in 1 file",
+          "value": "\u274c 1 violation",
           "target": "0"
         },
         {
@@ -412,29 +416,34 @@
           "label": "Unnecessary Conversions",
           "value": "\u2705 Compliant",
           "target": "0"
+        },
+        {
+          "label": "Dead Code",
+          "value": "\u2705 Compliant",
+          "target": "0"
         }
       ],
       "items": [
         {
-          "title": "Efficient Database Queries",
+          "title": "Database Queries",
           "assessment": "compliant",
-          "description": "Spring Data MongoDB queries are optimized"
+          "description": "Efficient MongoDB queries using Spring Data"
         },
         {
-          "title": "No Pagination on List Endpoints",
+          "title": "Memory Management",
           "assessment": "warning",
-          "description": "getAllCustomers could cause memory issues with large datasets"
+          "description": "getAllCustomers loads entire collection into memory"
         }
       ],
       "issues": [
         {
           "severity": "warning",
-          "title": "Potential Memory Issue with Large Datasets",
-          "description": "getAllCustomers loads all records into memory without pagination",
-          "file_path": "src/main/java/com/pulse/customerservice/controller/CustomerController.java",
-          "code_snippet": "List<CustomerResponse> customers = customerService.getAllCustomers();",
-          "recommendation": "Add pagination support using Spring Data Pageable",
-          "fix_example": "Page<CustomerResponse> getCustomers(Pageable pageable)"
+          "title": "Missing Pagination for Large Datasets",
+          "description": "getAllCustomers returns unbounded list - memory risk with growth",
+          "file_path": "src/main/java/com/pulse/customerservice/service/impl/CustomerServiceImpl.java",
+          "code_snippet": "List<Customer> customers = customerRepository.findAll();",
+          "recommendation": "Implement pagination to limit memory usage",
+          "fix_example": "Page<Customer> findAll(Pageable pageable);"
         }
       ]
     },
@@ -450,7 +459,7 @@
         },
         {
           "label": "Trace/Correlation IDs",
-          "value": "\u274c 1 violation in 1 file",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
@@ -468,30 +477,20 @@
         {
           "title": "SLF4J Logging",
           "assessment": "compliant",
-          "description": "Proper use of @Slf4j and log levels"
+          "description": "Proper use of @Slf4j and log levels throughout"
         },
         {
-          "title": "No Correlation IDs",
-          "assessment": "warning",
-          "description": "Missing trace/correlation IDs for distributed tracing"
-        },
-        {
-          "title": "Appropriate Log Levels",
+          "title": "Contextual Logging",
           "assessment": "compliant",
-          "description": "Info and error levels used appropriately"
+          "description": "Logs include relevant context (IDs, names, counts)"
+        },
+        {
+          "title": "No System.out",
+          "assessment": "compliant",
+          "description": "No System.out.println found in codebase"
         }
       ],
-      "issues": [
-        {
-          "severity": "warning",
-          "title": "Missing Correlation IDs",
-          "description": "No trace/correlation IDs for request tracking across services",
-          "file_path": "src/main/java/com/pulse/customerservice/controller/CustomerController.java",
-          "code_snippet": "log.info(\"POST /v1/customers - Creating customer: {} {}\",",
-          "recommendation": "Add MDC correlation ID or use Spring Cloud Sleuth",
-          "fix_example": "MDC.put(\"correlationId\", UUID.randomUUID().toString());"
-        }
-      ]
+      "issues": []
     },
     {
       "id": 8,
@@ -551,24 +550,19 @@
       ],
       "items": [
         {
-          "title": "All Dependencies Exist",
+          "title": "Real Dependencies",
           "assessment": "compliant",
-          "description": "Spring Boot, MongoDB, MapStruct, Swagger are valid libraries"
+          "description": "All imports are valid Spring Boot/MongoDB libraries"
         },
         {
-          "title": "No Placeholder Code",
+          "title": "Implemented Functionality",
           "assessment": "compliant",
-          "description": "All implementations are complete, no TODOs"
+          "description": "All methods have complete implementations, no TODOs"
         },
         {
-          "title": "Realistic Implementation",
+          "title": "Valid MapStruct Usage",
           "assessment": "compliant",
-          "description": "Design patterns appropriate for CRUD microservice"
-        },
-        {
-          "title": "Valid Configuration",
-          "assessment": "compliant",
-          "description": "MongoDB and Spring Boot config keys are standard"
+          "description": "MapStruct mapper interface correctly defined"
         }
       ],
       "issues": []
@@ -579,7 +573,22 @@
       "icon": "\ud83c\udfaf",
       "metrics": [
         {
-          "label": "Domain-Specific Compliance",
+          "label": "Business Logic Correctness",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Domain Model Integrity",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Validation Rules",
+          "value": "\u2705 Compliant",
+          "target": "0"
+        },
+        {
+          "label": "Data Consistency",
           "value": "\u2705 Compliant",
           "target": "0"
         }
@@ -588,27 +597,27 @@
         {
           "title": "Customer Domain Model",
           "assessment": "compliant",
-          "description": "Customer entity properly models domain requirements"
+          "description": "Customer entity properly models domain with appropriate fields"
         },
         {
-          "title": "Business Validation",
+          "title": "Validation Rules",
           "assessment": "compliant",
-          "description": "Age constraints (18-120) and field validations appropriate"
+          "description": "Bean validation ensures data integrity (age 18-120, name length)"
         },
         {
-          "title": "RESTful API Design",
+          "title": "Transactional Boundaries",
           "assessment": "compliant",
-          "description": "Proper REST conventions with standard HTTP methods"
+          "description": "@Transactional properly applied to write operations"
         }
       ],
       "issues": [
         {
           "severity": "info",
           "title": "Consider Adding Email Field",
-          "description": "Customer domain typically includes email for communication",
+          "description": "Customer model lacks email - common requirement for customer systems",
           "file_path": "src/main/java/com/pulse/customerservice/model/Customer.java",
           "code_snippet": "private String address;",
-          "recommendation": "Add email field with validation for customer contact",
+          "recommendation": "Add email field with validation for customer communication",
           "fix_example": "@Email\nprivate String email;"
         }
       ]
@@ -618,40 +627,45 @@
     "critical": [
       {
         "title": "Add Unit Tests",
-        "description": "No test coverage found - add tests for all layers",
+        "description": "No test files found - critical for production readiness",
         "category": "Custom Critique"
       }
     ],
     "warnings": [
       {
         "title": "Implement Pagination",
-        "description": "getAllCustomers returns all records without pagination",
+        "description": "getAllCustomers returns unbounded list - memory risk with growth",
         "category": "Performance"
       },
       {
-        "title": "Add Correlation IDs",
-        "description": "Missing trace/correlation IDs for distributed tracing",
-        "category": "Logging"
+        "title": "Prevent Duplicate Customers",
+        "description": "No validation prevents creating customers with identical names",
+        "category": "Custom Critique"
+      },
+      {
+        "title": "Add Pagination Support",
+        "description": "Large customer lists could cause memory issues",
+        "category": "Custom Critique"
       }
     ],
     "suggestions": [
       {
         "title": "Use Java Records for DTOs",
-        "description": "Consider using Records for immutable DTOs",
+        "description": "Reduce boilerplate with immutable Records",
         "category": "Code Quality"
       },
       {
-        "title": "Add Email to Customer Domain",
-        "description": "Customer domain typically includes email field",
+        "title": "Add Email Field to Customer",
+        "description": "Common requirement for customer communication",
         "category": "Domain"
       }
     ]
   },
   "final_assessment": {
     "key_improvements": [
-      "Add comprehensive unit tests with minimum 80% coverage",
+      "Add comprehensive unit tests for all layers (critical)",
       "Implement pagination for getAllCustomers endpoint",
-      "Add correlation IDs for distributed tracing support",
+      "Add duplicate customer validation before creation",
       "Consider using Java Records for immutable DTOs",
       "Add email field to Customer domain model"
     ]

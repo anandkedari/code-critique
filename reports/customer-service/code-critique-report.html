@@ -31,6 +31,7 @@
             margin-top: 0.75rem;
             font-size: 0.8rem;
             opacity: 0.85;
+            flex-wrap: wrap;
         }
         
         .container {
@@ -1002,7 +1003,7 @@
         <h1>🔍 Code Critique Report</h1>
         <div class="metadata">
             <div><strong>Service:</strong> customer-service</div>
-            <div><strong>Generated:</strong> 2025-12-11 15:53:38 IST</div>
+            <div><strong>Generated:</strong> 2025-12-11 16:16:09 IST</div>
             <div><strong>Framework:</strong> Spring Boot 3.2.1</div>
             <div><strong>Language:</strong> Java 21</div>
         </div>
@@ -1053,7 +1054,9 @@
                         
                             
                                 
-                                    
+                            
+                        
+                            
                                 
                             
                         
@@ -1063,16 +1066,6 @@
                 
                     
                 
-                    
-                
-                    
-                        
-                            
-                                
-                                    
-                                
-                            
-                        
                     
                 
                     
@@ -1081,6 +1074,8 @@
                                 
                             
                         
+                    
+                
                     
                 
                     
@@ -1095,7 +1090,7 @@
                         
                     
                 
-                <span class="badge badge-warning">5</span>
+                <span class="badge badge-warning">3</span>
             </div>
             
             <div class="card clickable" onclick="showScannedFiles()">
@@ -1131,7 +1126,7 @@
                     <span class="status-badge-inline">
                         ❌ 1 CRITICAL
                     </span>
-                    <span class="status-metrics">2 issues</span>
+                    <span class="status-metrics">3 issues</span>
                 </div>
                 
                 
@@ -1163,16 +1158,6 @@
                 
                 
                 
-                
-                <div class="compact-status-item status-good">
-                    <span class="status-icon">📝</span>
-                    <span class="status-name">Logging</span>
-                    <span class="status-badge-inline">
-                        ⚠️ 1 WARNING
-                        
-                    </span>
-                    <span class="status-metrics">1 issue</span>
-                </div>
                 
                 
                 
@@ -1214,7 +1199,10 @@
                         
                             
                                 
-                                    
+                                
+                            
+                        
+                            
                                 
                                 
                             
@@ -1231,20 +1219,11 @@
                         
                             
                                 
-                                    
-                                
                                 
                             
                         
                     
                 
-                    
-                        
-                            
-                                
-                                
-                            
-                        
                     
                 
                     
@@ -1263,10 +1242,6 @@
                 
                 
                 
-                
-                    
-                
-                    
                 
                     
                 
@@ -1283,32 +1258,33 @@
                     <div class="file-issues-header" onclick="toggleFileIssues(this)">
                         <span class="expand-icon">▶</span>
                         <span class="file-icon">📄</span>
-                        <span class="file-name">src/main/java/com/pulse/customerservice/controller/CustomerController.java</span>
-                        <span class="file-issues-count">2 issues</span>
+                        <span class="file-name">src/main/java/com/pulse/customerservice/service/impl/CustomerServiceImpl.java</span>
+                        <span class="file-issues-count">4 issues</span>
                     </div>
                     <div class="file-issues-content">
                         
-                        <div class="file-issue-detail severity-warning">
+                        <div class="file-issue-detail severity-critical">
                             <div class="file-issue-detail-title">
-                                ⚠️
+                                ❌
                                 
-                                Potential Memory Issue with Large Datasets
+                                No Unit Tests Found
                             </div>
-                            <div class="file-issue-detail-desc">getAllCustomers loads all records into memory without pagination</div>
-                            <span class="file-issue-category">⚡ Performance</span>
+                            <div class="file-issue-detail-desc">No test files present for service, controller, or repository layers</div>
+                            <span class="file-issue-category">🔍 Custom Critique</span>
                             
                             
-                            <div class="file-code-snippet">List<CustomerResponse> customers = customerService.getAllCustomers();</div>
+                            <div class="file-code-snippet">public class CustomerServiceImpl implements CustomerService {</div>
                             
                             
                             
                             <div class="file-recommendation">
                                 
                                 <div class="file-recommendation-label">💡 Fix:</div>
-                                <div>Add pagination support using Spring Data Pageable</div>
+                                <div>Add comprehensive unit tests for all layers using JUnit 5 and Mockito</div>
                                 
                                 
-                                <div class="file-fix-example">Page<CustomerResponse> getCustomers(Pageable pageable)</div>
+                                <div class="file-fix-example">@Test
+void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
                                 
                             </div>
                             
@@ -1318,23 +1294,77 @@
                             <div class="file-issue-detail-title">
                                 ⚠️
                                 
-                                Missing Correlation IDs
+                                Potential Duplicate Customer Creation
                             </div>
-                            <div class="file-issue-detail-desc">No trace/correlation IDs for request tracking across services</div>
-                            <span class="file-issue-category">📝 Logging</span>
+                            <div class="file-issue-detail-desc">No check prevents creating duplicate customers with same name</div>
+                            <span class="file-issue-category">🔍 Custom Critique</span>
                             
                             
-                            <div class="file-code-snippet">log.info("POST /v1/customers - Creating customer: {} {}",</div>
+                            <div class="file-code-snippet">Customer customer = customerMapper.toEntity(request);
+customer.setCreatedAt(LocalDateTime.now());</div>
                             
                             
                             
                             <div class="file-recommendation">
                                 
                                 <div class="file-recommendation-label">💡 Fix:</div>
-                                <div>Add MDC correlation ID or use Spring Cloud Sleuth</div>
+                                <div>Check if customer exists before creation using repository method</div>
                                 
                                 
-                                <div class="file-fix-example">MDC.put("correlationId", UUID.randomUUID().toString());</div>
+                                <div class="file-fix-example">if (customerRepository.existsByFirstNameAndLastName(...)) {
+    throw new DuplicateCustomerException(); }</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-warning">
+                            <div class="file-issue-detail-title">
+                                ⚠️
+                                
+                                Unbounded List Return in getAllCustomers
+                            </div>
+                            <div class="file-issue-detail-desc">Returns all customers without pagination - risk with large datasets</div>
+                            <span class="file-issue-category">🔍 Custom Critique</span>
+                            
+                            
+                            <div class="file-code-snippet">List<Customer> customers = customerRepository.findAll();</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Implement pagination using Spring Data Pageable</div>
+                                
+                                
+                                <div class="file-fix-example">Page<Customer> customers = customerRepository.findAll(pageable);</div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="file-issue-detail severity-warning">
+                            <div class="file-issue-detail-title">
+                                ⚠️
+                                
+                                Missing Pagination for Large Datasets
+                            </div>
+                            <div class="file-issue-detail-desc">getAllCustomers returns unbounded list - memory risk with growth</div>
+                            <span class="file-issue-category">⚡ Performance</span>
+                            
+                            
+                            <div class="file-code-snippet">List<Customer> customers = customerRepository.findAll();</div>
+                            
+                            
+                            
+                            <div class="file-recommendation">
+                                
+                                <div class="file-recommendation-label">💡 Fix:</div>
+                                <div>Implement pagination to limit memory usage</div>
+                                
+                                
+                                <div class="file-fix-example">Page<Customer> findAll(Pageable pageable);</div>
                                 
                             </div>
                             
@@ -1362,7 +1392,7 @@
                             
                             
                             <div class="file-code-snippet">@Data
-public class CustomerRequest {</div>
+public class CustomerRequest { ... }</div>
                             
                             
                             
@@ -1372,84 +1402,8 @@ public class CustomerRequest {</div>
                                 <div>Use Java Records for immutable DTOs to reduce boilerplate</div>
                                 
                                 
-                                <div class="file-fix-example">public record CustomerRequest(@NotBlank String firstName, ...) {}</div>
-                                
-                            </div>
-                            
-                        </div>
-                        
-                    </div>
-                </div>
-                
-                <div class="file-issues-item">
-                    <div class="file-issues-header" onclick="toggleFileIssues(this)">
-                        <span class="expand-icon">▶</span>
-                        <span class="file-icon">📄</span>
-                        <span class="file-name">src/test/</span>
-                        <span class="file-issues-count">1 issue</span>
-                    </div>
-                    <div class="file-issues-content">
-                        
-                        <div class="file-issue-detail severity-critical">
-                            <div class="file-issue-detail-title">
-                                ❌
-                                
-                                Missing Unit Tests
-                            </div>
-                            <div class="file-issue-detail-desc">No test coverage for service, controller, or repository layers</div>
-                            <span class="file-issue-category">🔍 Custom Critique</span>
-                            
-                            
-                            <div class="file-code-snippet">// No test files found</div>
-                            
-                            
-                            
-                            <div class="file-recommendation">
-                                
-                                <div class="file-recommendation-label">💡 Fix:</div>
-                                <div>Add unit tests for all layers with minimum 80% coverage</div>
-                                
-                                
-                                <div class="file-fix-example">@Test
-void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
-                                
-                            </div>
-                            
-                        </div>
-                        
-                    </div>
-                </div>
-                
-                <div class="file-issues-item">
-                    <div class="file-issues-header" onclick="toggleFileIssues(this)">
-                        <span class="expand-icon">▶</span>
-                        <span class="file-icon">📄</span>
-                        <span class="file-name">src/main/java/com/pulse/customerservice/service/impl/CustomerServiceImpl.java</span>
-                        <span class="file-issues-count">1 issue</span>
-                    </div>
-                    <div class="file-issues-content">
-                        
-                        <div class="file-issue-detail severity-warning">
-                            <div class="file-issue-detail-title">
-                                ⚠️
-                                
-                                No Pagination for getAllCustomers
-                            </div>
-                            <div class="file-issue-detail-desc">getAllCustomers returns all records without pagination</div>
-                            <span class="file-issue-category">🔍 Custom Critique</span>
-                            
-                            
-                            <div class="file-code-snippet">List<Customer> customers = customerRepository.findAll();</div>
-                            
-                            
-                            
-                            <div class="file-recommendation">
-                                
-                                <div class="file-recommendation-label">💡 Fix:</div>
-                                <div>Implement pagination using Spring Data Pageable</div>
-                                
-                                
-                                <div class="file-fix-example">Page<Customer> customers = customerRepository.findAll(pageable);</div>
+                                <div class="file-fix-example">public record CustomerRequest(
+    @NotBlank String firstName, ...) {}</div>
                                 
                             </div>
                             
@@ -1472,7 +1426,7 @@ void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
                                 ℹ️
                                 Consider Adding Email Field
                             </div>
-                            <div class="file-issue-detail-desc">Customer domain typically includes email for communication</div>
+                            <div class="file-issue-detail-desc">Customer model lacks email - common requirement for customer systems</div>
                             <span class="file-issue-category">🎯 Domain</span>
                             
                             
@@ -1483,7 +1437,7 @@ void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
                             <div class="file-recommendation">
                                 
                                 <div class="file-recommendation-label">💡 Fix:</div>
-                                <div>Add email field with validation for customer contact</div>
+                                <div>Add email field with validation for customer communication</div>
                                 
                                 
                                 <div class="file-fix-example">@Email
@@ -1529,6 +1483,11 @@ private String email;</div>
                             
                         
                     
+                        
+                        
+                            
+                        
+                    
                 
             
                 
@@ -1546,13 +1505,6 @@ private String email;</div>
                     
                 
             
-                
-                    
-                        
-                        
-                            
-                        
-                    
                 
             
                 
@@ -1591,12 +1543,12 @@ private String email;</div>
             
                 <div id="top-issues-container">
                     
-                    <div class="bar-item" onclick="toggleTopIssue(this, 'Missing Unit Tests')">
+                    <div class="bar-item" onclick="toggleTopIssue(this, 'No Unit Tests Found')">
                         <div class="bar-item-header">
                             <div class="bar-header">
                                 <span class="expand-icon bar-expand-icon">▶</span>
                                 <span class="bar-icon">🔍</span>
-                                <span class="bar-label">Missing Unit Tests</span>
+                                <span class="bar-label">No Unit Tests Found</span>
                                 <span class="bar-count critical">
                                     1 occurrence
                                 </span>
@@ -1621,12 +1573,12 @@ private String email;</div>
                         <div class="bar-item-content"></div>
                     </div>
                     
-                    <div class="bar-item" onclick="toggleTopIssue(this, 'No Pagination for getAllCustomers')">
+                    <div class="bar-item" onclick="toggleTopIssue(this, 'Potential Duplicate Customer Creation')">
                         <div class="bar-item-header">
                             <div class="bar-header">
                                 <span class="expand-icon bar-expand-icon">▶</span>
                                 <span class="bar-icon">🔍</span>
-                                <span class="bar-label">No Pagination for getAllCustomers</span>
+                                <span class="bar-label">Potential Duplicate Customer Creation</span>
                                 <span class="bar-count warning">
                                     1 occurrence
                                 </span>
@@ -1636,32 +1588,32 @@ private String email;</div>
                         <div class="bar-item-content"></div>
                     </div>
                     
-                    <div class="bar-item" onclick="toggleTopIssue(this, 'Potential Memory Issue with Large Datasets')">
+                    <div class="bar-item" onclick="toggleTopIssue(this, 'Unbounded List Return in getAllCustomers')">
+                        <div class="bar-item-header">
+                            <div class="bar-header">
+                                <span class="expand-icon bar-expand-icon">▶</span>
+                                <span class="bar-icon">🔍</span>
+                                <span class="bar-label">Unbounded List Return in getAllCustomers</span>
+                                <span class="bar-count warning">
+                                    1 occurrence
+                                </span>
+                            </div>
+                            <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Custom Critique</div>
+                        </div>
+                        <div class="bar-item-content"></div>
+                    </div>
+                    
+                    <div class="bar-item" onclick="toggleTopIssue(this, 'Missing Pagination for Large Datasets')">
                         <div class="bar-item-header">
                             <div class="bar-header">
                                 <span class="expand-icon bar-expand-icon">▶</span>
                                 <span class="bar-icon">⚡</span>
-                                <span class="bar-label">Potential Memory Issue with Large Datasets</span>
+                                <span class="bar-label">Missing Pagination for Large Datasets</span>
                                 <span class="bar-count warning">
                                     1 occurrence
                                 </span>
                             </div>
                             <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Performance</div>
-                        </div>
-                        <div class="bar-item-content"></div>
-                    </div>
-                    
-                    <div class="bar-item" onclick="toggleTopIssue(this, 'Missing Correlation IDs')">
-                        <div class="bar-item-header">
-                            <div class="bar-header">
-                                <span class="expand-icon bar-expand-icon">▶</span>
-                                <span class="bar-icon">📝</span>
-                                <span class="bar-label">Missing Correlation IDs</span>
-                                <span class="bar-count warning">
-                                    1 occurrence
-                                </span>
-                            </div>
-                            <div style="font-size: 0.75rem; color: #718096; margin-top: 0.2rem;">Logging</div>
                         </div>
                         <div class="bar-item-content"></div>
                     </div>
@@ -1723,6 +1675,8 @@ private String email;</div>
                 
             
                 
+                    
+                
             
                 
                     
@@ -1747,14 +1701,21 @@ private String email;</div>
                 <div class="metric-row">
                     <span class="metric-name">Unit Test Coverage</span>
                     <div class="metric-info">
-                        <span class="metric-value-display">❌ 1 violation in 1 file</span>
+                        <span class="metric-value-display">❌ No test files found</span>
+                    </div>
+                </div>
+                
+                <div class="metric-row">
+                    <span class="metric-name">Bugs Identified</span>
+                    <div class="metric-info">
+                        <span class="metric-value-display">❌ 2 potential bugs</span>
                     </div>
                 </div>
                 
                 <div class="metric-row">
                     <span class="metric-name">Production Risks</span>
                     <div class="metric-info">
-                        <span class="metric-value-display">❌ 1 violation in 1 file</span>
+                        <span class="metric-value-display">❌ 1 production risk</span>
                     </div>
                 </div>
                 
@@ -1780,27 +1741,27 @@ private String email;</div>
                         <div class="issue-title">
                             ❌
                             
-                            Missing Unit Tests
+                            No Unit Tests Found
                         </div>
                         <span class="badge badge-critical">CRITICAL</span>
                     </div>
                     
-                    <div class="issue-description">No test coverage for service, controller, or repository layers</div>
+                    <div class="issue-description">No test files present for service, controller, or repository layers</div>
                     
                     
-                    <div class="file-path">📄 src/test/</div>
+                    <div class="file-path">📄 src/main/java/com/pulse/customerservice/service/impl/CustomerServiceImpl.java</div>
                     
                     
                     
                     <div class="code-label">❌ Current Code:</div>
-                    <div class="code-block">// No test files found</div>
+                    <div class="code-block">public class CustomerServiceImpl implements CustomerService {</div>
                     
                     
                     
                     <div class="recommendation">
                         
                         <div class="recommendation-title">💡 Recommendation:</div>
-                        <div>Add unit tests for all layers with minimum 80% coverage</div>
+                        <div>Add comprehensive unit tests for all layers using JUnit 5 and Mockito</div>
                         
                         
                         
@@ -1817,12 +1778,50 @@ void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
                         <div class="issue-title">
                             ⚠️
                             
-                            No Pagination for getAllCustomers
+                            Potential Duplicate Customer Creation
                         </div>
                         <span class="badge badge-warning">WARNING</span>
                     </div>
                     
-                    <div class="issue-description">getAllCustomers returns all records without pagination</div>
+                    <div class="issue-description">No check prevents creating duplicate customers with same name</div>
+                    
+                    
+                    <div class="file-path">📄 src/main/java/com/pulse/customerservice/service/impl/CustomerServiceImpl.java</div>
+                    
+                    
+                    
+                    <div class="code-label">❌ Current Code:</div>
+                    <div class="code-block">Customer customer = customerMapper.toEntity(request);
+customer.setCreatedAt(LocalDateTime.now());</div>
+                    
+                    
+                    
+                    <div class="recommendation">
+                        
+                        <div class="recommendation-title">💡 Recommendation:</div>
+                        <div>Check if customer exists before creation using repository method</div>
+                        
+                        
+                        
+                        <div class="code-label">✅ Recommended Fix:</div>
+                        <div class="code-block">if (customerRepository.existsByFirstNameAndLastName(...)) {
+    throw new DuplicateCustomerException(); }</div>
+                        
+                    </div>
+                    
+                </div>
+                
+                <div class="issue issue-warning">
+                    <div class="issue-header">
+                        <div class="issue-title">
+                            ⚠️
+                            
+                            Unbounded List Return in getAllCustomers
+                        </div>
+                        <span class="badge badge-warning">WARNING</span>
+                    </div>
+                    
+                    <div class="issue-description">Returns all customers without pagination - risk with large datasets</div>
                     
                     
                     <div class="file-path">📄 src/main/java/com/pulse/customerservice/service/impl/CustomerServiceImpl.java</div>
@@ -1898,6 +1897,8 @@ void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
             
                 
             
+                
+            
             
             <div class="metrics-list">
                 <div class="metrics-grid">
@@ -1905,7 +1906,7 @@ void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
                 <div class="metric-row">
                     <span class="metric-name">Memory Usage</span>
                     <div class="metric-info">
-                        <span class="metric-value-display">❌ 1 violation in 1 file</span>
+                        <span class="metric-value-display">❌ 1 violation</span>
                     </div>
                 </div>
                 
@@ -1931,32 +1932,32 @@ void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
                         <div class="issue-title">
                             ⚠️
                             
-                            Potential Memory Issue with Large Datasets
+                            Missing Pagination for Large Datasets
                         </div>
                         <span class="badge badge-warning">WARNING</span>
                     </div>
                     
-                    <div class="issue-description">getAllCustomers loads all records into memory without pagination</div>
+                    <div class="issue-description">getAllCustomers returns unbounded list - memory risk with growth</div>
                     
                     
-                    <div class="file-path">📄 src/main/java/com/pulse/customerservice/controller/CustomerController.java</div>
+                    <div class="file-path">📄 src/main/java/com/pulse/customerservice/service/impl/CustomerServiceImpl.java</div>
                     
                     
                     
                     <div class="code-label">❌ Current Code:</div>
-                    <div class="code-block">List<CustomerResponse> customers = customerService.getAllCustomers();</div>
+                    <div class="code-block">List<Customer> customers = customerRepository.findAll();</div>
                     
                     
                     
                     <div class="recommendation">
                         
                         <div class="recommendation-title">💡 Recommendation:</div>
-                        <div>Add pagination support using Spring Data Pageable</div>
+                        <div>Implement pagination to limit memory usage</div>
                         
                         
                         
                         <div class="code-label">✅ Recommended Fix:</div>
-                        <div class="code-block">Page<CustomerResponse> getCustomers(Pageable pageable)</div>
+                        <div class="code-block">Page<Customer> findAll(Pageable pageable);</div>
                         
                     </div>
                     
@@ -1970,104 +1971,6 @@ void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
         
         
         
-        
-        <div class="category-section">
-            <!-- 3.1 Category Name with Status -->
-            <div class="category-header">
-                <div class="category-title">
-                    <span class="category-icon">📝</span>
-                    7. Logging
-                </div>
-                
-                
-                <span class="category-status-badge category-status-good">
-                    ⚠️ 1 WARNING
-                    
-                </span>
-            </div>
-
-            <!-- Metrics (Only show violations, hide compliant) -->
-            
-            
-            
-                
-            
-                
-                    
-                
-            
-                
-            
-                
-            
-            
-            <div class="metrics-list">
-                <div class="metrics-grid">
-                
-                <div class="metric-row">
-                    <span class="metric-name">Trace/Correlation IDs</span>
-                    <div class="metric-info">
-                        <span class="metric-value-display">❌ 1 violation in 1 file</span>
-                    </div>
-                </div>
-                
-                </div>
-            </div>
-            
-            
-
-            <!-- 3.2 List of Items with Assessment (Only show non-compliant) -->
-            
-
-            <!-- 3.3 List of Issues -->
-            
-            <div class="issues-list collapsed">
-                <h3 onclick="toggleIssuesList(this)">
-                    <span class="issues-list-toggle">▼</span>
-                    Detailed Findings
-                </h3>
-                <div class="issues-list-content">
-                
-                <div class="issue issue-warning">
-                    <div class="issue-header">
-                        <div class="issue-title">
-                            ⚠️
-                            
-                            Missing Correlation IDs
-                        </div>
-                        <span class="badge badge-warning">WARNING</span>
-                    </div>
-                    
-                    <div class="issue-description">No trace/correlation IDs for request tracking across services</div>
-                    
-                    
-                    <div class="file-path">📄 src/main/java/com/pulse/customerservice/controller/CustomerController.java</div>
-                    
-                    
-                    
-                    <div class="code-label">❌ Current Code:</div>
-                    <div class="code-block">log.info("POST /v1/customers - Creating customer: {} {}",</div>
-                    
-                    
-                    
-                    <div class="recommendation">
-                        
-                        <div class="recommendation-title">💡 Recommendation:</div>
-                        <div>Add MDC correlation ID or use Spring Cloud Sleuth</div>
-                        
-                        
-                        
-                        <div class="code-label">✅ Recommended Fix:</div>
-                        <div class="code-block">MDC.put("correlationId", UUID.randomUUID().toString());</div>
-                        
-                    </div>
-                    
-                </div>
-                
-                </div>
-            </div>
-            
-        </div>
         
         
         
@@ -2090,7 +1993,7 @@ void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
                     
                     <div class="priority-item critical">
                         <div class="priority-title">Add Unit Tests</div>
-                        <div class="priority-description">No test coverage found - add tests for all layers</div>
+                        <div class="priority-description">No test files found - critical for production readiness</div>
                         <div class="priority-category">Custom Critique</div>
                     </div>
                     
@@ -2105,14 +2008,20 @@ void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
                     
                     <div class="priority-item warning">
                         <div class="priority-title">Implement Pagination</div>
-                        <div class="priority-description">getAllCustomers returns all records without pagination</div>
+                        <div class="priority-description">getAllCustomers returns unbounded list - memory risk with growth</div>
                         <div class="priority-category">Performance</div>
                     </div>
                     
                     <div class="priority-item warning">
-                        <div class="priority-title">Add Correlation IDs</div>
-                        <div class="priority-description">Missing trace/correlation IDs for distributed tracing</div>
-                        <div class="priority-category">Logging</div>
+                        <div class="priority-title">Prevent Duplicate Customers</div>
+                        <div class="priority-description">No validation prevents creating customers with identical names</div>
+                        <div class="priority-category">Custom Critique</div>
+                    </div>
+                    
+                    <div class="priority-item warning">
+                        <div class="priority-title">Add Pagination Support</div>
+                        <div class="priority-description">Large customer lists could cause memory issues</div>
+                        <div class="priority-category">Custom Critique</div>
                     </div>
                     
                 </div>
@@ -2126,13 +2035,13 @@ void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
                     
                     <div class="priority-item info">
                         <div class="priority-title">Use Java Records for DTOs</div>
-                        <div class="priority-description">Consider using Records for immutable DTOs</div>
+                        <div class="priority-description">Reduce boilerplate with immutable Records</div>
                         <div class="priority-category">Code Quality</div>
                     </div>
                     
                     <div class="priority-item info">
-                        <div class="priority-title">Add Email to Customer Domain</div>
-                        <div class="priority-description">Customer domain typically includes email field</div>
+                        <div class="priority-title">Add Email Field to Customer</div>
+                        <div class="priority-description">Common requirement for customer communication</div>
                         <div class="priority-category">Domain</div>
                     </div>
                     
@@ -2149,11 +2058,11 @@ void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
             <div class="assessment-section">
                 <ul class="assessment-list improvements">
                     
-                    <li>Add comprehensive unit tests with minimum 80% coverage</li>
+                    <li>Add comprehensive unit tests for all layers (critical)</li>
                     
                     <li>Implement pagination for getAllCustomers endpoint</li>
                     
-                    <li>Add correlation IDs for distributed tracing support</li>
+                    <li>Add duplicate customer validation before creation</li>
                     
                     <li>Consider using Java Records for immutable DTOs</li>
                     
@@ -2169,7 +2078,7 @@ void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
             <p><strong>Generated by Sentinel Code Critique Framework</strong></p>
             <p style="font-size: 0.9rem; margin-top: 0.5rem;">Based on industry best practices and security standards</p>
             <p style="font-size: 0.85rem; margin-top: 1rem; color: #999;">
-                Report Date: 2025-12-11 15:53:38 IST | Version: 1.0.0
+                Report Date: 2025-12-11 16:16:09 IST | Version: 1.0.0
             </p>
         </div>
     </div>
@@ -2210,17 +2119,26 @@ void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
                     
                 {
                     severity: 'critical',
-                    title: "Missing Unit Tests",
-                    description: "No test coverage for service, controller, or repository layers",
-                    file_path: 'src/test/',
+                    title: "No Unit Tests Found",
+                    description: "No test files present for service, controller, or repository layers",
+                    file_path: 'src/main/java/com/pulse/customerservice/service/impl/CustomerServiceImpl.java',
                     category: 'Custom Critique',
                     icon: '🔍'
                 },
                     
                 {
                     severity: 'warning',
-                    title: "No Pagination for getAllCustomers",
-                    description: "getAllCustomers returns all records without pagination",
+                    title: "Potential Duplicate Customer Creation",
+                    description: "No check prevents creating duplicate customers with same name",
+                    file_path: 'src/main/java/com/pulse/customerservice/service/impl/CustomerServiceImpl.java',
+                    category: 'Custom Critique',
+                    icon: '🔍'
+                },
+                    
+                {
+                    severity: 'warning',
+                    title: "Unbounded List Return in getAllCustomers",
+                    description: "Returns all customers without pagination - risk with large datasets",
                     file_path: 'src/main/java/com/pulse/customerservice/service/impl/CustomerServiceImpl.java',
                     category: 'Custom Critique',
                     icon: '🔍'
@@ -2238,26 +2156,15 @@ void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
                     
                 {
                     severity: 'warning',
-                    title: "Potential Memory Issue with Large Datasets",
-                    description: "getAllCustomers loads all records into memory without pagination",
-                    file_path: 'src/main/java/com/pulse/customerservice/controller/CustomerController.java',
+                    title: "Missing Pagination for Large Datasets",
+                    description: "getAllCustomers returns unbounded list - memory risk with growth",
+                    file_path: 'src/main/java/com/pulse/customerservice/service/impl/CustomerServiceImpl.java',
                     category: 'Performance',
                     icon: '⚡'
                 },
                     
                 
             
-                
-                    
-                {
-                    severity: 'warning',
-                    title: "Missing Correlation IDs",
-                    description: "No trace/correlation IDs for request tracking across services",
-                    file_path: 'src/main/java/com/pulse/customerservice/controller/CustomerController.java',
-                    category: 'Logging',
-                    icon: '📝'
-                },
-                    
                 
             
                 
@@ -2267,7 +2174,7 @@ void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
                 {
                     severity: 'info',
                     title: "Consider Adding Email Field",
-                    description: "Customer domain typically includes email for communication",
+                    description: "Customer model lacks email - common requirement for customer systems",
                     file_path: 'src/main/java/com/pulse/customerservice/model/Customer.java',
                     category: 'Domain',
                     icon: '🎯'
@@ -2342,22 +2249,20 @@ void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
                             
                                 
             {
-                file: 'src/test/',
-                hasIssues: true
-            },
-                            
-                        
-                    
-                        
-                            
-                                
-            {
                 file: 'src/main/java/com/pulse/customerservice/service/impl/CustomerServiceImpl.java',
                 hasIssues: true
             },
                             
                         
                     
+                        
+                            
+                        
+                    
+                        
+                            
+                        
+                    
                 
             
                 
@@ -2370,22 +2275,10 @@ void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
                     
                         
                             
-                                
-            {
-                file: 'src/main/java/com/pulse/customerservice/controller/CustomerController.java',
-                hasIssues: true
-            },
-                            
                         
                     
                 
             
-                
-                    
-                        
-                            
-                        
-                    
                 
             
                 
@@ -2496,9 +2389,9 @@ void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
                     line_number: '',
                     category: 'Code Quality',
                     icon: '✨',
-                    code_snippet: "@Data\npublic class CustomerRequest {",
+                    code_snippet: "@Data\npublic class CustomerRequest { ... }",
                     recommendation: "Use Java Records for immutable DTOs to reduce boilerplate",
-                    fix_example: "public record CustomerRequest(@NotBlank String firstName, ...) {}"
+                    fix_example: "public record CustomerRequest(\n    @NotBlank String firstName, ...) {}"
                 },
                         
                     
@@ -2506,21 +2399,34 @@ void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
                     
                         
                 {
-                    title: "Missing Unit Tests",
-                    description: "No test coverage for service, controller, or repository layers",
+                    title: "No Unit Tests Found",
+                    description: "No test files present for service, controller, or repository layers",
                     severity: 'critical',
-                    file_path: 'src/test/',
+                    file_path: 'src/main/java/com/pulse/customerservice/service/impl/CustomerServiceImpl.java',
                     line_number: '',
                     category: 'Custom Critique',
                     icon: '🔍',
-                    code_snippet: "// No test files found",
-                    recommendation: "Add unit tests for all layers with minimum 80% coverage",
+                    code_snippet: "public class CustomerServiceImpl implements CustomerService {",
+                    recommendation: "Add comprehensive unit tests for all layers using JUnit 5 and Mockito",
                     fix_example: "@Test\nvoid createCustomer_ShouldReturnCustomerResponse() { ... }"
                 },
                         
                 {
-                    title: "No Pagination for getAllCustomers",
-                    description: "getAllCustomers returns all records without pagination",
+                    title: "Potential Duplicate Customer Creation",
+                    description: "No check prevents creating duplicate customers with same name",
+                    severity: 'warning',
+                    file_path: 'src/main/java/com/pulse/customerservice/service/impl/CustomerServiceImpl.java',
+                    line_number: '',
+                    category: 'Custom Critique',
+                    icon: '🔍',
+                    code_snippet: "Customer customer = customerMapper.toEntity(request);\ncustomer.setCreatedAt(LocalDateTime.now());",
+                    recommendation: "Check if customer exists before creation using repository method",
+                    fix_example: "if (customerRepository.existsByFirstNameAndLastName(...)) {\n    throw new DuplicateCustomerException(); }"
+                },
+                        
+                {
+                    title: "Unbounded List Return in getAllCustomers",
+                    description: "Returns all customers without pagination - risk with large datasets",
                     severity: 'warning',
                     file_path: 'src/main/java/com/pulse/customerservice/service/impl/CustomerServiceImpl.java',
                     line_number: '',
@@ -2542,35 +2448,20 @@ void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
                     
                         
                 {
-                    title: "Potential Memory Issue with Large Datasets",
-                    description: "getAllCustomers loads all records into memory without pagination",
+                    title: "Missing Pagination for Large Datasets",
+                    description: "getAllCustomers returns unbounded list - memory risk with growth",
                     severity: 'warning',
-                    file_path: 'src/main/java/com/pulse/customerservice/controller/CustomerController.java',
+                    file_path: 'src/main/java/com/pulse/customerservice/service/impl/CustomerServiceImpl.java',
                     line_number: '',
                     category: 'Performance',
                     icon: '⚡',
-                    code_snippet: "List\u003cCustomerResponse\u003e customers = customerService.getAllCustomers();",
-                    recommendation: "Add pagination support using Spring Data Pageable",
-                    fix_example: "Page\u003cCustomerResponse\u003e getCustomers(Pageable pageable)"
+                    code_snippet: "List\u003cCustomer\u003e customers = customerRepository.findAll();",
+                    recommendation: "Implement pagination to limit memory usage",
+                    fix_example: "Page\u003cCustomer\u003e findAll(Pageable pageable);"
                 },
                         
                     
                 
-                    
-                        
-                {
-                    title: "Missing Correlation IDs",
-                    description: "No trace/correlation IDs for request tracking across services",
-                    severity: 'warning',
-                    file_path: 'src/main/java/com/pulse/customerservice/controller/CustomerController.java',
-                    line_number: '',
-                    category: 'Logging',
-                    icon: '📝',
-                    code_snippet: "log.info(\"POST /v1/customers - Creating customer: {} {}\",",
-                    recommendation: "Add MDC correlation ID or use Spring Cloud Sleuth",
-                    fix_example: "MDC.put(\"correlationId\", UUID.randomUUID().toString());"
-                },
-                        
                     
                 
                     
@@ -2579,14 +2470,14 @@ void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
                         
                 {
                     title: "Consider Adding Email Field",
-                    description: "Customer domain typically includes email for communication",
+                    description: "Customer model lacks email - common requirement for customer systems",
                     severity: 'info',
                     file_path: 'src/main/java/com/pulse/customerservice/model/Customer.java',
                     line_number: '',
                     category: 'Domain',
                     icon: '🎯',
                     code_snippet: "private String address;",
-                    recommendation: "Add email field with validation for customer contact",
+                    recommendation: "Add email field with validation for customer communication",
                     fix_example: "@Email\nprivate String email;"
                 },
                         
@@ -2632,9 +2523,9 @@ void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
                     line_number: '',
                     category: 'Code Quality',
                     icon: '✨',
-                    code_snippet: "@Data\npublic class CustomerRequest {",
+                    code_snippet: "@Data\npublic class CustomerRequest { ... }",
                     recommendation: "Use Java Records for immutable DTOs to reduce boilerplate",
-                    fix_example: "public record CustomerRequest(@NotBlank String firstName, ...) {}"
+                    fix_example: "public record CustomerRequest(\n    @NotBlank String firstName, ...) {}"
                 },
                     
                 
@@ -2642,21 +2533,34 @@ void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
                 
                     
                 {
-                    title: "Missing Unit Tests",
-                    description: "No test coverage for service, controller, or repository layers",
+                    title: "No Unit Tests Found",
+                    description: "No test files present for service, controller, or repository layers",
                     severity: 'critical',
-                    file_path: 'src/test/',
+                    file_path: 'src/main/java/com/pulse/customerservice/service/impl/CustomerServiceImpl.java',
                     line_number: '',
                     category: 'Custom Critique',
                     icon: '🔍',
-                    code_snippet: "// No test files found",
-                    recommendation: "Add unit tests for all layers with minimum 80% coverage",
+                    code_snippet: "public class CustomerServiceImpl implements CustomerService {",
+                    recommendation: "Add comprehensive unit tests for all layers using JUnit 5 and Mockito",
                     fix_example: "@Test\nvoid createCustomer_ShouldReturnCustomerResponse() { ... }"
                 },
                     
                 {
-                    title: "No Pagination for getAllCustomers",
-                    description: "getAllCustomers returns all records without pagination",
+                    title: "Potential Duplicate Customer Creation",
+                    description: "No check prevents creating duplicate customers with same name",
+                    severity: 'warning',
+                    file_path: 'src/main/java/com/pulse/customerservice/service/impl/CustomerServiceImpl.java',
+                    line_number: '',
+                    category: 'Custom Critique',
+                    icon: '🔍',
+                    code_snippet: "Customer customer = customerMapper.toEntity(request);\ncustomer.setCreatedAt(LocalDateTime.now());",
+                    recommendation: "Check if customer exists before creation using repository method",
+                    fix_example: "if (customerRepository.existsByFirstNameAndLastName(...)) {\n    throw new DuplicateCustomerException(); }"
+                },
+                    
+                {
+                    title: "Unbounded List Return in getAllCustomers",
+                    description: "Returns all customers without pagination - risk with large datasets",
                     severity: 'warning',
                     file_path: 'src/main/java/com/pulse/customerservice/service/impl/CustomerServiceImpl.java',
                     line_number: '',
@@ -2678,35 +2582,20 @@ void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
                 
                     
                 {
-                    title: "Potential Memory Issue with Large Datasets",
-                    description: "getAllCustomers loads all records into memory without pagination",
+                    title: "Missing Pagination for Large Datasets",
+                    description: "getAllCustomers returns unbounded list - memory risk with growth",
                     severity: 'warning',
-                    file_path: 'src/main/java/com/pulse/customerservice/controller/CustomerController.java',
+                    file_path: 'src/main/java/com/pulse/customerservice/service/impl/CustomerServiceImpl.java',
                     line_number: '',
                     category: 'Performance',
                     icon: '⚡',
-                    code_snippet: "List\u003cCustomerResponse\u003e customers = customerService.getAllCustomers();",
-                    recommendation: "Add pagination support using Spring Data Pageable",
-                    fix_example: "Page\u003cCustomerResponse\u003e getCustomers(Pageable pageable)"
+                    code_snippet: "List\u003cCustomer\u003e customers = customerRepository.findAll();",
+                    recommendation: "Implement pagination to limit memory usage",
+                    fix_example: "Page\u003cCustomer\u003e findAll(Pageable pageable);"
                 },
                     
                 
             
-                
-                    
-                {
-                    title: "Missing Correlation IDs",
-                    description: "No trace/correlation IDs for request tracking across services",
-                    severity: 'warning',
-                    file_path: 'src/main/java/com/pulse/customerservice/controller/CustomerController.java',
-                    line_number: '',
-                    category: 'Logging',
-                    icon: '📝',
-                    code_snippet: "log.info(\"POST /v1/customers - Creating customer: {} {}\",",
-                    recommendation: "Add MDC correlation ID or use Spring Cloud Sleuth",
-                    fix_example: "MDC.put(\"correlationId\", UUID.randomUUID().toString());"
-                },
-                    
                 
             
                 
@@ -2715,14 +2604,14 @@ void createCustomer_ShouldReturnCustomerResponse() { ... }</div>
                     
                 {
                     title: "Consider Adding Email Field",
-                    description: "Customer domain typically includes email for communication",
+                    description: "Customer model lacks email - common requirement for customer systems",
                     severity: 'info',
                     file_path: 'src/main/java/com/pulse/customerservice/model/Customer.java',
                     line_number: '',
                     category: 'Domain',
                     icon: '🎯',
                     code_snippet: "private String address;",
-                    recommendation: "Add email field with validation for customer contact",
+                    recommendation: "Add email field with validation for customer communication",
                     fix_example: "@Email\nprivate String email;"
                 },
                     

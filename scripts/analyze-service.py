@@ -49,10 +49,6 @@ def load_code_files(service_path):
             if any(excluded in file_path.parts for excluded in exclude_dirs):
                 continue
             
-            path_str = str(file_path).lower()
-            if 'test' in path_str and ('src/test' in path_str or 'test.java' in path_str):
-                continue
-            
             try:
                 with open(file_path, 'r', encoding='utf-8') as f:
                     content = f.read()
@@ -89,13 +85,6 @@ def load_system_prompt():
     script_dir = Path(__file__).parent
     prompt_file = script_dir.parent / 'prompts' / 'code-critique-system-prompt.md'
     with open(prompt_file, 'r') as f:
-        return f.read()
-
-def load_guidelines():
-    """Load code critique guidelines."""
-    script_dir = Path(__file__).parent
-    guidelines_file = script_dir.parent / 'code_critique.md'
-    with open(guidelines_file, 'r') as f:
         return f.read()
 
 def show_progress(stop_event):
