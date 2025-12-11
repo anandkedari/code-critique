@@ -6,11 +6,34 @@
     "balanced": 70,
     "comprehensive": 60
   },
-  "claude_api": {
-    "model": "claude-sonnet-4-5-20250929",
-    "max_tokens": 20000,
-    "temperature": 0,
-    "timeout": 180.0,
-    "description": "Claude API configuration settings"
+  "ai_provider": "claude",
+  "providers": {
+    "claude": {
+      "model": "claude-sonnet-4-5-20250929",
+      "api_url": "https://api.anthropic.com",
+      "max_tokens": 20000,
+      "temperature": 0,
+      "timeout": 180.0,
+      "api_key_env": "ANTHROPIC_API_KEY",
+      "description": "Anthropic Claude API"
+    },
+    "perplexity": {
+      "model": "llama-3.1-sonar-huge-128k-online",
+      "api_url": "https://api.perplexity.ai",
+      "max_tokens": 20000,
+      "temperature": 0,
+      "timeout": 180.0,
+      "api_key_env": "PERPLEXITY_API_KEY",
+      "description": "Perplexity AI API (OpenAI-compatible)"
+    },
+    "ollama": {
+      "model": "qwen2.5-coder:32b-instruct",
+      "api_url": "http://localhost:11434",
+      "max_tokens": 20000,
+      "temperature": 0,
+      "timeout": 300.0,
+      "api_key_env": null,
+      "description": "Ollama local AI (Qwen3-Coder recommended)"
+    }
   }
 }

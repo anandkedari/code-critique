@@ -469,6 +469,263 @@ def validate_and_correct_counts(data):
     
     return data
 
+def analyze_with_ai(service_path, code_files, config):
+    """Route to appropriate AI provider based on configuration."""
+    provider = config['provider']
+    
+    if provider == 'claude':
+        return _analyze_with_claude(service_path, code_files, config)
+    elif provider == 'ollama':
+        return _analyze_with_ollama(service_path, code_files, config)
+    elif provider == 'perplexity':
+        return _analyze_with_perplexity(service_path, code_files, config)
+    else:
+        print(f"❌ Unknown provider: {provider}")
+        print("   Supported providers: claude, ollama, perplexity")
+        sys.exit(1)
+
+def _analyze_with_claude(service_path, code_files, config):
+    """Analyze with Claude (Anthropic)."""
+    try:
+        import anthropic
+    except ImportError:
+        print("❌ Error: anthropic package not installed")
+        print("   Run: pip install anthropic")
+        sys.exit(1)
+    
+    # Build codebase context and prepare prompt
+    codebase_context = build_codebase_context(code_files)
+    system_prompt = load_system_prompt()
+    detailed_content = _prepare_code_content(code_files)
+    
+    # Start progress indicator
+    stop_event = threading.Event()
+    progress_thread = threading.Thread(target=show_progress, args=(stop_event,))
+    progress_thread.daemon = True
+    progress_thread.start()
+    
+    try:
+        prompt = _build_analysis_prompt(system_prompt, codebase_context, detailed_content, config)
+        
+        client = anthropic.Anthropic(api_key=config['api_key'])
+        response = client.messages.create(
+            model=config['model'],
+            max_tokens=config['max_tokens'],
+            temperature=config['temperature'],
+            timeout=config['timeout'],
+            messages=[{"role": "user", "content": prompt}]
+        )
+        
+        stop_event.set()
+        progress_thread.join(timeout=1)
+        
+        print("\n   ✓ Received response from Claude\n")
+        return _parse_ai_response(response.content[0].text, code_files)
+        
+    except Exception as e:
+        stop_event.set()
+        progress_thread.join(timeout=1)
+        print(f"\n❌ Error: {e}")
+        sys.exit(1)
+
+def _analyze_with_ollama(service_path, code_files, config):
+    """Analyze with Ollama (local models like Qwen3-Coder)."""
+    try:
+        import requests
+    except ImportError:
+        print("❌ Error: requests package not installed")
+        print("   Run: pip install requests")
+        sys.exit(1)
+    
+    # Build codebase context and prepare prompt
+    codebase_context = build_codebase_context(code_files)
+    system_prompt = load_system_prompt()
+    detailed_content = _prepare_code_content(code_files)
+    
+    # Start progress indicator
+    stop_event = threading.Event()
+    progress_thread = threading.Thread(target=show_progress, args=(stop_event,))
+    progress_thread.daemon = True
+    progress_thread.start()
+    
+    try:
+        prompt = _build_analysis_prompt(system_prompt, codebase_context, detailed_content, config)
+        
+        # Ollama API call
+        response = requests.post(
+            f"{config['api_url']}/api/generate",
+            json={
+                "model": config['model'],
+                "prompt": prompt,
+                "stream": False,
+                "options": {
+                    "temperature": config['temperature'],
+                    "num_predict": config['max_tokens']
+                }
+            },
+            timeout=config['timeout']
+        )
+        response.raise_for_status()
+        
+        stop_event.set()
+        progress_thread.join(timeout=1)
+        
+        print("\n   ✓ Received response from Ollama\n")
+        return _parse_ai_response(response.json()['response'], code_files)
+        
+    except Exception as e:
+        stop_event.set()
+        progress_thread.join(timeout=1)
+        print(f"\n❌ Error: {e}")
+        sys.exit(1)
+
+def _analyze_with_perplexity(service_path, code_files, config):
+    """Analyze with Perplexity (OpenAI-compatible API)."""
+    try:
+        import openai
+    except ImportError:
+        print("❌ Error: openai package not installed")
+        print("   Run: pip install openai")
+        sys.exit(1)
+    
+    # Build codebase context and prepare prompt
+    codebase_context = build_codebase_context(code_files)
+    system_prompt = load_system_prompt()
+    detailed_content = _prepare_code_content(code_files)
+    
+    # Start progress indicator
+    stop_event = threading.Event()
+    progress_thread = threading.Thread(target=show_progress, args=(stop_event,))
+    progress_thread.daemon = True
+    progress_thread.start()
+    
+    try:
+        prompt = _build_analysis_prompt(system_prompt, codebase_context, detailed_content, config)
+        
+        client = openai.OpenAI(api_key=config['api_key'], base_url=config['api_url'])
+        response = client.chat.completions.create(
+            model=config['model'],
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=config['max_tokens'],
+            temperature=config['temperature'],
+            timeout=config['timeout']
+        )
+        
+        stop_event.set()
+        progress_thread.join(timeout=1)
+        
+        print("\n   ✓ Received response from Perplexity\n")
+        return _parse_ai_response(response.choices[0].message.content, code_files)
+        
+    except Exception as e:
+        stop_event.set()
+        progress_thread.join(timeout=1)
+        print(f"\n❌ Error: {e}")
+        sys.exit(1)
+
+def _prepare_code_content(code_files):
+    """Prepare code content for analysis."""
+    priority_files = []
+    other_files = []
+    
+    for file_info in code_files:
+        if any(keyword in file_info['path'].lower() for keyword in 
+               ['controller', 'service', 'repository', 'config', 'application', 'main', 'entity', 'model']):
+            priority_files.append(file_info)
+        else:
+            other_files.append(file_info)
+    
+    priority_files.sort(key=lambda x: x['path'])
+    other_files.sort(key=lambda x: x['path'])
+    
+    print("📦 Preparing full codebase for analysis...")
+    
+    detailed_content = "COMPLETE CODEBASE - ALL FILES WITH FULL CONTENT:\n" + "="*70 + "\n\n"
+    detailed_content += f"PRIORITY FILES ({len(priority_files)} files):\n" + "-"*70 + "\n\n"
+    for f in priority_files:
+        detailed_content += f"FILE: {f['path']}\n{'-'*70}\n{f['content']}\n\n"
+    
+    detailed_content += f"\n\nOTHER FILES ({len(other_files)} files):\n" + "-"*70 + "\n\n"
+    for f in other_files:
+        detailed_content += f"FILE: {f['path']}\n{'-'*70}\n{f['content']}\n\n"
+    
+    total_chars = len(detailed_content)
+    estimated_tokens = total_chars // 4
+    print(f"   📊 Total content: {total_chars:,} characters (~{estimated_tokens:,} tokens)")
+    print(f"   📁 Priority files: {len(priority_files)} (full content)")
+    print(f"   📁 Other files: {len(other_files)} (full content)")
+    
+    if estimated_tokens > 180000:
+        print(f"   ⚠️  Warning: Content size ({estimated_tokens:,} tokens) is large")
+    
+    return detailed_content
+
+def _build_analysis_prompt(system_prompt, codebase_context, detailed_content, config):
+    """Build analysis prompt for AI."""
+    context_summary = {
+        'total_files': codebase_context['total_files'],
+        'packages': codebase_context['packages'],
+        'key_files': codebase_context['key_files']
+    }
+    
+    return f"""{system_prompt}
+
+CONFIGURATION:
+- **CONFIDENCE_THRESHOLD**: {config['confidence_threshold']}%
+- You MUST have >{config['confidence_threshold']}% confidence to report ANY issue or metric violation
+- If confidence is <={config['confidence_threshold']}%, skip the metric entirely or mark as "✅ Compliant"
+
+CODEBASE OVERVIEW:
+Total Files: {context_summary['total_files']}
+Packages/Modules: {', '.join(context_summary['packages'])}
+Key Files: {', '.join(context_summary['key_files'][:10])}
+
+COMPLETE CODEBASE CONTENT:
+{detailed_content}
+
+CRITICAL INSTRUCTIONS:
+1. Output ONLY valid JSON (no markdown wrappers)
+2. Include ALL 9 categories with full metrics (including LLM as a Judge)
+3. Keep descriptions concise (under 80 chars)
+4. List ALL issues found (no artificial limits)
+5. Code snippets max 2 lines each
+6. MUST output COMPLETE valid JSON
+7. DYNAMICALLY COUNT issues - do not use fixed numbers
+
+STATUS VALUES (use these exact values):
+- "excellent": Outstanding code quality
+- "good": Solid implementation with minor issues
+- "needs-work": Significant improvements needed
+- "critical": Major problems requiring immediate attention
+
+GRADE VALUES for final_assessment (use ONE of these):
+- "Excellent"
+- "Good"
+- "Needs Work"
+- "Critical"
+
+Begin JSON:"""
+
+def _parse_ai_response(response_text, code_files):
+    """Parse AI response and extract JSON."""
+    # Handle markdown code blocks
+    if "```json" in response_text:
+        response_text = response_text.split("```json")[1].split("```")[0].strip()
+    elif "```" in response_text:
+        response_text = response_text.split("```")[1].split("```")[0].strip()
+    
+    # Parse JSON
+    analysis_data = json.loads(response_text)
+    
+    # Update timestamp
+    ist_now = datetime.now(ZoneInfo('Asia/Kolkata'))
+    analysis_data['metadata']['generated_at'] = ist_now.strftime('%Y-%m-%d %H:%M:%S IST')
+    analysis_data['metadata']['files_scanned'] = len(code_files)
+    analysis_data['summary']['files_scanned'] = len(code_files)
+    
+    # Validate and correct counts
+    return validate_and_correct_counts(analysis_data)
+
 def validate_json(data, schema_path):
     """Validate JSON output against schema."""
     with open(schema_path, 'r') as f:
@@ -497,17 +754,77 @@ def render_html(data, template_path, output_path):
     print(f"✅ Report saved: {output_path}\n")
 
 def main():
-    parser = argparse.ArgumentParser(description='Code Critique Analysis with AI')
+    parser = argparse.ArgumentParser(
+        description='Code Critique Analysis with AI',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog='''
+Examples:
+  # Use default provider from config.json
+  python3 analyze-service.py customer-service
+  
+  # Specify provider
+  python3 analyze-service.py customer-service --provider ollama
+  
+  # Full customization
+  python3 analyze-service.py customer-service --provider ollama --model qwen2.5-coder:14b --api-url http://localhost:11434
+  
+  # Using environment variables
+  export AI_PROVIDER=ollama
+  export AI_MODEL=qwen2.5-coder:32b-instruct
+  python3 analyze-service.py customer-service
+        '''
+    )
+    
+    # Required arguments
     parser.add_argument('service_path', help='Path to service directory')
-    parser.add_argument('--api-key', help='Anthropic API key (or set ANTHROPIC_API_KEY env var)')
+    
+    # Provider selection
+    parser.add_argument('--provider', help='AI provider (claude|perplexity|ollama)')
+    parser.add_argument('--model', help='Model name/ID')
+    parser.add_argument('--api-url', help='API endpoint URL')
+    parser.add_argument('--api-key', help='API authentication key')
+    
+    # Model parameters
+    parser.add_argument('--max-tokens', type=int, help='Maximum response tokens')
+    parser.add_argument('--temperature', type=float, help='Sampling temperature (0-1)')
+    parser.add_argument('--timeout', type=float, help='API timeout in seconds')
+    
+    # Analysis settings
+    parser.add_argument('--confidence', type=int, help='Confidence threshold (0-100)')
+    
     args = parser.parse_args()
     
+    # Load base configuration
+    config = load_config()
+    
+    # Resolve provider configuration (CLI > ENV > config.json)
+    provider = args.provider or os.environ.get('AI_PROVIDER') or config.get('ai_provider', 'claude')
+    
+    # Get provider-specific config from config.json
+    provider_configs = config.get('providers', {})
+    provider_config = provider_configs.get(provider, {})
+    
+    # Merge configuration with priority: CLI > ENV > config.json
+    final_config = {
+        'provider': provider,
+        'model': args.model or os.environ.get('AI_MODEL') or provider_config.get('model'),
+        'api_url': args.api_url or os.environ.get('AI_API_URL') or provider_config.get('api_url'),
+        'max_tokens': args.max_tokens or int(os.environ.get('AI_MAX_TOKENS', 0)) or provider_config.get('max_tokens', 20000),
+        'temperature': args.temperature if args.temperature is not None else float(os.environ.get('AI_TEMPERATURE', -1)) if os.environ.get('AI_TEMPERATURE') else provider_config.get('temperature', 0),
+        'timeout': args.timeout or float(os.environ.get('AI_TIMEOUT', 0)) or provider_config.get('timeout', 180.0),
+        'confidence_threshold': args.confidence or int(os.environ.get('AI_CONFIDENCE_THRESHOLD', 0)) or config.get('confidence_threshold', 70),
+    }
+    
     # Get API key
-    api_key = args.api_key or os.environ.get('ANTHROPIC_API_KEY')
-    if not api_key:
-        print("❌ Error: No API key provided")
-        print("   Option 1: export ANTHROPIC_API_KEY='your-key'")
-        print("   Option 2: python3 analyze-service.py <path> --api-key sk-ant-...")
+    api_key_env = provider_config.get('api_key_env')
+    final_config['api_key'] = args.api_key or os.environ.get('AI_API_KEY') or (os.environ.get(api_key_env) if api_key_env else None)
+    
+    # Validate required API key for cloud providers
+    if provider in ['claude', 'perplexity'] and not final_config['api_key']:
+        print(f"❌ Error: No API key provided for {provider}")
+        print(f"   Option 1: export {api_key_env}='your-key'")
+        print(f"   Option 2: export AI_API_KEY='your-key'")
+        print(f"   Option 3: --api-key your-key")
         sys.exit(1)
     
     service_path = Path(args.service_path).resolve()
@@ -535,8 +852,14 @@ def main():
         print("❌ No code files found")
         sys.exit(1)
     
-    # Analyze with AI
-    analysis_data = analyze_with_claude(service_path, code_files, api_key)
+    # Display configuration
+    print(f"🤖 Using AI Provider: {final_config['provider'].upper()}")
+    print(f"   Model: {final_config['model']}")
+    print(f"   API URL: {final_config['api_url']}")
+    print(f"   Confidence Threshold: {final_config['confidence_threshold']}%\n")
+    
+    # Analyze with AI (route to appropriate provider)
+    analysis_data = analyze_with_ai(service_path, code_files, final_config)
     
     # Save JSON
     output_json.parent.mkdir(parents=True, exist_ok=True)
