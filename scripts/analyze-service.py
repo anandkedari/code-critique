@@ -250,22 +250,30 @@ def analyze_with_claude(service_path, code_files, api_key):
     priority_files.sort(key=lambda x: x['path'])
     other_files.sort(key=lambda x: x['path'])
     
-    # Build detailed content string
-    detailed_content = "PRIORITY FILES (Full Content):\n" + "="*70 + "\n\n"
-    for f in priority_files[:15]:  # Top 15 priority files
-        detailed_content += f"FILE: {f['path']}\n{'-'*70}\n{f['content'][:3000]}\n\n"
+    # Build complete codebase content - NO TRUNCATION
+    print("📦 Preparing full codebase for analysis...")
     
-    detailed_content += "\n\nOTHER FILES (Structure Only):\n" + "="*70 + "\n\n"
-    for f in other_files[:30]:  # Structure of 30 more files
-        structure = extract_file_structure(f['path'], f['content'])
-        detailed_content += f"FILE: {f['path']}\n"
-        if structure['imports']:
-            detailed_content += f"  Imports: {', '.join(structure['imports'][:5])}\n"
-        if structure['classes']:
-            detailed_content += f"  Classes: {', '.join(structure['classes'][:3])}\n"
-        if structure['methods']:
-            detailed_content += f"  Methods: {', '.join(structure['methods'][:5])}\n"
-        detailed_content += "\n"
+    detailed_content = "COMPLETE CODEBASE - ALL FILES WITH FULL CONTENT:\n" + "="*70 + "\n\n"
+    
+    # Send ALL priority files with COMPLETE content
+    detailed_content += f"PRIORITY FILES ({len(priority_files)} files):\n" + "-"*70 + "\n\n"
+    for f in priority_files:  # ALL priority files, not just 15
+        detailed_content += f"FILE: {f['path']}\n{'-'*70}\n{f['content']}\n\n"  # FULL content, not truncated
+    
+    # Send ALL other files with COMPLETE content
+    detailed_content += f"\n\nOTHER FILES ({len(other_files)} files):\n" + "-"*70 + "\n\n"
+    for f in other_files:  # ALL other files, not just 30
+        detailed_content += f"FILE: {f['path']}\n{'-'*70}\n{f['content']}\n\n"  # FULL content, not just structure
+    
+    total_chars = len(detailed_content)
+    estimated_tokens = total_chars // 4  # Rough estimate: 1 token ≈ 4 chars
+    print(f"   📊 Total content: {total_chars:,} characters (~{estimated_tokens:,} tokens)")
+    print(f"   📁 Priority files: {len(priority_files)} (full content)")
+    print(f"   📁 Other files: {len(other_files)} (full content)")
+    
+    if estimated_tokens > 180000:  # Claude has 200K limit, leave room for response
+        print(f"   ⚠️  Warning: Content size ({estimated_tokens:,} tokens) is large")
+        print(f"   💡 Consider: Excluding large config/data files if analysis fails")
     
     # Start progress indicator in background thread
     stop_event = threading.Event()
@@ -287,8 +295,8 @@ Total Files: {context_summary['total_files']}
 Packages/Modules: {', '.join(context_summary['packages'])}
 Key Files: {', '.join(context_summary['key_files'][:10])}
 
-DETAILED CODE ANALYSIS:
-{detailed_content[:50000]}
+COMPLETE CODEBASE CONTENT:
+{detailed_content}
 
 CRITICAL INSTRUCTIONS:
 1. Output ONLY valid JSON (no markdown wrappers)
