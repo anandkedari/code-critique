@@ -76,11 +76,14 @@ For each metric, provide compliance status, violation count, and files impacted:
 10. SOLID Principles - No violations of SOLID
 11. Over-engineered Layers - No unnecessary complexity
 
-**Security Metrics (ALL REQUIRED):**
-1. Sensitive Data in Logs - No PII/secrets in logs
-2. Unmasked PII - PII properly masked in responses
-3. External Call Timeouts - Timeout + circuit breaker for external calls
-4. Environment Variables - Secrets from env vars, not hardcoded
+**Security Metrics (SKIP - Covered by Checkmarx SAST):**
+Note: Security vulnerability scanning (SQL injection, XSS, authentication issues, etc.) is handled by Checkmarx.
+Focus only on application-level security design patterns not covered by SAST tools:
+
+1. External Call Timeouts - Timeout + circuit breaker for external calls (resilience)
+2. Sensitive Data in Logs - No PII/secrets accidentally logged (operational security)
+
+DO NOT analyze: hardcoded secrets, injection vulnerabilities, crypto issues, auth/authz flaws (Checkmarx handles these)
 
 **Code Quality Metrics (ALL REQUIRED):**
 1. Code Verbosity - Overly verbose or repetitive code
