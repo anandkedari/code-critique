@@ -21,9 +21,17 @@
             padding: 1.5rem;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             border-bottom: 3px solid #00c853;
+            max-width: 100%;
+            overflow: hidden;
         }
         
-        .header h1 { font-size: 1.8rem; margin-bottom: 0.3rem; font-weight: 600; }
+        .header h1 { 
+            font-size: 1.8rem; 
+            margin-bottom: 0.3rem; 
+            font-weight: 600;
+            word-break: break-word;
+            max-width: 100%;
+        }
         
         .header .metadata {
             display: flex;
@@ -32,6 +40,12 @@
             font-size: 0.8rem;
             opacity: 0.85;
             flex-wrap: wrap;
+            max-width: 100%;
+        }
+        
+        .header .metadata > div {
+            word-break: break-word;
+            max-width: 100%;
         }
         
         .container {
