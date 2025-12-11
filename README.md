@@ -1,36 +1,16 @@
-# Code Critique System with Real AI Analysis
+# Code Critique System with Multi-Provider AI Support
 
-Automated code quality analysis using Anthropic Claude AI with standardized, reproducible HTML reports.
+Automated code quality analysis using AI (Claude, Ollama, Perplexity) with standardized, reproducible HTML reports.
 
 ## 🎯 Features
 
-- ✅ **Real AI Analysis** - Uses Anthropic Claude to analyze your actual code
+- ✅ **Multi-Provider AI Support** - Claude, Ollama (Qwen3-Coder), Perplexity
+- ✅ **Flexible Configuration** - CLI args, environment variables, or config file
+- ✅ **Local & Cloud** - Use free local models or cloud APIs
 - ✅ **8 Categories** - Architecture, Security, Code Quality, Performance, Error Handling, Logging, Self-Critique, Domain-Specific
 - ✅ **Consistent Reports** - Fixed HTML structure for reproducibility
 - ✅ **Actionable Insights** - Specific issues with code snippets and fixes
 - ✅ **JSON Schema Validation** - Ensures output consistency
-
----
-
-## 📁 Structure
-
-```
-code-critique/
-├── scripts/
-│   └── analyze-service.py          # Main analysis script (with AI)
-├── schemas/
-│   └── code-critique-schema.json   # JSON schema for validation
-├── prompts/
-│   └── code-critique-system-prompt.md  # AI system prompt
-├── templates/
-│   └── code-critique-template.html # Jinja2 HTML template
-├── reports/
-│   └── <service-name>/
-│       ├── code-critique-report.html
-│       └── code-critique-data.json
-├── code_critique.md                # Complete guidelines
-└── CODE_CRITIQUE_USAGE.md          # Detailed documentation
-```
 
 ---
 
@@ -44,34 +24,37 @@ python3 --version
 
 # Install dependencies
 cd sentinel
-source venv/bin/activate  # If you have venv
 pip install anthropic jinja2 jsonschema
+
+# Optional: For Ollama support
+pip install requests
+
+# Optional: For Perplexity support
+pip install openai
 ```
 
-### 2. Get API Key
+### 2. Choose Your AI Provider
 
-Sign up at [Anthropic](https://console.anthropic.com/) and get your API key.
-
-### 3. Set API Key
-
-**Option A: Environment Variable (Recommended)**
+#### Option A: Claude (Cloud, Best Quality)
 ```bash
 export ANTHROPIC_API_KEY="sk-ant-your-key-here"
-```
-
-**Option B: Command Line Argument**
-```bash
-python3 analyze-service.py <path> --api-key sk-ant-your-key
-```
-
-### 4. Run Analysis
-
-```bash
-cd sentinel/code-critique/scripts
 python3 analyze-service.py ../../../customer-service
 ```
 
-### 5. View Report
+#### Option B: Ollama (Local, Free, Private)
+```bash
+# Start Ollama
+ollama pull qwen2.5-coder:32b-instruct
+python3 analyze-service.py ../../../customer-service --provider ollama
+```
+
+#### Option C: Perplexity (Cloud, Web-Enhanced)
+```bash
+export PERPLEXITY_API_KEY="pplx-your-key-here"
+python3 analyze-service.py ../../../customer-service --provider perplexity
+```
+
+### 3. View Report
 
 ```bash
 open ../reports/customer-service/code-critique-report.html
@@ -79,185 +62,213 @@ open ../reports/customer-service/code-critique-report.html
 
 ---
 
-## 📊 What Gets Analyzed
+## 🤖 AI Provider Comparison
 
-The AI analyzes your code across **8 categories** (in priority order):
+| Provider | Cost | Privacy | Speed | Quality | Best For |
+|----------|------|---------|-------|---------|----------|
+| **Claude Opus** | $$$$ | Cloud | Slow | ⭐⭐⭐⭐⭐ | Production, critical analysis |
+| **Claude Sonnet** | $$ | Cloud | Fast | ⭐⭐⭐⭐ | **Default**, balanced |
+| **Ollama (Qwen3-Coder)** | Free | Local | Medium | ⭐⭐⭐⭐ | Development, on-premise |
+| **Perplexity** | $$ | Cloud | Fast | ⭐⭐⭐ | Web-enhanced analysis |
 
-### 1. ✨ Code Quality
-- Method length and complexity
-- Code duplication
-- Naming conventions
-- Code coverage
-- SOLID principles
+---
 
-### 2. 🔍 Custom Critique
-- Pre-commit checklist
-- Code review process
-- Technical debt tracking
-- Team-specific standards
+## ⚙️ Configuration Options
 
-### 3. 🔒 Security
-- PII data handling
-- Input validation
-- SQL injection risks
-- Hardcoded secrets
-- Authentication/authorization
+### Priority Order
+1. **CLI Arguments** (highest priority)
+2. **Environment Variables**
+3. **config.json** (default)
 
-### 4. 🛡️ Error Handling
-- Exception handling
-- Error responses
-- Logging of errors
-- Retry mechanisms
-- Graceful degradation
+### Configuration File (config.json)
 
-### 5. 🏗️ Architecture & Design
-- Layer violations
-- Business logic placement
-- Dependency management
-- Design patterns
-- Service boundaries
+```json
+{
+  "ai_provider": "claude",
+  "confidence_threshold": 70,
+  "providers": {
+    "claude": {
+      "model": "claude-sonnet-4-5-20250929",
+      "api_url": "https://api.anthropic.com",
+      "max_tokens": 20000,
+      "temperature": 0,
+      "timeout": 180.0
+    },
+    "ollama": {
+      "model": "qwen2.5-coder:32b-instruct",
+      "api_url": "http://localhost:11434",
+      "max_tokens": 20000,
+      "temperature": 0,
+      "timeout": 300.0
+    },
+    "perplexity": {
+      "model": "llama-3.1-sonar-huge-128k-online",
+      "api_url": "https://api.perplexity.ai",
+      "max_tokens": 20000,
+      "temperature": 0,
+      "timeout": 180.0
+    }
+  }
+}
+```
 
-### 6. ⚡ Performance Optimization
-- N+1 queries
-- Pagination
-- Caching strategy
-- Database optimization
-- Resource management
+### CLI Arguments
 
-### 7. 📝 Logging
-- Logging framework usage
-- Correlation IDs
-- Log levels
-- Sensitive data in logs
-- Structured logging
+```bash
+python3 analyze-service.py <service-path> [OPTIONS]
 
-### 8. 🎯 Domain-Specific Extensions
-- Service-specific patterns
-- Business logic validation
-- Domain model quality
-- Industry best practices
+Options:
+  --provider TEXT          AI provider (claude|perplexity|ollama)
+  --model TEXT             Model name/ID
+  --api-url TEXT           API endpoint URL
+  --api-key TEXT           API authentication key
+  --max-tokens INTEGER     Maximum response tokens
+  --temperature FLOAT      Sampling temperature (0-1)
+  --timeout FLOAT          API timeout in seconds
+  --confidence INTEGER     Confidence threshold (0-100)
+```
+
+### Environment Variables
+
+```bash
+# Provider Selection
+export AI_PROVIDER=ollama
+export AI_MODEL=qwen2.5-coder:32b-instruct
+export AI_API_URL=http://localhost:11434
+
+# API Keys
+export AI_API_KEY=your-key
+export ANTHROPIC_API_KEY=sk-ant-...
+export PERPLEXITY_API_KEY=pplx-...
+
+# Model Parameters
+export AI_MAX_TOKENS=30000
+export AI_TEMPERATURE=0.1
+export AI_TIMEOUT=300
+
+# Analysis Settings
+export AI_CONFIDENCE_THRESHOLD=75
+```
 
 ---
 
 ## 💡 Usage Examples
 
-### Basic Analysis
+### Default (Claude from config.json)
 ```bash
+cd sentinel/code-critique/scripts
+export ANTHROPIC_API_KEY="your-key"
 python3 analyze-service.py ../../../customer-service
 ```
 
-### With API Key Argument
+### Ollama with Qwen3-Coder
 ```bash
-python3 analyze-service.py ../../../customer-service --api-key sk-ant-...
+# Start Ollama
+ollama pull qwen2.5-coder:32b-instruct
+ollama serve
+
+# Run analysis
+python3 analyze-service.py ../../../customer-service --provider ollama
 ```
 
-### From Different Directory
+### Custom Model
 ```bash
-cd /path/to/sentinel/code-critique/scripts
-python3 analyze-service.py /absolute/path/to/customer-service
+python3 analyze-service.py ../../../customer-service \
+  --provider ollama \
+  --model qwen2.5-coder:14b \
+  --max-tokens 30000
 ```
+
+### Using Environment Variables
+```bash
+export AI_PROVIDER=ollama
+export AI_MODEL=qwen2.5-coder:32b-instruct
+export AI_CONFIDENCE_THRESHOLD=80
+python3 analyze-service.py ../../../customer-service
+```
+
+### Override Everything via CLI
+```bash
+python3 analyze-service.py ../../../customer-service \
+  --provider ollama \
+  --model qwen2.5-coder:14b \
+  --api-url http://192.168.1.100:11434 \
+  --max-tokens 30000 \
+  --temperature 0.1 \
+  --timeout 600 \
+  --confidence 75
+```
+
+---
+
+## 📊 What Gets Analyzed
+
+The AI analyzes your code across **8 categories**:
+
+1. ✨ **Code Quality** - Method length, complexity, duplication, naming, SOLID principles
+2. 🔍 **Custom Critique** - Pre-commit checklist, code review, technical debt
+3. 🔒 **Security** - PII handling, input validation, SQL injection, hardcoded secrets
+4. 🛡️ **Error Handling** - Exception handling, error responses, retry mechanisms
+5. 🏗️ **Architecture & Design** - Layer violations, business logic, dependencies
+6. ⚡ **Performance** - N+1 queries, pagination, caching, database optimization
+7. 📝 **Logging** - Framework usage, correlation IDs, sensitive data in logs
+8. 🎯 **Domain-Specific** - Service patterns, business logic, domain model quality
 
 ---
 
 ## 📋 Report Structure
 
-The generated HTML report includes the following sections:
+### 1. Overall Summary
+- Status badge (Excellent/Good/Needs Work/Critical)
+- Critical issues, warnings, files scanned
 
-### 1. **Overall Summary**
-   - Overall status badge (Excellent/Good/Needs Work/Critical)
-   - Critical issues count (clickable to filter)
-   - Warnings count (clickable to filter)
-   - Files not compliant count
-   - Total files scanned
+### 2. Assessment Status
+- Compact grid showing all 8 categories
+- Status and issue count per category
 
-### 2. **Assessment Status**
-   - Compact grid showing all 8 categories
-   - Status badge for each category (✅ Compliant / ⚠️ Warnings / ❌ Critical)
-   - Issue count per category
-   - Color-coded severity indicators
+### 3. Issues by File
+- Expandable file list with all issues
+- Code snippets and recommendations
 
-### 3. **Issues by File**
-   - Expandable file list showing issues per file
-   - Click to expand and see all issues in that file
-   - Shows issue title, description, and severity
-   - Includes code snippets and recommendations
-   - Category badges for each issue
+### 4. Top Issues
+- Most frequent issues by occurrence
+- Click to see all instances
 
-### 4. **Top Issues** 
-   - Most frequent issues sorted by occurrence count
-   - Secondary sort by severity (critical first)
-   - Shows top 5 issues by default with "Show More" button
-   - Click any issue to see all occurrences with:
-     - File path and line number
-     - Code snippet
-     - Detailed recommendation
-     - Fix example
+### 5. Detailed Category Analysis
+- One section per category
+- Metrics, findings, recommendations
 
-### 5. **Detailed Category Analysis**
-   - One section per category (in priority order)
-   - Category status badge
-   - Metrics in responsive grid layout
-   - Assessment items (inline badges)
-   - Expandable "Detailed Findings" section with:
-     - File path and line number
-     - Current code snippet
-     - Detailed description
-     - Actionable recommendations
-     - Example fixes
-
-### 6. **Priority Actions**
-   - 🔴 Critical (fix immediately)
-   - 🟡 Warnings (address soon)
-   - 🔵 Suggestions (nice to have)
-   - Organized in responsive grid layout
-
-### 7. **Key Improvements**
-   - Summary of main areas needing attention
-   - Action-oriented recommendations
-   - Prioritized improvement list
+### 6. Priority Actions
+- 🔴 Critical - fix immediately
+- 🟡 Warnings - address soon  
+- 🔵 Suggestions - nice to have
 
 ---
 
-## 🔧 Configuration
+## 🔧 Advanced Configuration
 
 ### Customize Analysis
 
-Edit `prompts/code-critique-system-prompt.md` to adjust:
+Edit `prompts/code-critique-system-prompt.md`:
 - Scoring thresholds
 - Metric definitions
-- Analysis focus areas
+- Analysis focus
 
 ### Customize Report
 
-Edit `templates/code-critique-template.html` to change:
+Edit `templates/code-critique-template.html`:
 - Colors and styling
 - Layout
-- Sections displayed
+- Sections
 
 ### Update Schema
 
-Edit `schemas/code-critique-schema.json` to modify:
+Edit `schemas/code-critique-schema.json`:
 - Required fields
 - Validation rules
 - Data structure
 
-**Important:** Keep prompt, template, and schema in sync!
-
----
-
-## 🎯 Output Files
-
-```
-reports/<service-name>/
-├── code-critique-report.html    # Beautiful HTML report (open in browser)
-└── code-critique-data.json      # Raw JSON data (for automation/tracking)
-```
-
-### Use JSON for:
-- CI/CD integration
-- Quality metrics tracking
-- Automated quality gates
-- Historical comparison
+**Keep prompt, template, and schema in sync!**
 
 ---
 
@@ -281,15 +292,12 @@ jobs:
           python-version: '3.9'
       
       - name: Install Dependencies
-        run: |
-          pip install anthropic jinja2 jsonschema
+        run: pip install anthropic jinja2 jsonschema requests
       
-      - name: Run Code Critique
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      - name: Run with Ollama (Self-Hosted Runner)
         run: |
           cd sentinel/code-critique/scripts
-          python3 analyze-service.py ../../../customer-service
+          python3 analyze-service.py ../../../customer-service --provider ollama
       
       - name: Upload Report
         uses: actions/upload-artifact@v2
@@ -297,29 +305,34 @@ jobs:
           name: code-critique-report
           path: sentinel/code-critique/reports/
       
-      - name: Check Quality Gate
+      - name: Quality Gate
         run: |
           score=$(jq '.summary.overall_score' sentinel/code-critique/reports/customer-service/code-critique-data.json)
-          if [ "$score" -lt 70 ]; then
-            echo "Quality gate failed: score $score < 70"
-            exit 1
-          fi
+          if [ "$score" -lt 70 ]; then exit 1; fi
 ```
+
+---
+
+## 💰 Cost Comparison
+
+### Cloud APIs (per analysis)
+- **Claude Opus**: ~$0.04-0.08
+- **Claude Sonnet**: ~$0.02-0.04
+- **Perplexity**: ~$0.02-0.05
+
+### Local (Ollama)
+- **Qwen3-Coder**: Free!
+- Hardware: 16GB RAM minimum, 32GB recommended
+- GPU: Optional but recommended for speed
 
 ---
 
 ## ⚠️ Important Notes
 
 ### Token Limits
-- Analyzes first 20 files by default (to stay within API limits)
-- Adjust `max_files` in script if needed
-- For large codebases, consider analyzing modules separately
-
-### API Costs
-- Uses Claude 3.5 Sonnet
-- ~8000 tokens per analysis
-- Monitor usage in Anthropic console
-- Estimated cost: ~$0.02-0.05 per analysis
+- Analyzes all files in one pass
+- Adjust `max_tokens` if needed
+- Large codebases may need chunking
 
 ### File Types Analyzed
 - Java (`.java`)
@@ -328,7 +341,7 @@ jobs:
 - TypeScript (`.ts`)
 - Go (`.go`)
 
-**Test files are excluded automatically**
+**Test files automatically excluded**
 
 ---
 
@@ -336,64 +349,73 @@ jobs:
 
 ### "No API key provided"
 ```bash
-# Set environment variable
-export ANTHROPIC_API_KEY="sk-ant-your-key"
+# For Claude
+export ANTHROPIC_API_KEY="sk-ant-..."
 
-# Or use command line
-python3 analyze-service.py <path> --api-key sk-ant-...
+# For Perplexity
+export PERPLEXITY_API_KEY="pplx-..."
+
+# Or use CLI
+python3 analyze-service.py <path> --api-key your-key
 ```
 
 ### "anthropic package not installed"
 ```bash
-pip install anthropic
+pip install anthropic jinja2 jsonschema
 ```
 
-### "No code files found"
-- Check service path is correct
-- Verify files have supported extensions
-- Check if files are in excluded directories
+### "requests package not installed" (Ollama)
+```bash
+pip install requests
+```
 
-### "JSON validation failed"
-- AI response may not match schema
-- Check `code-critique-data.json` for issues
-- Report continues anyway, check HTML
+### "openai package not installed" (Perplexity)
+```bash
+pip install openai
+```
+
+### Ollama Connection Error
+```bash
+# Check Ollama is running
+ollama list
+
+# Start Ollama
+ollama serve
+
+# Check endpoint
+curl http://localhost:11434/api/tags
+```
 
 ---
 
 ## 📚 Documentation
 
 - **`code_critique.md`** - Complete analysis guidelines
-- **`CODE_CRITIQUE_USAGE.md`** - Detailed usage guide
-- **`schemas/code-critique-schema.json`** - JSON structure reference
+- **`config.json`** - Configuration reference
+- **`schemas/code-critique-schema.json`** - JSON structure
 
 ---
 
 ## 🔄 Version History
 
-- **v2.0** - Enhanced report with interactive features
-  - Reordered categories (Code Quality first)
-  - Top Issues section with occurrence tracking
-  - Clickable issues with detailed drill-down
-  - Issues by File view with expandable sections
-  - Responsive grid layouts for better readability
-  - Inline status badges for quick scanning
-  - Color-coded severity indicators
+- **v3.0** - Multi-provider AI support
+  - Added Ollama (Qwen3-Coder) support
+  - Added Perplexity support
+  - Comprehensive CLI and ENV configuration
+  - Provider-specific optimizations
+  - Simplified codebase (removed 240+ lines)
 
-- **v1.0** - Initial release with real AI integration
-  - Anthropic Claude 3.5 Sonnet
+- **v2.0** - Enhanced interactive reports
+  - Top Issues section
+  - Issues by File view
+  - Clickable drill-down
+  - Responsive layouts
+
+- **v1.0** - Initial release
+  - Claude 3.5 Sonnet
   - 8 category analysis
-  - Consistent HTML reports
-  - JSON schema validation
-
----
-
-## 🆘 Support
-
-For issues:
-1. Check `reports/<service>/code-critique-data.json` for raw analysis
-2. Verify API key is correct
-3. Check file loading worked (should see file list)
-4. Review generated JSON against schema
+  - HTML reports
+  - JSON validation
 
 ---
 
@@ -403,8 +425,27 @@ Part of the Sentinel Code Quality Framework
 
 ---
 
-**Ready to analyze your code? Run:**
+## 🆘 Support
+
+For issues:
+1. Check `reports/<service>/code-critique-data.json` for raw analysis
+2. Verify configuration (CLI > ENV > config.json)
+3. Check file loading worked
+4. Review generated JSON against schema
+
+---
+
+**Ready to analyze? Choose your provider:**
+
 ```bash
-cd sentinel/code-critique/scripts
+# Claude (Cloud)
 export ANTHROPIC_API_KEY="your-key"
-python3 analyze-service.py ../../../customer-service
+python3 analyze-service.py customer-service
+
+# Ollama (Local)
+ollama pull qwen2.5-coder:32b-instruct
+python3 analyze-service.py customer-service --provider ollama
+
+# Perplexity (Cloud)
+export PERPLEXITY_API_KEY="your-key"
+python3 analyze-service.py customer-service --provider perplexity

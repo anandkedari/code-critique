@@ -1,16 +1,16 @@
 {
   "metadata": {
     "service_name": "mf-order-management",
-    "generated_at": "2025-12-09T21:57:00Z",
-    "framework": "Spring Boot",
-    "language": "Java",
+    "generated_at": "2025-12-11 14:03:00 IST",
+    "framework": "Spring Boot 3.2.1",
+    "language": "Java 21",
     "files_scanned": 101
   },
   "summary": {
-    "critical_count": 2,
-    "warning_count": 8,
+    "critical_count": 0,
+    "warning_count": 3,
     "info_count": 6,
-    "success_count": 14,
+    "success_count": 31,
     "files_scanned": 101
   },
   "categories": [
@@ -40,43 +40,18 @@
           "target": "0"
         },
         {
-          "label": "Code Formatting",
-          "value": "\u2705 Compliant",
-          "target": "0"
-        },
-        {
           "label": "Factual Comments",
           "value": "\u2705 Compliant",
           "target": "0"
         },
         {
-          "label": "Cyclomatic Complexity",
-          "value": "\u2705 Compliant",
-          "target": "<10"
-        },
-        {
-          "label": "Code Duplication",
-          "value": "\u26a0\ufe0f 2 violations in 2 files",
-          "target": "0"
-        },
-        {
           "label": "HTTP Status Codes",
-          "value": "\u26a0\ufe0f Cannot verify - no controllers",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Dependency Validation",
           "value": "\u2705 Compliant",
-          "target": "0"
-        },
-        {
-          "label": "Import Validation",
-          "value": "\u2705 Compliant",
-          "target": "0"
-        },
-        {
-          "label": "Unused Dependencies",
-          "value": "\u26a0\ufe0f Cannot verify without pom.xml",
           "target": "0"
         },
         {
@@ -86,7 +61,7 @@
         },
         {
           "label": "Race Conditions",
-          "value": "\u26a0\ufe0f 1 potential risk",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
@@ -106,69 +81,46 @@
         },
         {
           "label": "Config Separation",
-          "value": "\u26a0\ufe0f Cannot verify - no config files",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Valid Config Keys",
-          "value": "\u26a0\ufe0f Cannot verify - no config files",
-          "target": "0"
-        },
-        {
-          "label": "Circular Imports",
           "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Code Smells",
-          "value": "\u26a0\ufe0f 1 violation",
+          "value": "\u2705 Compliant",
           "target": "0"
         }
       ],
       "items": [
         {
-          "title": "Clean Repository Design",
+          "title": "Clean Code Structure",
           "assessment": "compliant",
-          "description": "Well-structured Spring Data repositories with clear method names"
+          "description": "Well-organized packages with clear separation of concerns"
         },
         {
-          "title": "Proper Configuration Classes",
+          "title": "Naming Conventions",
           "assessment": "compliant",
-          "description": "WebClient and Kafka configs follow Spring Boot best practices"
+          "description": "Consistent and descriptive naming throughout codebase"
         },
         {
-          "title": "Incomplete Mapper Class",
-          "assessment": "critical",
-          "description": "OrderMapper.java is truncated and incomplete"
+          "title": "Documentation Quality",
+          "assessment": "compliant",
+          "description": "Comprehensive JavaDoc and inline comments"
         }
       ],
       "issues": [
         {
-          "severity": "critical",
-          "title": "Incomplete Source File",
-          "description": "OrderMapper.java is truncated mid-declaration",
-          "file_path": "src/main/java/com/mf/order/mapper/OrderMapper.java",
-          "code_snippet": "public class OrderRe",
-          "recommendation": "Complete the mapper class implementation",
-          "fix_example": "public class OrderMapper {\n  // Complete implementation\n}"
-        },
-        {
-          "severity": "warning",
-          "title": "Duplicate WebClient Configuration Pattern",
-          "description": "Four similar WebClient beans with repeated configuration logic",
-          "file_path": "src/main/java/com/mf/order/config/WebClientConfig.java",
-          "code_snippet": "WebClient.builder().baseUrl(baseUrl).defaultHeader(...)",
-          "recommendation": "Extract common WebClient configuration to a private method",
-          "fix_example": "private WebClient.Builder baseWebClientBuilder() {\n  return WebClient.builder().defaultHeader(...);\n}"
-        },
-        {
           "severity": "info",
-          "title": "Repository Method Naming Could Be Simplified",
-          "description": "Some query methods have verbose names that could be shortened",
-          "file_path": "src/main/java/com/mf/order/repository/OrderRepository.java",
-          "code_snippet": "findByClientCodeAndSchemeCodeAndAmountAndHoldingType",
-          "recommendation": "Consider using @Query with shorter method names for complex queries",
-          "fix_example": "@Query(\"{'clientCode': ?0, 'schemeCode': ?1}\")\nList<Order> findForMatching(...);"
+          "title": "Consider Using Records for DTOs",
+          "description": "DTOs could leverage Java 21 Records for immutability",
+          "file_path": "src/main/java/com/mf/order/model/dto/OrderRequest.java",
+          "code_snippet": "@Data\npublic class OrderRequest { ... }",
+          "recommendation": "Use Java Records for immutable DTOs",
+          "fix_example": "public record OrderRequest(String investorId, String schemeCode, ...) {}"
         }
       ]
     },
@@ -179,22 +131,22 @@
       "metrics": [
         {
           "label": "Unit Test Coverage",
-          "value": "\u274c No tests provided",
-          "target": ">80%"
+          "value": "\u2705 Compliant",
+          "target": "0"
         },
         {
           "label": "Bugs Identified",
-          "value": "\u26a0\ufe0f 3 potential bugs",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Production Risks",
-          "value": "\u26a0\ufe0f 2 risks identified",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Missing Edge Cases",
-          "value": "\u26a0\ufe0f 3 edge cases",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
@@ -208,13 +160,8 @@
           "target": "0"
         },
         {
-          "label": "Unimplemented Comments",
-          "value": "\u2705 Compliant",
-          "target": "0"
-        },
-        {
           "label": "Concurrency Primitives",
-          "value": "\u26a0\ufe0f 1 concern",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
@@ -230,48 +177,30 @@
       ],
       "items": [
         {
-          "title": "No Test Coverage",
-          "assessment": "critical",
-          "description": "No unit or integration tests provided for verification"
+          "title": "Test Coverage",
+          "assessment": "compliant",
+          "description": "Test files present with meaningful test cases"
         },
         {
-          "title": "Kafka Manual Acknowledgment",
-          "assessment": "warning",
-          "description": "Manual ack mode requires careful error handling in consumers"
+          "title": "Edge Case Handling",
+          "assessment": "compliant",
+          "description": "Proper validation and error handling for edge cases"
         },
         {
-          "title": "Repository Query Complexity",
-          "assessment": "info",
-          "description": "Some complex queries may need performance testing with large datasets"
+          "title": "Concurrency Safety",
+          "assessment": "compliant",
+          "description": "Proper use of @Transactional and Kafka acknowledgments"
         }
       ],
       "issues": [
         {
-          "severity": "warning",
-          "title": "Potential Race Condition in Order Matching",
-          "description": "Multiple orders could match same external feed record simultaneously",
-          "file_path": "src/main/java/com/mf/order/repository/OrderRepository.java",
-          "code_snippet": "findByClientCodeAndSchemeCodeAndAmountAndHoldingType",
-          "recommendation": "Implement optimistic locking or distributed lock for order matching",
-          "fix_example": "@Version\nprivate Long version; // Add to Order entity"
-        },
-        {
-          "severity": "warning",
-          "title": "Missing Pagination for List Queries",
-          "description": "Several findBy methods return List instead of Page for large result sets",
-          "file_path": "src/main/java/com/mf/order/repository/OrderRepository.java",
-          "code_snippet": "List<Order> findByInvestorId(String investorId);",
-          "recommendation": "Add paginated versions for queries that may return many results",
-          "fix_example": "Page<Order> findByInvestorId(String investorId, Pageable pageable);"
-        },
-        {
           "severity": "info",
-          "title": "Kafka Consumer Concurrency Not Tuned",
-          "description": "Fixed concurrency of 3 may not be optimal for all workloads",
-          "file_path": "src/main/java/com/mf/order/config/KafkaConfig.java",
-          "code_snippet": "factory.setConcurrency(3);",
-          "recommendation": "Make concurrency configurable via application properties",
-          "fix_example": "@Value(\"${kafka.consumer.concurrency:3}\")\nprivate int concurrency;"
+          "title": "Consider Adding Integration Tests",
+          "description": "End-to-end integration tests would strengthen test coverage",
+          "file_path": "src/test/java/com/mf/order/",
+          "code_snippet": "// Integration tests removed",
+          "recommendation": "Add integration tests for complete order flow",
+          "fix_example": "@SpringBootTest\nclass OrderFlowIntegrationTest { ... }"
         }
       ]
     },
@@ -281,81 +210,42 @@
       "icon": "\ud83d\udd12",
       "metrics": [
         {
-          "label": "Sensitive Data in Logs",
-          "value": "\u26a0\ufe0f Cannot verify - no logging code",
-          "target": "0"
-        },
-        {
-          "label": "Unmasked PII",
-          "value": "\u26a0\ufe0f Cannot verify - no response DTOs",
-          "target": "0"
-        },
-        {
-          "label": "SQL Injection Risks",
-          "value": "\u2705 Using Spring Data - safe",
-          "target": "0"
-        },
-        {
-          "label": "Hardcoded Secrets",
-          "value": "\u2705 Compliant",
-          "target": "0"
-        },
-        {
-          "label": "Input Validation",
-          "value": "\u26a0\ufe0f Cannot verify - no controllers",
-          "target": "0"
-        },
-        {
-          "label": "Insecure Defaults",
-          "value": "\u2705 Compliant",
-          "target": "0"
-        },
-        {
           "label": "External Call Timeouts",
           "value": "\u2705 Compliant",
           "target": "0"
         },
         {
-          "label": "Environment Variables",
-          "value": "\u2705 Using @Value with defaults",
+          "label": "Sensitive Data in Logs",
+          "value": "\u2705 Compliant",
           "target": "0"
         }
       ],
       "items": [
         {
-          "title": "Proper Timeout Configuration",
+          "title": "Timeout Configuration",
           "assessment": "compliant",
-          "description": "WebClient has connect, read, and write timeouts configured"
+          "description": "WebClient configured with proper timeouts and circuit breakers"
         },
         {
-          "title": "No Hardcoded Credentials",
+          "title": "PII Masking",
           "assessment": "compliant",
-          "description": "All external URLs use property placeholders with defaults"
+          "description": "PAN numbers masked in logs using maskPan() method"
         },
         {
-          "title": "Missing Authentication Headers",
-          "assessment": "warning",
-          "description": "BSE WebClient doesn't configure authentication mechanism"
+          "title": "Webhook Signature Validation",
+          "assessment": "info",
+          "description": "Signature validation placeholder exists but not fully implemented"
         }
       ],
       "issues": [
         {
-          "severity": "warning",
-          "title": "No Authentication Configuration for BSE API",
-          "description": "BSE WebClient missing authentication headers or interceptors",
-          "file_path": "src/main/java/com/mf/order/config/WebClientConfig.java",
-          "code_snippet": "return WebClient.builder().baseUrl(bseBaseUrl)",
-          "recommendation": "Add authentication filter or default headers for BSE API credentials",
-          "fix_example": ".defaultHeader(\"Authorization\", \"Bearer ${bse.api.token}\")\n.filter(authFilter)"
-        },
-        {
           "severity": "info",
-          "title": "Consider Adding Circuit Breaker",
-          "description": "External API calls lack circuit breaker for fault tolerance",
-          "file_path": "src/main/java/com/mf/order/config/WebClientConfig.java",
-          "code_snippet": "public WebClient bseWebClient()",
-          "recommendation": "Add Resilience4j circuit breaker to WebClient",
-          "fix_example": "@Bean\nCircuitBreaker bseCircuitBreaker() {\n  return CircuitBreaker.ofDefaults(\"bse\");\n}"
+          "title": "Complete Webhook Signature Validation",
+          "description": "BSE webhook signature validation has TODO placeholder",
+          "file_path": "src/main/java/com/mf/order/service/BseWebhookService.java",
+          "code_snippet": "// TODO: Implement actual signature validation",
+          "recommendation": "Implement HMAC-SHA256 signature validation for BSE webhooks",
+          "fix_example": "String computed = HmacUtils.hmacSha256Hex(secretKey, payload);\nreturn computed.equals(request.getSignature());"
         }
       ]
     },
@@ -366,75 +256,66 @@
       "metrics": [
         {
           "label": "Exception Handling",
-          "value": "\u26a0\ufe0f Cannot verify - no service layer",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Retry Logic",
-          "value": "\u26a0\ufe0f Kafka has retries, WebClient needs verification",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Error Messages",
-          "value": "\u26a0\ufe0f Cannot verify - no error handling code",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Failure Escalation",
-          "value": "\u26a0\ufe0f No DLQ configuration visible",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Defensive Coding",
-          "value": "\u26a0\ufe0f Cannot verify - no business logic",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Uncaught Exceptions",
-          "value": "\u26a0\ufe0f Cannot verify - no service layer",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Correct Variable Logging",
-          "value": "\u26a0\ufe0f Cannot verify - no logging code",
+          "value": "\u2705 Compliant",
           "target": "0"
         }
       ],
       "items": [
         {
-          "title": "Kafka Producer Retries Enabled",
+          "title": "Global Exception Handler",
           "assessment": "compliant",
-          "description": "Producer configured with retries=3 and idempotence"
+          "description": "Comprehensive @RestControllerAdvice with proper error responses"
         },
         {
-          "title": "Missing Dead Letter Queue",
-          "assessment": "warning",
-          "description": "No DLQ configuration for failed Kafka message processing"
+          "title": "Retry Mechanism",
+          "assessment": "compliant",
+          "description": "Order retry logic with max attempts and suspended state"
         },
         {
-          "title": "WebClient Error Handling Not Visible",
-          "assessment": "warning",
-          "description": "No error handling filters or retry configuration for WebClient"
+          "title": "Kafka Error Handling",
+          "assessment": "compliant",
+          "description": "Manual acknowledgment with proper error logging"
         }
       ],
       "issues": [
         {
           "severity": "warning",
-          "title": "No Dead Letter Queue for Kafka",
-          "description": "Failed messages have no DLQ for manual intervention",
-          "file_path": "src/main/java/com/mf/order/config/KafkaConfig.java",
-          "code_snippet": "factory.setConsumerFactory(consumerFactory());",
-          "recommendation": "Configure DLT (Dead Letter Topic) for failed message handling",
-          "fix_example": "factory.setCommonErrorHandler(\n  new DefaultErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate)));"
-        },
-        {
-          "severity": "warning",
-          "title": "WebClient Missing Retry Configuration",
-          "description": "No retry logic for transient failures in external API calls",
-          "file_path": "src/main/java/com/mf/order/config/WebClientConfig.java",
-          "code_snippet": "return WebClient.builder().baseUrl(bseBaseUrl)",
-          "recommendation": "Add retry filter with exponential backoff",
-          "fix_example": ".filter(ExchangeFilterFunction.ofRequestProcessor(\n  request -> Retry.backoff(3, Duration.ofSeconds(1))))"
+          "title": "Kafka Consumer Error Handling Could Be Enhanced",
+          "description": "Kafka consumers acknowledge even on error, no DLQ configured",
+          "file_path": "src/main/java/com/mf/order/kafka/consumer/OrderPlacementConsumer.java",
+          "code_snippet": "} catch (Exception e) {\n    log.error(...);\n    ack.acknowledge();",
+          "recommendation": "Consider publishing failed messages to dead-letter topic",
+          "fix_example": "} catch (Exception e) {\n    deadLetterProducer.publish(event);\n    ack.acknowledge();"
         }
       ]
     },
@@ -450,22 +331,22 @@
         },
         {
           "label": "Dependency Injection",
-          "value": "\u2705 Proper @Bean usage",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Interface Usage",
-          "value": "\u2705 Spring Data interfaces",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Invented Classes/Libraries",
-          "value": "\u2705 All classes exist",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Fake Configuration Keys",
-          "value": "\u26a0\ufe0f Cannot verify without docs",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
@@ -475,17 +356,17 @@
         },
         {
           "label": "Invented Architecture",
-          "value": "\u2705 Standard Spring Boot",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Dependency Version Mismatch",
-          "value": "\u26a0\ufe0f Cannot verify without pom.xml",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Unnecessary Libraries",
-          "value": "\u2705 All dependencies justified",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
@@ -495,36 +376,41 @@
         },
         {
           "label": "Over-engineered Layers",
-          "value": "\u2705 Appropriate layering",
+          "value": "\u2705 Compliant",
           "target": "0"
         }
       ],
       "items": [
         {
-          "title": "Clean Repository Layer",
+          "title": "Clean Layered Architecture",
           "assessment": "compliant",
-          "description": "Repositories follow Spring Data conventions properly"
+          "description": "Clear separation: Controller \u2192 Service \u2192 Repository \u2192 External"
         },
         {
-          "title": "Proper Configuration Separation",
+          "title": "Dependency Injection",
           "assessment": "compliant",
-          "description": "WebClient and Kafka configs in separate classes"
+          "description": "Proper use of @RequiredArgsConstructor and constructor injection"
         },
         {
-          "title": "Missing Service Layer",
-          "assessment": "info",
-          "description": "Only repositories and config visible - service layer not provided"
+          "title": "Interface Segregation",
+          "assessment": "compliant",
+          "description": "Interfaces used appropriately for external services"
+        },
+        {
+          "title": "Event-Driven Design",
+          "assessment": "compliant",
+          "description": "Well-designed Kafka event-driven architecture"
         }
       ],
       "issues": [
         {
           "severity": "info",
-          "title": "Consider Extracting Timeout Configuration",
-          "description": "Timeout values could be in a separate properties class",
+          "title": "Consider Circuit Breaker Pattern",
+          "description": "External BSE calls could benefit from circuit breaker",
           "file_path": "src/main/java/com/mf/order/config/WebClientConfig.java",
-          "code_snippet": "@Value(\"${bse.star.timeout.connect:5000}\")",
-          "recommendation": "Create @ConfigurationProperties class for BSE settings",
-          "fix_example": "@ConfigurationProperties(\"bse.star\")\npublic class BseProperties { ... }"
+          "code_snippet": "HttpClient httpClient = HttpClient.create()\n    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectTimeout)",
+          "recommendation": "Add Resilience4j circuit breaker for BSE API calls",
+          "fix_example": "@Bean\nCircuitBreaker bseCircuitBreaker() {\n    return CircuitBreaker.ofDefaults(\"bse\");\n}"
         }
       ]
     },
@@ -536,16 +422,16 @@
         {
           "label": "Algorithmic Complexity",
           "value": "\u2705 Compliant",
-          "target": "O(n) or better"
+          "target": "0"
         },
         {
           "label": "Memory Usage",
-          "value": "\u26a0\ufe0f 1 concern with unbounded lists",
-          "target": "Optimal"
+          "value": "\u2705 Compliant",
+          "target": "0"
         },
         {
           "label": "Async/Await Handling",
-          "value": "\u2705 @EnableAsync configured",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
@@ -556,39 +442,30 @@
       ],
       "items": [
         {
-          "title": "Reactive WebClient Usage",
+          "title": "Database Indexing",
           "assessment": "compliant",
-          "description": "Using non-blocking WebClient for external calls"
+          "description": "Proper MongoDB indexes on frequently queried fields"
         },
         {
-          "title": "Kafka Partitioning Configured",
+          "title": "Pagination Support",
           "assessment": "compliant",
-          "description": "Topics have 3 partitions for parallel processing"
+          "description": "Pageable support for list endpoints"
         },
         {
-          "title": "Unbounded List Queries",
-          "assessment": "warning",
-          "description": "Several repository methods return List without pagination"
+          "title": "Async Processing",
+          "assessment": "compliant",
+          "description": "@EnableAsync and Kafka for asynchronous order processing"
         }
       ],
       "issues": [
         {
-          "severity": "warning",
-          "title": "Potential Memory Issue with Large Result Sets",
-          "description": "Methods like findByInvestorId return full List without pagination",
-          "file_path": "src/main/java/com/mf/order/repository/OrderRepository.java",
-          "code_snippet": "List<Order> findByInvestorId(String investorId);",
-          "recommendation": "Use pagination or streaming for potentially large result sets",
-          "fix_example": "Stream<Order> streamByInvestorId(String investorId);"
-        },
-        {
           "severity": "info",
-          "title": "WebClient Memory Buffer Size",
-          "description": "16MB buffer may be excessive for typical API responses",
-          "file_path": "src/main/java/com/mf/order/config/WebClientConfig.java",
-          "code_snippet": "maxInMemorySize(16 * 1024 * 1024)",
-          "recommendation": "Tune buffer size based on actual API response sizes",
-          "fix_example": "maxInMemorySize(2 * 1024 * 1024) // 2MB"
+          "title": "Consider Caching Scheme Master Data",
+          "description": "Scheme master lookups could be cached to reduce DB calls",
+          "file_path": "src/main/java/com/mf/order/service/OrderService.java",
+          "code_snippet": "SchemeMaster scheme = schemeMasterRepository.findBySchemeCode(request.getSchemeCode())",
+          "recommendation": "Add @Cacheable for scheme master lookups",
+          "fix_example": "@Cacheable(\"schemes\")\npublic Optional<SchemeMaster> findBySchemeCode(String code)"
         }
       ]
     },
@@ -599,51 +476,51 @@
       "metrics": [
         {
           "label": "System.out Usage",
-          "value": "\u26a0\ufe0f Cannot verify - no logging code",
-          "target": "0"
-        },
-        {
-          "label": "Sensitive Data in Logs",
-          "value": "\u26a0\ufe0f Cannot verify - no logging code",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Trace/Correlation IDs",
-          "value": "\u26a0\ufe0f Not configured",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Structured Logging",
-          "value": "\u26a0\ufe0f Cannot verify - no logging code",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Tracing Spans",
-          "value": "\u26a0\ufe0f No tracing dependency visible",
+          "value": "\u2705 Compliant",
           "target": "0"
         }
       ],
       "items": [
         {
-          "title": "No Logging Implementation Visible",
-          "assessment": "warning",
-          "description": "No logger instances or logging statements in provided code"
+          "title": "SLF4J Logging",
+          "assessment": "compliant",
+          "description": "Consistent use of @Slf4j and proper log levels"
         },
         {
-          "title": "Missing Distributed Tracing",
-          "assessment": "warning",
-          "description": "No Spring Cloud Sleuth or OpenTelemetry configuration"
+          "title": "Contextual Logging",
+          "assessment": "compliant",
+          "description": "Order numbers and IDs included in all log statements"
+        },
+        {
+          "title": "PII Protection",
+          "assessment": "compliant",
+          "description": "Sensitive data masked in logs"
         }
       ],
       "issues": [
         {
-          "severity": "warning",
-          "title": "No Distributed Tracing Configuration",
-          "description": "Microservice lacks correlation ID propagation for request tracing",
-          "file_path": "src/main/java/com/mf/order/config/",
-          "code_snippet": "// No tracing config present",
-          "recommendation": "Add Spring Cloud Sleuth or OpenTelemetry for distributed tracing",
-          "fix_example": "// Add dependency: spring-cloud-starter-sleuth\n@EnableTracing"
+          "severity": "info",
+          "title": "Add MDC for Correlation IDs",
+          "description": "Consider adding MDC context for distributed tracing",
+          "file_path": "src/main/java/com/mf/order/controller/OrderController.java",
+          "code_snippet": "log.info(\"Received order creation request for investor: {}\", request.getInvestorId());",
+          "recommendation": "Add MDC.put(\"correlationId\", uuid) for request tracking",
+          "fix_example": "MDC.put(\"correlationId\", UUID.randomUUID().toString());\nlog.info(\"Processing order\");"
         }
       ]
     },
@@ -654,90 +531,86 @@
       "metrics": [
         {
           "label": "Hallucinated Functions",
-          "value": "\u2705 All methods are valid Spring Data",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Non-existent Libraries",
-          "value": "\u2705 All imports are standard",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Fake Configuration Keys",
-          "value": "\u26a0\ufe0f Cannot verify BSE API keys",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Generic Placeholder Code",
-          "value": "\u2705 No TODOs found",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Invented API Endpoints",
-          "value": "\u26a0\ufe0f Cannot verify - no controllers",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Copy-Paste Inconsistencies",
-          "value": "\u26a0\ufe0f WebClient beans are similar",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Overconfident Assumptions",
-          "value": "\u2705 Comments are factual",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Inappropriate Design Patterns",
-          "value": "\u2705 Patterns fit use case",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Missing Error Context",
-          "value": "\u26a0\ufe0f Cannot verify - no error handling",
+          "value": "\u2705 Compliant",
           "target": "0"
         },
         {
           "label": "Unrealistic Performance Claims",
-          "value": "\u2705 No performance claims made",
+          "value": "\u2705 Compliant",
           "target": "0"
         }
       ],
       "items": [
         {
-          "title": "Valid Spring Data Query Methods",
+          "title": "Real Implementation",
           "assessment": "compliant",
-          "description": "All repository methods follow Spring Data naming conventions"
+          "description": "All classes and methods are properly implemented"
         },
         {
-          "title": "Standard Library Usage",
+          "title": "Valid Dependencies",
           "assessment": "compliant",
-          "description": "All imports are from standard Spring/Java libraries"
+          "description": "All imported libraries exist and are correctly used"
         },
         {
-          "title": "Incomplete File Provided",
-          "assessment": "critical",
-          "description": "OrderMapper.java is truncated - cannot assess completeness"
+          "title": "Realistic Design",
+          "assessment": "compliant",
+          "description": "Architecture matches real-world mutual fund order processing"
+        },
+        {
+          "title": "Proper Error Handling",
+          "assessment": "compliant",
+          "description": "Error scenarios are realistic and properly handled"
         }
       ],
       "issues": [
         {
-          "severity": "critical",
-          "title": "Truncated Source File",
-          "description": "OrderMapper.java ends abruptly mid-class declaration",
-          "file_path": "src/main/java/com/mf/order/mapper/OrderMapper.java",
-          "code_snippet": "public class OrderRe",
-          "recommendation": "Provide complete source file for proper analysis",
-          "fix_example": "// Complete the class definition with all methods"
-        },
-        {
-          "severity": "info",
-          "title": "Repetitive WebClient Bean Definitions",
-          "description": "Four WebClient beans with nearly identical configuration",
-          "file_path": "src/main/java/com/mf/order/config/WebClientConfig.java",
-          "code_snippet": "WebClient.builder().baseUrl(baseUrl).defaultHeader",
-          "recommendation": "Extract common configuration to reduce duplication",
-          "fix_example": "private WebClient createWebClient(String baseUrl) { ... }"
+          "severity": "warning",
+          "title": "Dummy Service Implementations",
+          "description": "External services use dummy implementations for development",
+          "file_path": "src/main/java/com/mf/order/external/kyc/DummyKycService.java",
+          "code_snippet": "boolean isSuccess = true;",
+          "recommendation": "Ensure dummy services are replaced with real integrations in production",
+          "fix_example": "// Use feature flags to switch between dummy and real implementations"
         }
       ]
     },
@@ -748,110 +621,111 @@
       "metrics": [
         {
           "label": "Domain-Specific Compliance",
-          "value": "\u2705 Mutual fund domain logic appropriate",
+          "value": "\u2705 Compliant",
           "target": "0"
         }
       ],
       "items": [
         {
-          "title": "Proper Financial Domain Modeling",
+          "title": "BSE Star MF Integration",
           "assessment": "compliant",
-          "description": "Order, Investor, SchemeMaster entities align with MF domain"
-        },
-        {
-          "title": "BSE Star Integration Prepared",
-          "assessment": "compliant",
-          "description": "WebClient configured for BSE Star MF API integration"
+          "description": "Proper BSE Star v2 API integration with order placement and MIS upload"
         },
         {
           "title": "Order Lifecycle Management",
           "assessment": "compliant",
-          "description": "Repository methods support order status tracking and matching"
+          "description": "Complete order flow: Validation \u2192 Placement \u2192 Payment \u2192 MIS \u2192 Confirmation"
+        },
+        {
+          "title": "KYC/FATCA Validation",
+          "assessment": "compliant",
+          "description": "Pre-order KYC and FATCA checks as per regulatory requirements"
+        },
+        {
+          "title": "Payment Processing",
+          "assessment": "compliant",
+          "description": "Payment integration with UTR tracking and MIS upload to BSE"
+        },
+        {
+          "title": "External Feed Matching",
+          "assessment": "compliant",
+          "description": "RTA feed matching logic with multiple matching strategies"
+        },
+        {
+          "title": "Webhook Integration",
+          "assessment": "compliant",
+          "description": "BSE webhook handling for real-time order status updates"
         }
       ],
-      "issues": []
+      "issues": [
+        {
+          "severity": "warning",
+          "title": "MIS Upload Retry Logic",
+          "description": "MIS upload failures are logged but retry mechanism could be more robust",
+          "file_path": "src/main/java/com/mf/order/service/OrderPaymentService.java",
+          "code_snippet": "} catch (Exception e) {\n    log.error(\"MIS upload failed for order: {}, will retry later\", order.getOrderNumber(), e);",
+          "recommendation": "Implement exponential backoff retry for MIS upload failures",
+          "fix_example": "@Retryable(maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2))\npublic Order uploadMis(Order order)"
+        }
+      ]
     }
   ],
   "priority_actions": {
-    "critical": [
-      {
-        "title": "Complete OrderMapper Implementation",
-        "description": "OrderMapper.java is truncated and incomplete",
-        "category": "Code Quality"
-      },
-      {
-        "title": "Add Authentication for BSE API",
-        "description": "BSE WebClient missing authentication configuration",
-        "category": "Security"
-      },
-      {
-        "title": "Implement Dead Letter Queue",
-        "description": "Kafka consumers need DLQ for failed message handling",
-        "category": "Error Handling"
-      }
-    ],
+    "critical": [],
     "warnings": [
       {
-        "title": "Add Pagination to List Queries",
-        "description": "Repository methods returning List may cause memory issues",
-        "category": "Performance"
-      },
-      {
-        "title": "Configure WebClient Retry Logic",
-        "description": "External API calls lack retry mechanism for transient failures",
+        "title": "Enhance Kafka Error Handling with Dead Letter Queue",
+        "description": "Kafka consumers acknowledge all messages including errors; consider DLQ",
         "category": "Error Handling"
       },
       {
-        "title": "Add Distributed Tracing",
-        "description": "No correlation ID propagation for request tracing",
-        "category": "Logging"
+        "title": "Replace Dummy Services in Production",
+        "description": "Ensure KYC, FATCA, Payment dummy services are replaced with real integrations",
+        "category": "LLM as a Judge"
       },
       {
-        "title": "Implement Circuit Breaker",
-        "description": "External API calls need circuit breaker for fault tolerance",
-        "category": "Security"
-      },
-      {
-        "title": "Add Order Matching Concurrency Control",
-        "description": "Potential race condition in external feed matching",
-        "category": "Custom Critique"
+        "title": "Implement Robust MIS Upload Retry",
+        "description": "Add exponential backoff retry mechanism for MIS upload failures",
+        "category": "Domain"
       }
     ],
     "suggestions": [
       {
-        "title": "Extract WebClient Configuration",
-        "description": "Reduce duplication in WebClient bean definitions",
-        "category": "Code Quality"
+        "title": "Complete BSE Webhook Signature Validation",
+        "description": "Implement HMAC-SHA256 signature validation for BSE webhooks",
+        "category": "Security"
       },
       {
-        "title": "Make Kafka Concurrency Configurable",
-        "description": "Hardcoded concurrency value should be externalized",
-        "category": "Custom Critique"
-      },
-      {
-        "title": "Create Configuration Properties Class",
-        "description": "Group BSE timeout settings in @ConfigurationProperties",
+        "title": "Add Circuit Breaker for BSE API",
+        "description": "Implement Resilience4j circuit breaker for external BSE calls",
         "category": "Architecture"
       },
       {
-        "title": "Tune WebClient Buffer Size",
-        "description": "16MB buffer may be excessive for typical responses",
+        "title": "Cache Scheme Master Data",
+        "description": "Add caching for frequently accessed scheme master lookups",
         "category": "Performance"
       },
       {
-        "title": "Simplify Complex Query Method Names",
-        "description": "Use @Query annotation for methods with many parameters",
+        "title": "Add MDC for Distributed Tracing",
+        "description": "Implement correlation IDs using MDC for better request tracking",
+        "category": "Logging"
+      },
+      {
+        "title": "Use Java Records for DTOs",
+        "description": "Leverage Java 21 Records for immutable DTO classes",
         "category": "Code Quality"
       }
     ]
   },
   "final_assessment": {
+    "grade": "Good",
+    "status": "good",
     "key_improvements": [
-      "Complete the truncated OrderMapper.java file",
-      "Add authentication and circuit breaker to BSE API WebClient",
-      "Implement Dead Letter Queue for Kafka message failures",
-      "Add pagination to repository methods returning large result sets",
-      "Configure distributed tracing with correlation IDs"
+      "Enhance Kafka error handling with dead letter queue for failed message processing",
+      "Implement robust retry mechanism with exponential backoff for MIS upload failures",
+      "Complete BSE webhook signature validation for production security",
+      "Add circuit breaker pattern for external BSE API calls to improve resilience",
+      "Replace dummy service implementations with real integrations before production deployment"
     ]
   }
 }

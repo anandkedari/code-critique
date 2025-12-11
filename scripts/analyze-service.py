@@ -1,18 +1,25 @@
 #!/usr/bin/env python3
 """
-Code Critique Report Generator with Real AI Analysis
+Code Critique Report Generator with Multi-Provider AI Support
 
-This script analyzes code using Anthropic Claude AI and generates standardized reports.
+Analyzes code using AI (Claude, Ollama, Perplexity) and generates standardized reports.
 
 Usage:
-    python3 analyze-service.py <service-path> [--api-key YOUR_KEY]
+    python3 analyze-service.py <service-path> [OPTIONS]
 
-Example:
+Examples:
+    # Use default provider (Claude)
     python3 analyze-service.py ../../customer-service
-    python3 analyze-service.py ../../customer-service --api-key sk-ant-...
+    
+    # Use Ollama with Qwen3-Coder
+    python3 analyze-service.py ../../customer-service --provider ollama
+    
+    # Full customization
+    python3 analyze-service.py ../../customer-service --provider ollama --model qwen2.5-coder:14b
 
-Environment Variable:
-    export ANTHROPIC_API_KEY="your-key-here"
+Environment Variables:
+    AI_PROVIDER, AI_MODEL, AI_API_URL, AI_API_KEY
+    ANTHROPIC_API_KEY, PERPLEXITY_API_KEY
 """
 
 import sys
@@ -185,209 +192,6 @@ def build_codebase_context(code_files):
     context['packages'] = sorted(list(context['packages']))
     print(f"   ✓ Context built: {len(context['file_structures'])} files, {len(context['packages'])} packages\n")
     return context
-
-def analyze_with_claude(service_path, code_files, api_key):
-    """Analyze code using Anthropic Claude AI with full codebase context."""
-    try:
-        import anthropic
-    except ImportError:
-        print("❌ Error: anthropic package not installed")
-        print("   Run: pip install anthropic")
-        sys.exit(1)
-    
-    print("🤖 Analyzing code with Anthropic Claude AI...")
-    print(f"   Service: {Path(service_path).name}")
-    print(f"   Files: {len(code_files)}")
-    print(f"   Total size: {sum(f['size'] for f in code_files):,} bytes\n")
-    
-    # Phase 1: Build full codebase context
-    codebase_context = build_codebase_context(code_files)
-    
-    # Phase 2: Analyze in batches with context
-    batch_size = 15  # Analyze 15 files per batch
-    total_batches = (len(code_files) + batch_size - 1) // batch_size
-    
-    print(f"📊 Analysis Plan:")
-    print(f"   Batch size: {batch_size} files")
-    print(f"   Total batches: {total_batches}")
-    print(f"   Strategy: Full context analysis\n")
-    
-    # Load configuration and prompts
-    config = load_config()
-    confidence_threshold = config.get('confidence_threshold', 70)
-    
-    # Load Claude API configuration
-    api_config = config.get('claude_api', {})
-    model = api_config.get('model', 'claude-sonnet-4-5-20250929')
-    max_tokens = api_config.get('max_tokens', 20000)
-    temperature = api_config.get('temperature', 0)
-    timeout = api_config.get('timeout', 180.0)
-    
-    system_prompt = load_system_prompt()
-    guidelines = load_guidelines()
-    
-    print(f"   📊 Confidence Threshold: {confidence_threshold}%")
-    print(f"   🤖 Model: {model}")
-    print(f"   🎯 Max Tokens: {max_tokens:,}")
-    print(f"   (AI will only report issues/metrics with >{confidence_threshold}% confidence)\n")
-    
-    # Call Claude API
-    client = anthropic.Anthropic(api_key=api_key)
-    
-    print("   🚀 Sending to Claude API...\n")
-    
-    # Prepare context summary (lightweight)
-    context_summary = {
-        'total_files': codebase_context['total_files'],
-        'packages': codebase_context['packages'],
-        'key_files': codebase_context['key_files'],
-        'file_list': [s['file'] for s in codebase_context['file_structures']]
-    }
-    
-    # Prepare detailed code content
-    # Include structure of ALL files + full content of priority files
-    priority_files = []
-    other_files = []
-    
-    for file_info in code_files:
-        if any(keyword in file_info['path'].lower() for keyword in 
-               ['controller', 'service', 'repository', 'config', 'application', 'main', 'entity', 'model']):
-            priority_files.append(file_info)
-        else:
-            other_files.append(file_info)
-    
-    # Sort both lists to ensure deterministic order
-    priority_files.sort(key=lambda x: x['path'])
-    other_files.sort(key=lambda x: x['path'])
-    
-    # Build complete codebase content - NO TRUNCATION
-    print("📦 Preparing full codebase for analysis...")
-    
-    detailed_content = "COMPLETE CODEBASE - ALL FILES WITH FULL CONTENT:\n" + "="*70 + "\n\n"
-    
-    # Send ALL priority files with COMPLETE content
-    detailed_content += f"PRIORITY FILES ({len(priority_files)} files):\n" + "-"*70 + "\n\n"
-    for f in priority_files:  # ALL priority files, not just 15
-        detailed_content += f"FILE: {f['path']}\n{'-'*70}\n{f['content']}\n\n"  # FULL content, not truncated
-    
-    # Send ALL other files with COMPLETE content
-    detailed_content += f"\n\nOTHER FILES ({len(other_files)} files):\n" + "-"*70 + "\n\n"
-    for f in other_files:  # ALL other files, not just 30
-        detailed_content += f"FILE: {f['path']}\n{'-'*70}\n{f['content']}\n\n"  # FULL content, not just structure
-    
-    total_chars = len(detailed_content)
-    estimated_tokens = total_chars // 4  # Rough estimate: 1 token ≈ 4 chars
-    print(f"   📊 Total content: {total_chars:,} characters (~{estimated_tokens:,} tokens)")
-    print(f"   📁 Priority files: {len(priority_files)} (full content)")
-    print(f"   📁 Other files: {len(other_files)} (full content)")
-    
-    if estimated_tokens > 180000:  # Claude has 200K limit, leave room for response
-        print(f"   ⚠️  Warning: Content size ({estimated_tokens:,} tokens) is large")
-        print(f"   💡 Consider: Excluding large config/data files if analysis fails")
-    
-    # Start progress indicator in background thread
-    stop_event = threading.Event()
-    progress_thread = threading.Thread(target=show_progress, args=(stop_event,))
-    progress_thread.daemon = True
-    progress_thread.start()
-    
-    try:
-        # Construct comprehensive prompt with context and config
-        prompt = f"""{system_prompt}
-
-CONFIGURATION:
-- **CONFIDENCE_THRESHOLD**: {confidence_threshold}%
-- You MUST have >{confidence_threshold}% confidence to report ANY issue or metric violation
-- If confidence is <={confidence_threshold}%, skip the metric entirely or mark as "✅ Compliant"
-
-CODEBASE OVERVIEW:
-Total Files: {context_summary['total_files']}
-Packages/Modules: {', '.join(context_summary['packages'])}
-Key Files: {', '.join(context_summary['key_files'][:10])}
-
-COMPLETE CODEBASE CONTENT:
-{detailed_content}
-
-CRITICAL INSTRUCTIONS:
-1. Output ONLY valid JSON (no markdown wrappers)
-2. Include ALL 9 categories with full metrics (including LLM as a Judge)
-3. Keep descriptions concise (under 80 chars)
-4. List ALL issues found (no artificial limits)
-5. Code snippets max 2 lines each
-6. MUST output COMPLETE valid JSON
-7. DYNAMICALLY COUNT issues - do not use fixed numbers
-
-STATUS VALUES (use these exact values):
-- "excellent": Outstanding code quality
-- "good": Solid implementation with minor issues
-- "needs-work": Significant improvements needed
-- "critical": Major problems requiring immediate attention
-
-GRADE VALUES for final_assessment (use ONE of these):
-- "Excellent"
-- "Good"
-- "Needs Work"
-- "Critical"
-
-Begin JSON:"""
-
-        response = client.messages.create(
-            model=model,
-            max_tokens=max_tokens,
-            temperature=temperature,
-            timeout=timeout,
-            messages=[{
-                "role": "user",
-                "content": prompt
-            }]
-        )
-        
-        # Stop progress indicator
-        stop_event.set()
-        progress_thread.join(timeout=1)
-        
-        print("\n   ✓ Received response from Claude\n")
-        
-        # Extract JSON from response
-        json_text = response.content[0].text
-        
-        # Handle markdown code blocks
-        if "```json" in json_text:
-            json_text = json_text.split("```json")[1].split("```")[0].strip()
-        elif "```" in json_text:
-            json_text = json_text.split("```")[1].split("```")[0].strip()
-        
-        # Parse JSON
-        analysis_data = json.loads(json_text)
-        
-        # Update timestamp to current time in IST
-        ist_now = datetime.now(ZoneInfo('Asia/Kolkata'))
-        analysis_data['metadata']['generated_at'] = ist_now.strftime('%Y-%m-%d %H:%M:%S IST')
-        
-        # Ensure files_scanned is accurate
-        analysis_data['metadata']['files_scanned'] = len(code_files)
-        analysis_data['summary']['files_scanned'] = len(code_files)
-        
-        # CRITICAL: Validate and correct counts
-        analysis_data = validate_and_correct_counts(analysis_data)
-        
-        return analysis_data
-        
-    except anthropic.APIError as e:
-        stop_event.set()
-        progress_thread.join(timeout=1)
-        print(f"\n❌ API Error: {e}")
-        sys.exit(1)
-    except json.JSONDecodeError as e:
-        stop_event.set()
-        progress_thread.join(timeout=1)
-        print(f"\n❌ JSON Parse Error: {e}")
-        print("Response was:")
-        print(json_text[:500])
-        sys.exit(1)
-    finally:
-        # Ensure progress indicator is stopped
-        stop_event.set()
 
 def validate_and_correct_counts(data):
     """Validate AI counts match actual issues and correct if needed."""
