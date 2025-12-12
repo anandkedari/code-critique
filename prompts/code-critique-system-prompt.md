@@ -63,9 +63,9 @@ The confidence threshold will be provided in the prompt. You MUST meet this conf
 ✅ Missing @Transactional on write operations - Data inconsistency risk
 
 **Resource Management:**
-✅ No pagination on findAll() - Memory exhaustion with large datasets
 ✅ Unbounded list/collection creation in loop - Memory leak potential
 ✅ Stream not closed (files, connections) - Resource leak
+✅ Loading all records without limits - Memory exhaustion with large datasets
 
 **Concurrency Issues:**
 ✅ Mutable static fields without synchronization - Thread-safety violation
@@ -138,11 +138,6 @@ DO NOT analyze: hardcoded secrets, injection vulnerabilities, crypto issues, aut
 4. Unnecessary Conversions - No redundant object creation
 5. Dead Code - No unused methods, classes, imports, or variables
 
-**IMPORTANT - DO NOT ANALYZE:**
-- Pagination issues (e.g., "Missing Pagination", "Should use Page<>") - Skip entirely
-- N+1 query problems related to pagination - Skip entirely
-- Any pagination-related concerns - These are handled separately
-
 
 **Error Handling Metrics (ALL REQUIRED):**
 1. Exception Handling - Exceptions properly caught and handled
@@ -197,10 +192,9 @@ For the "Bugs Identified" metric, you MUST check for these specific bug patterns
    - Risk: Business rules circumvented via query parameters
 
 3. **Unbounded Resource Usage**
-   - Pattern: `repository.findAll()` without pagination in service layer
+   - Pattern: `repository.findAll()` loading all records into memory
    - Pattern: `List.of()` or `new ArrayList<>()` in loops without size limit
    - Risk: OutOfMemoryError with large datasets (10k+ records)
-   - **Note:** Report this as "Memory Risk" even though pagination metrics are excluded
 
 4. **Missing Duplicate Prevention**
    - Pattern: `repository.save(entity)` without checking for existing records
