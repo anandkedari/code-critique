@@ -34,6 +34,11 @@ from zoneinfo import ZoneInfo
 from jinja2 import Environment, FileSystemLoader
 import jsonschema
 
+# File patterns configuration
+INCLUDE_PATTERNS = ['**/*.java', '**/*.py', '**/*.js', '**/*.ts', '**/*.go']
+EXCLUDE_DIRS = ['build', 'target', 'node_modules', '.git', 'venv', 'dist', 'gradle']
+PRIORITY_KEYWORDS = ['controller', 'service', 'repository', 'config', 'application', 'main', 'entity', 'model']
+
 def load_code_files(service_path):
     """Load all relevant source code files from the service."""
     service_path = Path(service_path)
@@ -41,12 +46,9 @@ def load_code_files(service_path):
     
     print(f"📁 Loading code files from: {service_path.name}")
     
-    include_patterns = ['**/*.java', '**/*.py', '**/*.js', '**/*.ts', '**/*.go']
-    exclude_dirs = ['build', 'target', 'node_modules', '.git', 'venv', 'dist', 'gradle']
-    
-    for pattern in include_patterns:
+    for pattern in INCLUDE_PATTERNS:
         for file_path in service_path.glob(pattern):
-            if any(excluded in file_path.parts for excluded in exclude_dirs):
+            if any(excluded in file_path.parts for excluded in EXCLUDE_DIRS):
                 continue
             
             try:
@@ -87,17 +89,44 @@ def load_system_prompt():
     with open(prompt_file, 'r') as f:
         return f.read()
 
+def load_test_scenarios(service_path, scenarios_path=None):
+    """Load test scenarios from specified path or service directory."""
+    if scenarios_path:
+        # Use provided path
+        scenarios_file = Path(scenarios_path)
+        print(f"📋 Loading test scenarios from: {scenarios_file}")
+    else:
+        # Default: look in service directory
+        scenarios_file = Path(service_path) / 'test-scenarios.yml'
+        print(f"📋 Looking for test scenarios: {scenarios_file}")
+    
+    if not scenarios_file.exists():
+        if scenarios_path:
+            print(f"   ✗ File not found: {scenarios_file}\n")
+        else:
+            print(f"   ℹ️  No test-scenarios.yml found (optional)\n")
+        return None
+    
+    try:
+        with open(scenarios_file, 'r', encoding='utf-8') as f:
+            content = f.read()
+            print(f"   ✓ Test scenarios loaded ({len(content)} characters)\n")
+            return content
+    except Exception as e:
+        print(f"   ✗ Error loading scenarios: {e}\n")
+        return None
+
 def show_progress(stop_event):
     """Show animated progress indicator."""
     categories = [
         "🏗️  Architecture & Design",
-        "🔒 Security", 
         "✨ Code Quality",
         "⚡ Performance",
         "🛡️  Error Handling",
         "📝 Logging",
         "🔍 Self-Critique",
-        "🎯 Domain-Specific"
+        "🎯 Domain-Specific",
+        "🧪 Functional Compliance"
     ]
     
     idx = 0
@@ -174,8 +203,7 @@ def build_codebase_context(code_files):
             context['packages'].add(path_parts[0])
         
         # Identify key files
-        if any(keyword in file_info['path'].lower() for keyword in 
-               ['controller', 'service', 'repository', 'config', 'application', 'main']):
+        if any(keyword in file_info['path'].lower() for keyword in PRIORITY_KEYWORDS):
             context['key_files'].append(file_info['path'])
     
     context['packages'] = sorted(list(context['packages']))
@@ -199,12 +227,17 @@ def validate_and_correct_counts(data):
                 print(f"   ⚠️  {category_name}: Metric '{metric.get('label')}' shows violations but no issues found")
     
     # Count actual issues by severity across all categories
+    # EXCLUDE Functional Compliance from bug counts
     actual_critical = 0
     actual_warning = 0
     actual_info = 0
     actual_compliant = 0
     
     for category in data.get('categories', []):
+        # Skip Functional Compliance category for bug counts
+        if category.get('name') == 'Functional Compliance':
+            continue
+        
         for issue in category.get('issues', []):
             severity = issue.get('severity', '').lower()
             if severity == 'critical':
@@ -254,7 +287,7 @@ def validate_and_correct_counts(data):
     else:
         print("   ✓ All counts accurate!")
     
-    # Validate category count
+    # Validate category count  
     expected_categories = 9
     actual_categories = len(data.get('categories', []))
     if actual_categories != expected_categories:
@@ -262,22 +295,22 @@ def validate_and_correct_counts(data):
     
     return data
 
-def analyze_with_ai(service_path, code_files, config):
+def analyze_with_ai(service_path, code_files, config, scenarios_path=None):
     """Route to appropriate AI provider based on configuration."""
     provider = config['provider']
     
     if provider == 'claude':
-        return _analyze_with_claude(service_path, code_files, config)
+        return _analyze_with_claude(service_path, code_files, config, scenarios_path)
     elif provider == 'ollama':
-        return _analyze_with_ollama(service_path, code_files, config)
+        return _analyze_with_ollama(service_path, code_files, config, scenarios_path)
     elif provider == 'perplexity':
-        return _analyze_with_perplexity(service_path, code_files, config)
+        return _analyze_with_perplexity(service_path, code_files, config, scenarios_path)
     else:
         print(f"❌ Unknown provider: {provider}")
         print("   Supported providers: claude, ollama, perplexity")
         sys.exit(1)
 
-def _analyze_with_claude(service_path, code_files, config):
+def _analyze_with_claude(service_path, code_files, config, scenarios_path=None):
     """Analyze with Claude (Anthropic)."""
     try:
         import anthropic
@@ -290,6 +323,7 @@ def _analyze_with_claude(service_path, code_files, config):
     codebase_context = build_codebase_context(code_files)
     system_prompt = load_system_prompt()
     detailed_content = _prepare_code_content(code_files)
+    test_scenarios = load_test_scenarios(service_path, scenarios_path)
     
     # Start progress indicator
     stop_event = threading.Event()
@@ -298,7 +332,7 @@ def _analyze_with_claude(service_path, code_files, config):
     progress_thread.start()
     
     try:
-        prompt = _build_analysis_prompt(system_prompt, codebase_context, detailed_content, config)
+        prompt = _build_analysis_prompt(system_prompt, codebase_context, detailed_content, config, test_scenarios)
         
         client = anthropic.Anthropic(api_key=config['api_key'])
         response = client.messages.create(
@@ -321,7 +355,7 @@ def _analyze_with_claude(service_path, code_files, config):
         print(f"\n❌ Error: {e}")
         sys.exit(1)
 
-def _analyze_with_ollama(service_path, code_files, config):
+def _analyze_with_ollama(service_path, code_files, config, scenarios_path=None):
     """Analyze with Ollama (local models like Qwen3-Coder)."""
     try:
         import requests
@@ -334,6 +368,7 @@ def _analyze_with_ollama(service_path, code_files, config):
     codebase_context = build_codebase_context(code_files)
     system_prompt = load_system_prompt()
     detailed_content = _prepare_code_content(code_files)
+    test_scenarios = load_test_scenarios(service_path, scenarios_path)
     
     # Start progress indicator
     stop_event = threading.Event()
@@ -342,7 +377,7 @@ def _analyze_with_ollama(service_path, code_files, config):
     progress_thread.start()
     
     try:
-        prompt = _build_analysis_prompt(system_prompt, codebase_context, detailed_content, config)
+        prompt = _build_analysis_prompt(system_prompt, codebase_context, detailed_content, config, test_scenarios)
         
         # Ollama API call
         response = requests.post(
@@ -372,7 +407,7 @@ def _analyze_with_ollama(service_path, code_files, config):
         print(f"\n❌ Error: {e}")
         sys.exit(1)
 
-def _analyze_with_perplexity(service_path, code_files, config):
+def _analyze_with_perplexity(service_path, code_files, config, scenarios_path=None):
     """Analyze with Perplexity (OpenAI-compatible API)."""
     try:
         import openai
@@ -385,6 +420,7 @@ def _analyze_with_perplexity(service_path, code_files, config):
     codebase_context = build_codebase_context(code_files)
     system_prompt = load_system_prompt()
     detailed_content = _prepare_code_content(code_files)
+    test_scenarios = load_test_scenarios(service_path, scenarios_path)
     
     # Start progress indicator
     stop_event = threading.Event()
@@ -393,7 +429,7 @@ def _analyze_with_perplexity(service_path, code_files, config):
     progress_thread.start()
     
     try:
-        prompt = _build_analysis_prompt(system_prompt, codebase_context, detailed_content, config)
+        prompt = _build_analysis_prompt(system_prompt, codebase_context, detailed_content, config, test_scenarios)
         
         client = openai.OpenAI(api_key=config['api_key'], base_url=config['api_url'])
         response = client.chat.completions.create(
@@ -422,8 +458,7 @@ def _prepare_code_content(code_files):
     other_files = []
     
     for file_info in code_files:
-        if any(keyword in file_info['path'].lower() for keyword in 
-               ['controller', 'service', 'repository', 'config', 'application', 'main', 'entity', 'model']):
+        if any(keyword in file_info['path'].lower() for keyword in PRIORITY_KEYWORDS):
             priority_files.append(file_info)
         else:
             other_files.append(file_info)
@@ -453,13 +488,58 @@ def _prepare_code_content(code_files):
     
     return detailed_content
 
-def _build_analysis_prompt(system_prompt, codebase_context, detailed_content, config):
+def _build_analysis_prompt(system_prompt, codebase_context, detailed_content, config, test_scenarios=None):
     """Build analysis prompt for AI."""
     context_summary = {
         'total_files': codebase_context['total_files'],
         'packages': codebase_context['packages'],
         'key_files': codebase_context['key_files']
     }
+    
+    # Build test scenarios section if provided
+    scenarios_section = ""
+    if test_scenarios:
+        scenarios_section = f"""
+
+TEST SCENARIOS FOR VALIDATION:
+The service includes test-scenarios.yml with business requirements to validate.
+You MUST validate ONLY the "scenarios:" list in Category 10 (Functional Compliance).
+
+{test_scenarios}
+
+CRITICAL: Focus ONLY on the "scenarios:" section, NOT "global_validations"!
+
+For each scenario in the "scenarios:" list, you MUST:
+1. Create an "items" entry with:
+   - title: The exact scenario text from test-scenarios.yml
+   - assessment: "compliant" / "critical" / "warning" / "info"
+   - description: Brief validation result
+2. Search the codebase for relevant implementation
+3. Provide FILE PATHS and LINE NUMBERS as evidence
+4. Quote actual CODE SNIPPETS in the issues array
+5. Mark as ✅ PASS (compliant) / ❌ FAIL (critical) / ⚠️ PARTIAL (warning) / ❓ CANNOT_VERIFY (info)
+
+Example structure:
+"items": [
+  {{
+    "title": "if the customer does not exist, a new customer is created",
+    "assessment": "compliant",
+    "description": "Verified: CustomerService.createCustomer() creates new customer when not found"
+  }}
+],
+"issues": [
+  {{
+    "severity": "info",
+    "title": "Scenario: if the customer does not exist, a new customer is created",
+    "description": "Implementation found and verified",
+    "file_path": "CustomerServiceImpl.java",
+    "line_number": 42,
+    "code_snippet": "Customer customer = customerMapper.toEntity(request);\\ncustomer.setCreatedAt(LocalDateTime.now());"
+  }}
+]
+
+NEVER assume behavior without seeing actual code!
+"""
     
     return f"""{system_prompt}
 
@@ -472,13 +552,13 @@ CODEBASE OVERVIEW:
 Total Files: {context_summary['total_files']}
 Packages/Modules: {', '.join(context_summary['packages'])}
 Key Files: {', '.join(context_summary['key_files'][:10])}
-
+{scenarios_section}
 COMPLETE CODEBASE CONTENT:
 {detailed_content}
 
 CRITICAL INSTRUCTIONS:
 1. Output ONLY valid JSON (no markdown wrappers)
-2. Include ALL 9 categories with full metrics (including LLM as a Judge)
+2. Include ALL 10 categories with full metrics (including Test Scenario Compliance if scenarios provided)
 3. Keep descriptions concise (under 80 chars)
 4. List ALL issues found (no artificial limits)
 5. Code snippets max 2 lines each
@@ -584,6 +664,7 @@ Examples:
     
     # Analysis settings
     parser.add_argument('--confidence', type=int, help='Confidence threshold (0-100)')
+    parser.add_argument('--scenarios', help='Path to test-scenarios.yml file')
     
     args = parser.parse_args()
     
@@ -651,8 +732,11 @@ Examples:
     print(f"   API URL: {final_config['api_url']}")
     print(f"   Confidence Threshold: {final_config['confidence_threshold']}%\n")
     
+    # Get scenarios path (CLI > ENV > None)
+    scenarios_path = args.scenarios or os.environ.get('TEST_SCENARIOS_PATH')
+    
     # Analyze with AI (route to appropriate provider)
-    analysis_data = analyze_with_ai(service_path, code_files, final_config)
+    analysis_data = analyze_with_ai(service_path, code_files, final_config, scenarios_path)
     
     # Save JSON
     output_json.parent.mkdir(parents=True, exist_ok=True)
