@@ -1,0 +1,61 @@
+.PHONY: help docker_login build publish analyze analyze_clean validate validate_clean metadata clean
+
+# Colors for output
+BLUE := \033[0;34m
+GREEN := \033[0;32m
+YELLOW := \033[0;33m
+RED := \033[0;31m
+NC := \033[0m # No Color
+
+# Artifactory configuration
+ARTIFACTORY_DOCKER_REGISTRY := artifactory.idfcbank.com/docker
+ARTIFACTORY_DOCKER_LIB_REGISTRY := $(ARTIFACTORY_DOCKER_REGISTRY)/optimus-library
+
+# Image configuration
+IMAGE_NAME := code-critique
+REVISION := $(or ${GO_REVISION_CODE_CRITIQUE}, latest)
+PYTHON_VERSION := 3.11
+
+# Service configuration
+SERVICE_NAME_FROM_ENV := $(or ${SERVICE_NAME}, $(shell basename ${SERVICE_PATH}))
+COMPOSE_PROJECT_NAME := code-critique-${SERVICE_NAME_FROM_ENV}
+
+# Metadata for tracking
+define METADATA
+export GO_REVISION_CODE_CRITIQUE=$(GO_REVISION_CODE_CRITIQUE)
+export GIT_REPO_NAME=code-critique
+export SERVICE_NAME=$(SERVICE_NAME_FROM_ENV)
+export BUILD_TIMESTAMP=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+endef
+export METADATA
+
+docker_login: ## Login to Docker artifactory
+	@echo "$(BLUE)Logging into artifactory...$(NC)"
+	@docker login -u ${ARTIFACTORY_USER} -p ${ARTIFACTORY_PASSWORD} ${ARTIFACTORY_DOCKER_REGISTRY}
+	@echo "$(GREEN)✓ Login successful$(NC)"
+
+build: docker_login ## Build Docker image
+	@echo "$(BLUE)Building code-critique:$(REVISION)...$(NC)"
+	@docker build . \
+		-f Dockerfile.idfc \
+		--build-arg PYTHON_VERSION=$(PYTHON_VERSION) \
+		--build-arg ARTIFACTORY_USER=${ARTIFACTORY_USER} \
+		--build-arg ARTIFACTORY_PASSWORD=${ARTIFACTORY_PASSWORD} \
+		--build-arg http_proxy=${http_proxy} \
+		--build-arg https_proxy=${https_proxy} \
+		-t $(ARTIFACTORY_DOCKER_LIB_REGISTRY)/$(IMAGE_NAME):$(REVISION)
+	@echo "$(GREEN)✓ Build complete: $(IMAGE_NAME):$(REVISION)$(NC)"
+
+publish: docker_login ## Publish image to artifactory
+	@echo "$(BLUE)Publishing $(IMAGE_NAME):$(REVISION) to artifactory...$(NC)"
+	@docker push $(ARTIFACTORY_DOCKER_LIB_REGISTRY)/$(IMAGE_NAME):$(REVISION)
+	@echo "$(GREEN)✓ Published successfully$(NC)"
+
+analyze: docker_login ## Run code analysis
+	@echo "$(BLUE)Running code analysis for $(SERVICE_NAME_FROM_ENV)...$(NC)"
+	@REVISION=${REVISION} SERVICE_NAME=${SERVICE_NAME_FROM_ENV} docker-compose \
+		-p analyze-${COMPOSE_PROJECT_NAME} \
+		-f docker-compose.idfc.yml \
+		run --rm analyze
+	@echo "$(GREEN)✓ Analysis complete!$(NC)"
+	@echo "$(YELLOW)Report: reports/$(SERVICE_NAME_FROM_ENV)/code-critique-report.html$(NC)"

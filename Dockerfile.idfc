@@ -1,0 +1,56 @@
+# Code-Critique AI Analysis Tool - IDFC Enterprise Version
+
+ARG PYTHON_VERSION=3.11
+FROM artifactory.idfcbank.com/docker/python:${PYTHON_VERSION}-slim
+
+# Build arguments for corporate environment
+ARG ARTIFACTORY_USER
+ARG ARTIFACTORY_PASSWORD
+
+# Environment variables for authentication and proxy
+ENV ARTIFACTORY_USER=${ARTIFACTORY_USER} \
+    ARTIFACTORY_PASSWORD=${ARTIFACTORY_PASSWORD} \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Configure pip to use artifactory
+ENV PIP_INDEX_URL=https://${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}@artifactory.idfcbank.com/artifactory/api/pypi/pypi/simple
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add internal CA certificate (if exists)
+COPY infrastructure/IDFCBANKCA.pem /usr/local/share/ca-certificates/IDFCBANKCA.crt 2>/dev/null || echo "No CA cert found, skipping..."
+RUN update-ca-certificates || true
+
+# Set working directory
+WORKDIR /app/code-critique
+
+# Install Python dependencies from artifactory
+RUN pip install --no-cache-dir \
+    jinja2 \
+    jsonschema \
+    requests \
+
+# Install provider-specific package based on build argument
+RUN if [ "$AI_PROVIDER" = "anthropic" ]; then \
+        pip install --no-cache-dir anthropic; \
+    elif [ "$AI_PROVIDER" = "openai" ]; then \
+        pip install --no-cache-dir openai; \
+    else \
+        echo "Invalid AI_PROVIDER: $AI_PROVIDER. Must be 'anthropic' or 'openai'" && exit 1; \
+    fi
+
+# Copy code-critique framework
+COPY . /app/code-critique/
+
+# Create reports directory
+#RUN mkdir -p /app/code-critique/reports
+
+# Set working directory
+WORKDIR /app/code-critique

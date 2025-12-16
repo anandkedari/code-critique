@@ -1,0 +1,43 @@
+version: '3.8'
+
+# Shared configuration for extra hosts (internal DNS resolution)
+x-extra-hosts: &x-extra-hosts
+  extra_hosts:
+    - "artifactory.idfcbank.com:10.176.6.140"
+    - "host.docker.internal:host-gateway"
+
+services:
+  # Main analysis service
+  analyze:
+    <<: *x-extra-hosts
+    image: artifactory.idfcbank.com/docker/optimus-library/code-critique:${REVISION}
+    container_name: code-critique-analyze
+    command: sh -c "python3 scripts/analyze-service.py"
+    environment:
+      # AI Configuration
+      - AI_PROVIDER=${AI_PROVIDER}
+      - AI_MODEL=${AI_MODEL}
+      - AI_API_KEY=${AI_API_KEY}
+      - AI_API_URL=${AI_API_URL}
+      - AI_CONFIDENCE_THRESHOLD=${AI_CONFIDENCE_THRESHOLD}
+      
+      # Service Configuration
+      - SERVICE_PATH=/service
+      - SERVICE_NAME=${SERVICE_NAME}
+      - TEST_SCENARIOS_PATH=${TEST_SCENARIOS_PATH}
+      
+      # CI/CD Pipeline Variables (GoCD)
+      - GO_PIPELINE_NAME=${GO_PIPELINE_NAME}
+      - GO_PIPELINE_LABEL=${GO_PIPELINE_LABEL}
+      - GO_JOB_NAME=${GO_JOB_NAME}
+      - GO_STAGE_COUNTER=${GO_STAGE_COUNTER}
+      - GO_STAGE_NAME=${GO_STAGE_NAME}
+      - CI=${CI}
+    volumes:
+      # Mount service code to analyze (read-only)
+      - ${SERVICE_PATH}:/service:ro
+      # Mount reports directory (read-write)
+      - ./reports:/app/code-critique/reports
+      # Mount config file (for defaults)
+      - ./config.json:/app/code-critique/config.json:ro
+    working_dir: /app/code-critique

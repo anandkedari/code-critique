@@ -1,0 +1,25 @@
+# Reports (generated at runtime)
+reports/*
+!reports/.gitkeep
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Docker build artifacts
+*.tar
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

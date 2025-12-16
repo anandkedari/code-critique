@@ -1,0 +1,72 @@
+# Docker ignore file - applies to all Docker builds
+# Add environment-specific patterns in .dockerignore.tw or .dockerignore.idfc if needed
+
+# Reports (generated output - don't include in image)
+reports/*
+!reports/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation (not needed in container)
+*.md
+!README.md
+
+# Test files
+*.test
+test_*.py
+*_test.py
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+Jenkinsfile
+
+# Docker files themselves (don't copy into image)
+Dockerfile*
+docker-compose*.yml
+.dockerignore*
+
+# Makefile alternatives (don't need both in image)
+Makefile.tw
+Makefile.idfc
+
+# Metadata
+code_critique_metadata.env

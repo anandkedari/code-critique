@@ -9,16 +9,13 @@ You MUST output ONLY valid JSON that exactly matches the schema in `sentinel/sch
 ### Output Rules:
 1. **NO TEXT** before or after the JSON
 2. **EXACT field names** as specified in schema
-3. **9 categories EXACTLY** in this order with these exact IDs:
-   - ID 1: "Code Quality" (icon: "✨")
-   - ID 2: "Custom Critique" (icon: "🔍")
-   - ID 3: "Error Handling" (icon: "🛡️")
-   - ID 4: "Architecture" (icon: "🏗️")
-   - ID 5: "Performance" (icon: "⚡")
-   - ID 6: "Logging" (icon: "📝")
-   - ID 7: "LLM as a Judge" (icon: "🤖")
-   - ID 8: "Domain" (icon: "🎯")
-   - ID 9: "Functional Compliance" (icon: "🧪")
+3. **6 categories EXACTLY** in this order with these exact IDs:
+   - ID 1: "Code Architecture & Design" (icon: "🏗️")
+   - ID 2: "Error Handling & Observability" (icon: "🛡️")
+   - ID 3: "Performance & Resource Management" (icon: "⚡")
+   - ID 4: "AI Quality Assurance" (icon: "🤖")
+   - ID 5: "Domain & Business Logic" (icon: "🎯")
+   - ID 6: "Functional Compliance" (icon: "🧪") - ONLY if test scenarios provided
 
 4. **Severity**: Must be one of: "critical", "warning", "info"
 5. **Assessment**: Must be one of: "compliant", "warning", "critical", "info"
@@ -79,90 +76,216 @@ The confidence threshold will be provided in the prompt. You MUST meet this conf
 ❌ "Possibly missing validation" - Validation might be in another layer
 ❌ "Could be inefficient" - No profiling data
 
-## Analysis Instructions
+## SCOPE: AVOID OVERLAP WITH LINTERS & SECURITY SCANS
 
-For each category, you must provide:
+### ❌ DO NOT REPORT (Linters Handle These):
+- Unused imports (IntelliJ/ESLint catches)
+- Unused local variables (all linters catch)
+- Simple unreachable code after return (linters catch)
+- Code style violations (Checkstyle/ESLint)
+- Basic complexity metrics (SonarQube)
 
-### 1. Metrics
-For each metric, provide compliance status, violation count, and files impacted:
+### ❌ DO NOT REPORT (Security Scans Handle These):
+- SQL injection patterns (SAST tools)
+- XSS vulnerabilities (SAST tools)
+- Known CVEs in dependencies (Snyk/Dependabot)
+- Hardcoded secrets - basic patterns (GitLeaks)
 
-**Format**: {"label": "Metric Name", "value": "✅ Compliant" OR "❌ 4 violations in 3 files", "target": "0"}
+### ✅ DO REPORT (AI-Unique Semantic Analysis):
+- SOLID principle violations requiring context
+- Over-engineering vs necessary abstraction
+- Business logic in wrong layer
+- AI-generated code issues (hallucinations, placeholders)
+- Semantic dead code (logically obsolete methods still called)
+- Race conditions requiring flow analysis
+- N+1 query patterns
+- Missing business validation
+- Production risks requiring context understanding
 
-**CRITICAL**: You MUST provide ALL metrics listed below for each category. Do not skip any metrics.
+---
 
-**Architecture Metrics (ALL REQUIRED):**
-1. Unnecessary Abstraction - AI tends to add unneeded layers
-2. Dependency Injection - Proper DI usage
-3. Interface Usage - Interfaces created only when needed
-4. Invented Classes/Libraries - No non-existent libraries
-5. Fake Configuration Keys - No invalid config keys
-6. Function Parameter Mismatch - Correct parameter count/types
-7. Invented Architecture - No architecture without instruction
-8. Dependency Version Mismatch - Versions are compatible
-9. Unnecessary Libraries - No redundant dependencies
-10. SOLID Principles - No violations of SOLID
-11. Over-engineered Layers - No unnecessary complexity
+## CATEGORY 1: CODE ARCHITECTURE & DESIGN (ID: 1, Icon: 🏗️)
 
-**Code Quality Metrics (ALL REQUIRED):**
-1. Code Verbosity - Overly verbose or repetitive code
-2. Meaningful Names - Variable and method names are descriptive
-3. Single Responsibility - Code modularity with SRP
-4. Method Length - Functions not too large
-5. Factual Comments - Comments are accurate, not invented assumptions
-6. HTTP Status Codes - Correct status codes used
-7. Dependency Validation - All dependencies actually exist
-8. Unimplemented Comments - No comments describing behavior not implemented
-9. Deadlock Risks - No potential deadlocks
-10. Unbounded Resources - No unbounded goroutines/threads/tasks
-11. Missing Default Values - All defaults configured
-12. Config Separation - Proper dev/staging/prod config separation
-13. Valid Config Keys - application.yml/properties keys are valid
-14. Code Smells - Business logic issues and anti-patterns
-15. Dead Code - No unused methods, classes, imports, or variables
+### Purpose
+Evaluate architectural patterns, code structure, and design principles. Focus on semantic issues requiring understanding of intent.
 
-**NOTE:** Race Conditions are evaluated ONLY in Custom Critique "Bugs Identified" metric - NOT here
+### Metrics (ALL REQUIRED):
 
-**Performance Metrics (ALL REQUIRED):**
-1. Algorithmic Complexity - Optimal algorithm complexity
-2. Memory Usage - Efficient memory utilization
-3. Async/Await Handling - Proper async operations
-4. Unnecessary Conversions - No redundant object creation
-5. Dead Code - No unused methods, classes, imports, or variables
+**Architecture Patterns:**
+1. **SOLID Principle Violations** - Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion
+2. **Unnecessary Abstraction Layers** - AI tends to add unneeded interfaces/wrappers
+3. **Business Logic Placement** - Business logic leaking into Controllers or Repositories
+4. **Dependency Injection Issues** - Constructor injection vs field injection, circular dependencies
+5. **Interface Misuse** - Interfaces created when not needed (single implementation)
+6. **Tight Coupling** - Classes depending on concrete implementations instead of abstractions
+7. **Dependency Version Conflicts** - Incompatible versions that will cause runtime issues
+8. **Unnecessary Libraries** - No redundant dependencies
+9. **Over-engineered Layers** - No unnecessary complexity
 
-**IMPORTANT - Deduplication Rule:**
-Unbounded resource issues (e.g., `findAll()` loading all records) are evaluated in Custom Critique "Unbounded Resource Usage" metric. DO NOT report them here in Performance category to avoid duplication.
+**Code Quality:**
+10. **Method Length** - Methods > 50 lines (semantic complexity, not just line count)
+11. **Class Responsibilities** - Classes violating Single Responsibility Principle
+12. **Meaningful Naming** - Variables/methods with unclear names (x, temp, data, doStuff)
+13. **Code Duplication** - Identical logic repeated 3+ times
+14. **Magic Numbers** - Hardcoded values without constants
+15. **Code Verbosity** - Overly verbose or repetitive code
+16. **HTTP Status Codes** - Correct status codes used
+17. **Code Smells** - Business logic issues and anti-patterns
 
+**AI-Generated Code Issues:**
+18. **Invented Classes/Libraries** - Non-existent libraries or classes
+19. **Fake Configuration Keys** - Invalid config keys (not in Spring Boot/framework docs)
+20. **Function Parameter Mismatch** - Wrong parameter count/types for actual API
+21. **Invented Architecture** - Architecture patterns not requested
+22. **Dependency Validation** - All dependencies actually exist
 
-**Error Handling Metrics (ALL REQUIRED):**
-1. Exception Handling - Exceptions properly caught and handled
-2. Retry Logic - Retries, backoff, and fallbacks implemented
-3. Error Messages - Meaningful, not generic placeholders
-4. Failure Escalation - Dead-letter queue/logging for failures
-5. Defensive Coding - Null checks, boundary checks present
-6. Uncaught Exceptions - No uncaught exceptions
-7. Correct Variable Logging - Variables logged correctly
+**Semantic Dead Code (Linters Miss These):**
+23. **Logically Obsolete Methods** - Methods still called but superseded by newer approach
+24. **Unused Dependencies** - In pom.xml/build.gradle but never imported in code
+25. **Large Commented Blocks** - 15+ lines of commented production code
+26. **Orphaned Business Logic** - Old features no longer used
+27. **Stale Config Keys** - application.yml properties for deleted features
+28. **Dead Code** - No unused methods, classes, imports, or variables
 
+**Configuration:**
+29. **Valid Config Keys** - application.yml/properties keys are valid
+30. **Missing Default Values** - All defaults configured
+31. **Config Separation** - Proper dev/staging/prod config separation
 
-**Logging Metrics (ALL REQUIRED):**
-1. System.out Usage - No System.out.println usage
-2. Trace/Correlation IDs - Correlation IDs present
-3. Structured Logging - Proper structured logging format
-4. Tracing Spans - Distributed tracing spans added
+**Documentation & Comments:**
+32. **Factual Comments** - Comments describe code accurately (not invented assumptions)
+33. **Unimplemented Comments** - Comments describing behavior not actually implemented
 
+### Example Issues:
 
-**Custom Critique Metrics (ALL REQUIRED):**
-1. Unit Test Coverage - Tests cover real cases, not trivial ones
-2. Bugs Identified - List of 5 potential bugs in the code
-3. Production Risks - Where might this break in production
-4. Missing Edge Cases - Edge cases not handled
-5. Hallucinated Logic - No logic not in requirements
-6. API Misuse - Language-specific APIs used correctly
-7. Concurrency Primitives - Correct locks/channels/threads usage
-8. Over-Engineering - No unnecessary patterns (repositories, factories)
-9. Silent Failures - No empty catch blocks
+```json
+{
+  "severity": "warning",
+  "title": "Single Responsibility Violation: CustomerService",
+  "description": "CustomerService handles customer CRUD, email notifications, and audit logging (3 responsibilities)",
+  "file_path": "CustomerService.java",
+  "line_number": 15,
+  "code_snippet": "@Service\npublic class CustomerService {\n    public void createCustomer() { ... sendEmail() ... logAudit() ... }",
+  "recommendation": "Split into CustomerService, NotificationService, AuditService",
+  "fix_example": "// CustomerService - only CRUD\n// NotificationService - email\n// AuditService - logging"
+}
+```
+
+---
+
+## CATEGORY 2: ERROR HANDLING & OBSERVABILITY (ID: 2, Icon: 🛡️)
+
+### Purpose
+Evaluate error handling, logging, and observability. Focus on production-readiness.
+
+### Metrics (ALL REQUIRED):
+
+**Error Handling:**
+1. **Exception Handling Coverage** - Try-catch blocks with proper handling
+2. **Empty Catch Blocks** - Catch blocks that silently swallow exceptions (semantic issue linters miss)
+3. **Retry Logic** - Retries with backoff for external calls
+4. **Error Messages** - Meaningful messages (not generic "Error occurred")
+5. **Defensive Coding** - Null checks, boundary validation present
+6. **Uncaught Exceptions** - Methods that can throw but don't declare/handle
+7. **Variable Logging in Errors** - Correct variables logged (not wrong ones)
+8. **Failure Escalation** - Dead-letter queue/logging for failures
+
+**Logging & Observability:**
+9. **System.out.println Usage** - No console logging in production code
+10. **Correlation/Trace IDs** - Request IDs for distributed tracing
+11. **Structured Logging** - JSON format, not plain text
+12. **Tracing Spans** - Distributed tracing annotations (@Span, etc.)
+
+### Example Issue:
+
+```json
+{
+  "severity": "critical",
+  "title": "Silent Exception Swallowing",
+  "description": "Empty catch block hides exceptions without logging or re-throwing",
+  "file_path": "CustomerRepository.java",
+  "line_number": 67,
+  "code_snippet": "try {\n    database.save(customer);\n} catch (Exception e) {\n    // empty\n}",
+  "recommendation": "Log exception with context or re-throw as business exception",
+  "fix_example": "catch (Exception e) {\n    log.error(\"Failed to save customer {}\", customer.getId(), e);\n    throw new CustomerSaveException(\"Error saving customer\", e);\n}"
+}
+```
+
+---
+
+## CATEGORY 3: PERFORMANCE & RESOURCE MANAGEMENT (ID: 3, Icon: ⚡)
+
+### Purpose
+Identify performance bottlenecks and resource leaks requiring semantic analysis.
+
+### Metrics (ALL REQUIRED):
+
+1. **Algorithmic Complexity** - O(n²) where O(n) possible, nested loops on large datasets
+2. **Memory Leaks** - Unbounded collections, unreleased resources
+3. **Memory Usage** - Efficient memory utilization
+4. **Async/Await Misuse** - Blocking calls in async methods
+5. **N+1 Query Patterns** - Loop with database call inside (requires flow analysis)
+6. **Unbounded Resource Loading** - findAll() without pagination, loading all records
+7. **Unnecessary Object Creation** - Creating objects in loops unnecessarily
+8. **Unnecessary Conversions** - No redundant object creation
+9. **Resource Cleanup** - Streams, connections not closed (try-with-resources missing)
+10. **Deadlock Risks** - No potential deadlocks
+11. **Unbounded Resources** - No unbounded goroutines/threads/tasks
+
+### Example Issue:
+
+```json
+{
+  "severity": "critical",
+  "title": "N+1 Query Pattern in getAllCustomers",
+  "description": "Loop fetches orders for each customer individually (1 + N queries instead of 1)",
+  "file_path": "CustomerService.java",
+  "line_number": 89,
+  "code_snippet": "for (Customer c : customers) {\n    List<Order> orders = orderRepo.findByCustomerId(c.getId());\n}",
+  "recommendation": "Use JOIN FETCH or @EntityGraph to load orders in single query",
+  "fix_example": "@Query(\"SELECT c FROM Customer c LEFT JOIN FETCH c.orders\")\nList<Customer> findAllWithOrders();"
+}
+```
+
+---
+
+## CATEGORY 4: AI QUALITY ASSURANCE (ID: 4, Icon: 🤖)
+
+### Purpose
+Detect AI-generated code issues and potential bugs requiring semantic understanding. This category combines AI code generation detection AND custom critique analysis.
+
+### Metrics (ALL REQUIRED):
+
+**LLM as a Judge - AI Code Generation Issues:**
+1. **Hallucinated Functions** - Invented methods that don't exist in imported libraries
+2. **Non-existent Libraries** - Imported libraries that don't exist
+3. **Generic Placeholder Code** - "TODO", placeholders in production
+4. **Fake API Endpoints** - REST endpoints that don't match actual routes
+5. **Copy-Paste Inconsistencies** - Duplicated AI blocks with slight variations
+6. **Overconfident Assumptions** - Comments claiming functionality not implemented
+7. **Inappropriate Design Patterns** - Patterns that don't fit the use case
+8. **API Misuse** - Language-specific APIs used incorrectly (wrong parameters, deprecated methods, mismatched types)
+9. **Missing Error Context** - Error handling accounts for real failure scenarios
+10. **Unrealistic Performance Claims** - No optimizations that don't actually work
+
+**Custom Critique Metrics - Bug Detection (Semantic Analysis):**
+11. **Bugs Identified** - Concrete bugs found in business logic (e.g., off-by-one, wrong operator)
+12. **Race Conditions** - Check-then-act patterns without synchronization
+13. **Concurrency Primitives** - Correct usage of locks, channels, threads, synchronized blocks, atomic operations
+14. **Validation Bypass** - DTO validates but query param doesn't
+15. **Transaction Boundary Issues** - @Transactional missing or incorrectly scoped
+16. **Missing Edge Cases** - Boundary conditions not handled (null, empty, zero, negative)
+17. **Production Risks** - What will break in prod (external API down, high load, etc.)
+18. **Silent Failures** - Operations that fail without alerting
+19. **Hallucinated Logic** - No logic not in requirements
+
+**Over-Engineering:**
+20. **Over-Engineering** - No unnecessary patterns (repositories, factories)
+21. **Unnecessary Patterns** - Repository pattern for simple CRUD, factories with single impl
+22. **Premature Optimization** - Complex caching for data that doesn't change often
 
 **IMPORTANT - Custom Critique Assessment Logic:**
-These metrics identify PROBLEMS in the code. The logic is OPPOSITE to other categories:
+Metrics 11-19 identify PROBLEMS in the code. The logic is OPPOSITE to other categories:
 - ✅ "0 bugs found" = Compliant
 - ❌ "3 bugs identified" = Violation (list them as issues)
 - ✅ "No production risks" = Compliant
@@ -170,285 +293,247 @@ These metrics identify PROBLEMS in the code. The logic is OPPOSITE to other cate
 
 In other words: Finding results for these metrics means there ARE problems to report.
 
-**LLM as a Judge Metrics (ALL REQUIRED):**
-1. Hallucinated Functions - No invented functions or methods that don't exist
-2. Non-existent Libraries - All imported libraries actually exist
-3. Fake Configuration Keys - Configuration keys are valid and documented
-4. Generic Placeholder Code - No "TODO" or placeholder implementations in production
-5. Invented API Endpoints - No fictional REST endpoints or routes
-6. Copy-Paste Inconsistencies - No duplicated AI-generated blocks with slight variations
-7. Overconfident Assumptions - No comments claiming functionality not implemented
-8. Inappropriate Design Patterns - Design patterns fit the actual use case
-9. Missing Error Context - Error handling accounts for real failure scenarios
-10. Unrealistic Performance Claims - No optimizations that don't actually work
+### Example Issue:
 
-**Domain Metrics (ALL REQUIRED):**
-Domain-Specific Compliance
+```json
+{
+  "severity": "critical",
+  "title": "Bug: Race Condition in existsById Check",
+  "description": "Non-atomic check-then-act: another thread can delete between check and save",
+  "file_path": "src/main/java/com/example/service/CustomerService.java",
+  "line_number": 45,
+  "code_snippet": "if (!customerRepository.existsById(id)) {\n    customerRepository.deleteById(id);\n}",
+  "recommendation": "Use database constraint or lock to make operation atomic",
+  "fix_example": "@Transactional(isolation = Isolation.SERIALIZABLE)\npublic void deleteIfExists(Long id) {\n    customerRepository.deleteById(id); // Let DB handle concurrency\n}"
+}
+```
 
-**Test Scenario Compliance Metrics (ALL REQUIRED):**
+---
 
-This category validates that code behavior matches user-defined test scenarios from `test-scenarios.yml`.
+## CATEGORY 5: DOMAIN & BUSINESS LOGIC (ID: 5, Icon: 🎯)
 
-1. Scenario Pass Rate - Percentage of scenarios that pass validation
-2. Global Validation Compliance - Compliance with global_validations from test-scenarios.yml
-3. Critical Scenarios Failed - Count of high-priority scenarios that fail
+### Purpose
+Validate domain-specific patterns and business rules.
 
-**CRITICAL ANTI-HALLUCINATION RULES FOR TEST SCENARIO COMPLIANCE:**
+### Metrics (ALL REQUIRED):
+
+1. **Domain-Specific Compliance** - Domain patterns properly implemented (DDD, CQRS, etc.)
+2. **Business Rule Validation** - Business constraints enforced in code
+3. **Domain Model Quality** - Entities, value objects, aggregates properly modeled
+
+### Example Issue:
+
+```json
+{
+  "severity": "warning",
+  "title": "Anemic Domain Model",
+  "description": "Customer entity has only getters/setters, no business logic",
+  "file_path": "src/main/java/com/example/entity/Customer.java",
+  "line_number": 10,
+  "code_snippet": "@Entity\npublic class Customer {\n    private String name;\n    // only getters/setters\n}",
+  "recommendation": "Move business logic from service to entity (Rich Domain Model)",
+  "fix_example": "public class Customer {\n    public void updateName(String newName) {\n        validateName(newName);\n        this.name = newName;\n    }\n}"
+}
+```
+
+---
+
+## CATEGORY 6: FUNCTIONAL COMPLIANCE (ID: 6, Icon: 🧪) - OPTIONAL
+
+### Purpose
+Validate code behavior matches user-defined test scenarios from `test-scenarios.yml`.
+
+**CRITICAL**: This category appears ONLY when test scenarios are provided in the prompt.
+
+### Metrics (ALL REQUIRED):
+
+1. **Scenario Pass Rate** - Percentage of scenarios that pass validation
+2. **Global Validation Compliance** - Compliance with global_validations from test-scenarios.yml
+3. **Critical Scenarios Failed** - Count of high-priority scenarios that fail
+
+### CRITICAL ANTI-HALLUCINATION RULES:
 
 When analyzing test scenarios, you MUST:
 1. ✅ **Cite actual code** - Provide file paths and line numbers as evidence
 2. ✅ **Quote code snippets** - Show the actual code that passes/fails validation
 3. ✅ **Trace complete flow** - Follow actual code paths through all layers
-4. ❌ **NEVER assume behavior** - If you can't see the code, mark as "CANNOT_VERIFY"
+4. ❌ **NEVER assume behavior** - If you can't see the code, mark as "CANNOT_VERIFY" (info)
 5. ❌ **NEVER mark PASS without code evidence** - Must see actual implementation
 6. ❌ **NEVER invent validations** - Only check what's in test-scenarios.yml
 
-**Scenario Validation Process:**
+### Validation Process:
 
 For EACH scenario in `test-scenarios.yml`:
 
 1. **Read the scenario** (plain English description)
-2. **Identify what to validate** (from global_validations + scenario-specific requirements)
+2. **Identify what to validate** (from global_validations + scenario requirements)
 3. **Search the codebase** for relevant code (Controller → Service → Repository → Entity)
-4. **Trace the execution path** step by step
+4. **Trace the execution path** step by step with LINE NUMBERS
 5. **Verify each validation point** with actual code evidence
 6. **Report**: ✅ PASS / ❌ FAIL / ⚠️ PARTIAL / ❓ CANNOT_VERIFY
 
-**Evidence Requirements:**
+**CRITICAL - Assessment Field Mapping:**
+- ✅ PASS → `assessment: "compliant"`
+- ❌ FAIL → `assessment: "critical"`
+- ⚠️ PARTIAL → `assessment: "warning"` (some validations pass, some fail)
+- ❓ CANNOT_VERIFY → `assessment: "info"` (insufficient evidence to determine)
+
+**The assessment field determines the summary count - use it correctly!**
+
+### Evidence Requirements:
 
 For each scenario validation, you MUST provide:
-- ✅ **File path** where validation is found (e.g., "CustomerServiceImpl.java:38")
+- ✅ **Complete file path** from service root (e.g., "src/main/java/com/example/service/CustomerServiceImpl.java")
+- ✅ **Line number** of the code
 - ✅ **Code snippet** showing the actual implementation
 - ✅ **Explanation** of how it satisfies (or fails) the validation
 
-**Example Scenario Validation:**
+**CRITICAL**: Always use COMPLETE file paths from the service root directory, not just filenames.
 
-Scenario: "If a customer does not exist, a new customer is created"
+### Example Validation:
 
-Global Validations to Check:
-1. "Data stored in database must match request payload" 
-2. "Timestamps must be set automatically"
-3. "Response must match what was stored"
-4. "@Transactional annotation present"
-5. "Proper HTTP status code (201)"
-6. "Clear error messages"
+**Scenario:** "If a customer does not exist, a new customer is created"
 
-Evidence-Based Validation:
-```
-✅ PASS: "If a customer does not exist, a new customer is created"
+**Global Validations to Check:**
+1. Data stored in database must match request payload
+2. Timestamps must be set automatically
+3. Response must match what was stored
+4. @Transactional annotation present
+5. Proper HTTP status code (201)
+6. Clear error messages
 
-Evidence:
-1. Data Integrity:
-   File: CustomerServiceImpl.java:36-38
-   Code: customer.setFirstName(request.getFirstName());
-         customer.setLastName(request.getLastName());
-         customer.setAge(request.getAge());
-   ✅ All fields from request are mapped to entity
+**Evidence-Based Validation:**
 
-2. Timestamps:
-   File: CustomerServiceImpl.java:38-39
-   Code: customer.setCreatedAt(LocalDateTime.now());
-         customer.setUpdatedAt(LocalDateTime.now());
-   ✅ Timestamps set automatically
-
-3. Response Matches DB:
-   File: CustomerServiceImpl.java:43
-   Code: return customerMapper.toResponse(savedCustomer);
-   ✅ Maps saved entity to response
-
-4. @Transactional:
-   File: CustomerServiceImpl.java:31
-   Code: @Transactional
-   ✅ Transaction annotation present
-
-5. HTTP Status:
-   File: CustomerController.java:53
-   Code: return ResponseEntity.status(HttpStatus.CREATED).body(response);
-   ✅ Returns 201 Created
-
-6. Error Messages:
-   File: GlobalExceptionHandler.java:25
-   Code: Handles CustomerNotFoundException with clear message
-   ✅ Error handling in place
+```json
+{
+  "severity": "info",
+  "title": "Scenario: if the customer does not exist, a new customer is created",
+  "description": "✅ PASS - All global validations verified with code evidence:\n\n1. ✅ Data Integrity Check\n   File: src/main/java/com/example/service/CustomerServiceImpl.java:38-41\n   Evidence: customer.setFirstName(request.getFirstName());\n             customer.setLastName(request.getLastName());\n             customer.setAge(request.getAge());\n   Result: All request fields properly mapped to entity\n\n2. ✅ Automatic Timestamps\n   File: src/main/java/com/example/service/CustomerServiceImpl.java:42-43\n   Evidence: customer.setCreatedAt(LocalDateTime.now());\n             customer.setUpdatedAt(LocalDateTime.now());\n   Result: Timestamps set automatically on create\n\n3. ✅ Transaction Management\n   File: src/main/java/com/example/service/CustomerServiceImpl.java:32\n   Evidence: @Transactional\n             public CustomerResponse createCustomer(CustomerRequest request)\n   Result: Transaction annotation present\n\n4. ✅ Response Integrity\n   File: src/main/java/com/example/service/CustomerServiceImpl.java:47\n   Evidence: return customerMapper.toResponse(savedCustomer);\n   Result: Response built from saved entity\n\n5. ✅ HTTP Status Code\n   File: src/main/java/com/example/controller/CustomerController.java:53\n   Evidence: return ResponseEntity.status(HttpStatus.CREATED).body(response);\n   Result: Returns 201 Created on success\n\n6. ✅ Error Handling\n   File: src/main/java/com/example/exception/GlobalExceptionHandler.java:25-30\n   Evidence: @ExceptionHandler handles CustomerNotFoundException\n   Result: Clear error messages with context",
+  "file_path": "src/main/java/com/example/service/CustomerServiceImpl.java",
+  "line_number": 32,
+  "code_snippet": "@Transactional\npublic CustomerResponse createCustomer(CustomerRequest request) {\n    Customer customer = customerMapper.toEntity(request);\n    customer.setCreatedAt(LocalDateTime.now());\n    customer.setUpdatedAt(LocalDateTime.now());\n    Customer savedCustomer = customerRepository.save(customer);\n    return customerMapper.toResponse(savedCustomer);\n}",
+  "recommendation": "Implementation is correct - all validations pass",
+  "fix_example": "// Already implemented correctly"
+}
 ```
 
 **Failure Example:**
 
-```
-❌ FAIL: "Customer age must be at least 18"
-
-Evidence:
-File: CustomerRequest.java:20
-Current Code: private Integer age;
-Expected: @Min(value = 18, message = "Age must be at least 18")
-         private Integer age;
-
-✗ Missing @Min(18) validation annotation
-✗ No age validation found in service layer
-✗ System accepts any age value
-
-Recommendation: Add @Min(18) annotation to age field in CustomerRequest.java
+```json
+{
+  "severity": "critical",
+  "title": "Scenario: Customer age must be at least 18",
+  "description": "❌ FAIL - Age validation not implemented:\n\n1. ❌ DTO Validation Missing\n   File: src/main/java/com/example/dto/CustomerRequest.java:20\n   Current Code: private Integer age;\n   Expected: @Min(value = 18, message = \"Age must be at least 18\")\n             private Integer age;\n   Issue: No @Min annotation to enforce minimum age\n\n2. ❌ Service Layer Validation Missing\n   File: src/main/java/com/example/service/CustomerServiceImpl.java:36-48\n   Current Code: No age validation logic found\n   Issue: Service doesn't validate age >= 18\n\n3. ❌ Result\n   System accepts customers of any age, including minors\n   Business rule violation: Age requirement not enforced",
+  "file_path": "src/main/java/com/example/dto/CustomerRequest.java",
+  "line_number": 20,
+  "code_snippet": "private Integer age;",
+  "recommendation": "Add @Min(18) annotation to CustomerRequest.age field",
+  "fix_example": "@Min(value = 18, message = \"Age must be at least 18\")\nprivate Integer age;"
+}
 ```
 
 **Cannot Verify Example:**
 
-```
-❓ CANNOT_VERIFY: "System prevents duplicate customers"
-
-Reason: 
-- Repository has existsByFirstNameAndLastName() method
-- But method is not called in createCustomer()
-- Cannot determine if duplicate check exists elsewhere
-- Insufficient evidence to mark as PASS or FAIL
-
-Mark as: warning (potential gap in implementation)
-```
-
-**Metrics Format:**
-
 ```json
 {
-  "id": 10,
-  "name": "Test Scenario Compliance",
-  "icon": "🧪",
-  "score": 70,
-  "status": "fair",
-  "metrics": [
-    {"label": "Scenario Pass Rate", "value": "❌ 7 of 10 scenarios pass (70%)", "target": "100%"},
-    {"label": "Global Validation Compliance", "value": "⚠️ 5 of 6 validations pass (83%)", "target": "100%"},
-    {"label": "Critical Scenarios Failed", "value": "❌ 2 critical scenarios fail", "target": "0"}
-  ],
-  "items": [
-    {
-      "title": "if the customer does not exist, a new customer is created",
-      "assessment": "compliant",
-      "description": "✅ PASS - All global validations passed for this scenario"
-    },
-    {
-      "title": "When trying to create the same customer, it should throw error",
-      "assessment": "compliant",
-      "description": "✅ PASS - Duplicate detection working correctly"
-    },
-    {
-      "title": "Customer age must be at least 18",
-      "assessment": "critical",
-      "description": "❌ FAIL - Missing @Min(18) validation on age field"
-    }
-  ],
-  "issues": [
-    {
-      "severity": "info",
-      "title": "Scenario: if the customer does not exist, a new customer is created",
-      "description": "✅ PASS - All global validations verified with code evidence:\n\n1. ✅ Data Integrity Check\n   File: CustomerServiceImpl.java:38-41\n   Evidence: customer.setFirstName(request.getFirstName());\n             customer.setLastName(request.getLastName());\n             customer.setAge(request.getAge());\n   Result: All request fields properly mapped to entity\n\n2. ✅ Automatic Timestamps\n   File: CustomerServiceImpl.java:42-43\n   Evidence: customer.setCreatedAt(LocalDateTime.now());\n             customer.setUpdatedAt(LocalDateTime.now());\n   Result: Timestamps set automatically on create\n\n3. ✅ Transaction Management\n   File: CustomerServiceImpl.java:32\n   Evidence: @Transactional\n             public CustomerResponse createCustomer(CustomerRequest request)\n   Result: Transaction annotation present\n\n4. ✅ Response Integrity\n   File: CustomerServiceImpl.java:47\n   Evidence: return customerMapper.toResponse(savedCustomer);\n   Result: Response built from saved entity\n\n5. ✅ HTTP Status Code\n   File: CustomerController.java:53\n   Evidence: return ResponseEntity.status(HttpStatus.CREATED).body(response);\n   Result: Returns 201 Created on success\n\n6. ✅ Error Handling\n   File: GlobalExceptionHandler.java:25-30\n   Evidence: @ExceptionHandler handles CustomerNotFoundException\n   Result: Clear error messages with context",
-      "file_path": "src/main/java/com/pulse/customerservice/service/impl/CustomerServiceImpl.java",
-      "line_number": 32,
-      "code_snippet": "@Transactional\npublic CustomerResponse createCustomer(CustomerRequest request) {\n    Customer customer = customerMapper.toEntity(request);\n    customer.setCreatedAt(LocalDateTime.now());\n    customer.setUpdatedAt(LocalDateTime.now());\n    Customer savedCustomer = customerRepository.save(customer);\n    return customerMapper.toResponse(savedCustomer);\n}",
-      "recommendation": "Implementation is correct - all validations pass",
-      "fix_example": "// Already implemented correctly"
-    },
-    {
-      "severity": "critical",
-      "title": "Scenario: Customer age must be at least 18",
-      "description": "❌ FAIL - Age validation not implemented:\n\n1. ❌ DTO Validation Missing\n   File: CustomerRequest.java:20\n   Current Code: private Integer age;\n   Expected: @Min(value = 18, message = \"Age must be at least 18\")\n             private Integer age;\n   Issue: No @Min annotation to enforce minimum age\n\n2. ❌ Service Layer Validation Missing\n   File: CustomerServiceImpl.java:36-48\n   Current Code: No age validation logic found\n   Issue: Service doesn't validate age >= 18\n\n3. ❌ Result\n   System accepts customers of any age, including minors\n   Business rule violation: Age requirement not enforced",
-      "file_path": "src/main/java/com/pulse/customerservice/dto/CustomerRequest.java",
-      "line_number": 20,
-      "code_snippet": "private Integer age;",
-      "recommendation": "Add @Min(18) annotation to CustomerRequest.age field",
-      "fix_example": "@Min(value = 18, message = \"Age must be at least 18\")\nprivate Integer age;"
-    }
-  ]
+  "severity": "info",
+  "title": "Scenario: System prevents duplicate customers",
+  "description": "❓ CANNOT_VERIFY - Insufficient evidence:\n\n- Repository has existsByFirstNameAndLastName() method\n- But method is NOT called in createCustomer()\n- Cannot determine if duplicate check exists elsewhere\n- Insufficient evidence to mark as PASS or FAIL",
+  "file_path": "src/main/java/com/example/repository/CustomerRepository.java",
+  "line_number": 15,
+  "code_snippet": "boolean existsByFirstNameAndLastName(String firstName, String lastName);",
+  "recommendation": "Call repository method in createCustomer() before save",
+  "fix_example": "if (customerRepository.existsByFirstNameAndLastName(request.getFirstName(), request.getLastName())) {\n    throw new DuplicateCustomerException();\n}"
 }
 ```
 
-### 3. Items (High-level assessments)
-List key items checked with their assessment status
+---
 
-### 4. Issues (Detailed findings)
-For each issue found, provide:
-- severity (critical/warning/info)
-- title (concise issue name)
-- description (what's wrong)
-- file_path (specific file)
-- code_snippet (actual problematic code)
-- recommendation (how to fix)
-- fix_example (code showing the fix)
+## OUTPUT FORMAT
 
-## Priority Actions
-
-Group all issues into:
-1. **Critical**: Issues that can cause security breaches, data loss, or system failures (only if confidence > threshold)
-2. **Warnings**: Issues that affect code quality, performance, or maintainability (only if confidence > threshold)
-3. **Suggestions**: Nice-to-have improvements (only if confidence > threshold)
-
-**IMPORTANT**: Only include issues where confidence exceeds the configured threshold. Skip all others.
-
-## Final Assessment
-
-Provide:
-- **Key Improvements**: 3-5 most important fixes based on high-confidence issues only
-
-## Example JSON Structure
-
+### Summary Section
 ```json
 {
   "metadata": {
     "service_name": "customer-service",
-    "generated_at": "2025-12-09T21:57:00Z",
+    "generated_at": "2025-12-17T00:00:00 IST",
     "framework": "Spring Boot 3.2.1",
     "language": "Java 21",
     "files_scanned": 25
   },
   "summary": {
-    "critical_count": 0,
-    "warning_count": 0,
-    "info_count": 0,
+    "critical_count": 2,
+    "warning_count": 5,
+    "info_count": 3,
+    "success_count": 12,
     "files_scanned": 25
-  },
+  }
+}
+```
+
+### Categories Section
+```json
+{
   "categories": [
     {
       "id": 1,
-      "name": "Code Quality",
-      "icon": "✨",
+      "name": "Code Architecture & Design",
+      "icon": "🏗️",
+      "score": 75,
+      "status": "good",
       "metrics": [
-        {"label": "Layer Violations", "value": "✅ Compliant", "target": "0"},
-        {"label": "Business Logic in Controllers", "value": "✅ Compliant", "target": "0"},
-        {"label": "Dependencies per Class", "value": "❌ 3 violations in 2 files", "target": "<5"}
+        {"label": "SOLID Violations", "value": "❌ 2 violations in 2 files", "target": "0"},
+        {"label": "Unnecessary Abstraction", "value": "✅ Compliant", "target": "0"}
       ],
       "items": [
         {
           "title": "Clean Layer Separation",
           "assessment": "compliant",
-          "description": "Perfect separation of Controller → Service → Repository"
+          "description": "Perfect Controller → Service → Repository separation"
         }
       ],
       "issues": [
         {
-          "severity": "info",
-          "title": "Consider Using Records",
-          "description": "DTOs could be made immutable using Java Records",
-          "file_path": "CustomerRequest.java",
-          "code_snippet": "@Data\npublic class CustomerRequest { ... }",
-          "recommendation": "Use Java Records for immutable DTOs",
-          "fix_example": "public record CustomerRequest(String firstName, ...) {}"
+          "severity": "warning",
+          "title": "Single Responsibility Violation",
+          "description": "CustomerService has 3 responsibilities",
+          "file_path": "CustomerService.java",
+          "line_number": 15,
+          "code_snippet": "...",
+          "recommendation": "Split into separate services",
+          "fix_example": "..."
         }
       ]
     }
-    // ... 8 more categories ...
-  ],
+  ]
+}
+```
+
+### Priority Actions Section
+```json
+{
   "priority_actions": {
     "critical": [
       {
-        "title": "Implement data masking for PII",
-        "description": "getAllCustomers() returns List instead of Page",
-        "category": "Performance"
+        "title": "Fix Race Condition in deleteCustomer",
+        "description": "Non-atomic check-then-act causes data inconsistency",
+        "category": "AI Quality Assurance"
       }
     ],
-    "warnings": [...],
-    "suggestions": [...]
-  },
+    "warnings": [],
+    "suggestions": []
+  }
+}
+```
+
+### Final Assessment
+```json
+{
   "final_assessment": {
     "key_improvements": [
-      "Implement data masking for PII"
+      "Fix Race Condition in deleteCustomer",
+      "Implement pagination for getAllCustomers",
+      "Add @Min(18) validation for customer age"
     ]
   }
 }
@@ -456,23 +541,24 @@ Provide:
 
 ## CRITICAL COUNTING REQUIREMENTS
 
-**IMPORTANT**: The counts in the summary section MUST be dynamically calculated by counting actual issues:
+**IMPORTANT**: The counts in the summary section MUST be dynamically calculated:
 
-1. **critical_count**: Count ALL issues with severity="critical" across ALL categories
-2. **warning_count**: Count ALL issues with severity="warning" across ALL categories  
-3. **info_count**: Count ALL issues with severity="info" across ALL categories
+1. **critical_count**: Count ALL issues with severity="critical" across ALL categories (EXCLUDE Functional Compliance)
+2. **warning_count**: Count ALL issues with severity="warning" across ALL categories (EXCLUDE Functional Compliance)
+3. **info_count**: Count ALL issues with severity="info" across ALL categories (EXCLUDE Functional Compliance)
 4. **success_count**: Count ALL items with assessment="compliant" across ALL categories
 
 DO NOT use fixed numbers. Count the actual issues you identify.
 
-Example: If you find 2 critical issues in Architecture and 1 in Security, critical_count = 3.
-
 ## REMEMBER
 
 - Output ONLY the JSON, nothing else
-- All 9 categories MUST be present
+- All 6 categories MUST be present (5 without test scenarios, 6 with test scenarios)
 - DYNAMICALLY COUNT all issues - do not use fixed numbers
-- Follow the exact field names from the schema
-- Use the specified enums for status, severity, and assessment
-- Provide code snippets and fix examples for all issues
-- Be specific with file paths and line numbers when possible
+- Follow exact field names from schema
+- Use specified enums for status, severity, assessment
+- **CRITICAL**: Always use COMPLETE file paths from service root (e.g., "src/main/java/com/example/Service.java"), NOT just filenames
+- Provide code snippets with LINE NUMBERS and fix examples for all issues
+- Only report issues where confidence > threshold
+- Avoid overlap with linters (unused imports, variables) and security scans (SQL injection, XSS)
+- Focus on semantic analysis requiring code understanding

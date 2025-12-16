@@ -18,7 +18,7 @@
     },
     "summary": {
       "type": "object",
-      "required": ["overall_score", "critical_count", "warning_count", "info_count", "files_scanned"],
+      "required": ["critical_count", "warning_count", "info_count", "files_scanned"],
       "properties": {
         "overall_score": {"type": "integer", "minimum": 0, "maximum": 100},
         "critical_count": {"type": "integer", "minimum": 0},
@@ -30,17 +30,17 @@
     },
     "categories": {
       "type": "array",
-      "minItems": 8,
-      "maxItems": 8,
+      "minItems": 5,
+      "maxItems": 6,
       "items": {
         "type": "object",
-        "required": ["id", "name", "icon", "score", "status", "metrics", "assessment_items", "issues"],
+        "required": ["id", "name", "icon", "score", "status", "metrics", "items", "issues"],
         "properties": {
-          "id": {"type": "integer", "minimum": 1, "maximum": 8},
+          "id": {"type": "integer", "minimum": 1, "maximum": 6},
           "name": {"type": "string"},
           "icon": {"type": "string"},
           "score": {"type": "integer", "minimum": 0, "maximum": 100},
-          "status": {"type": "string", "enum": ["excellent", "good", "fair", "poor"]},
+          "status": {"type": "string", "enum": ["excellent", "good", "needs-work", "critical"]},
           "metrics": {
             "type": "array",
             "items": {
@@ -53,7 +53,7 @@
               }
             }
           },
-          "assessment_items": {
+          "items": {
             "type": "array",
             "items": {
               "type": "object",
@@ -129,9 +129,9 @@
     },
     "final_assessment": {
       "type": "object",
-      "required": ["grade", "strengths", "key_improvements"],
+      "required": ["key_improvements"],
       "properties": {
-        "grade": {"type": "string", "enum": ["Excellent", "Good", "Fair", "Poor"]},
+        "grade": {"type": "string", "enum": ["Excellent", "Good", "Needs Work", "Critical"]},
         "strengths": {
           "type": "array",
           "items": {"type": "string"}

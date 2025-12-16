@@ -542,6 +542,11 @@
             <div><strong>Generated:</strong> {{ metadata.generated_at }}</div>
             <div><strong>Framework:</strong> {{ metadata.framework }}</div>
             <div><strong>Language:</strong> {{ metadata.language }}</div>
+            {% if metadata.ai_provider %}
+            <div><strong>AI Provider:</strong> {{ metadata.ai_provider|upper }}</div>
+            <div><strong>AI Model:</strong> {{ metadata.ai_model }}</div>
+            <div><strong>Confidence Threshold:</strong> {{ metadata.confidence_threshold }}%</div>
+            {% endif %}
         </div>
     </div>
 
@@ -554,7 +559,7 @@
             </button>
             <button class="tab" onclick="switchTab(1)">
                 <span class="tab-icon">📊</span>
-                Code Analysis (8 Categories)
+                Code Analysis
             </button>
         </div>
     </div>
@@ -686,7 +691,7 @@
                     <div style="background: #e8f4f8; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #2196f3;">
                         <p style="margin-bottom: 1rem;"><strong>ℹ️ No Test Scenarios Detected</strong></p>
                         <p style="color: #4a5568; margin-bottom: 1rem;">
-                            To enable scenario-based testing, create a <code>test-scenarios.yml</code> file in your service directory.
+                            To enable scenario-based testing, set the <code>TEST_SCENARIOS_PATH</code> environment variable pointing to your <code>test-scenarios.yml</code> file.
                         </p>
                         <p style="color: #4a5568; font-size: 0.85rem;">
                             <strong>Example:</strong>

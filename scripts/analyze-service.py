@@ -2,30 +2,58 @@
 """
 Code Critique Report Generator with Multi-Provider AI Support
 
-Analyzes code using AI (Claude, Ollama, Perplexity) and generates standardized reports.
+Analyzes code using AI (Anthropic, OpenAI-compatible APIs) and generates standardized reports.
+Configuration is done entirely through environment variables.
 
 Usage:
-    python3 analyze-service.py <service-path> [OPTIONS]
+    python3 analyze-service.py
 
 Examples:
-    # Use default provider (Claude)
-    python3 analyze-service.py ../../customer-service
+    # Anthropic (Claude)
+    export AI_PROVIDER=anthropic
+    export AI_MODEL=claude-sonnet-4-5-20250929
+    export AI_API_KEY=sk-ant-...
+    export SERVICE_PATH=/path/to/service
+    python3 analyze-service.py
     
-    # Use Ollama with Qwen3-Coder
-    python3 analyze-service.py ../../customer-service --provider ollama
+    # OpenAI-compatible (Perplexity)
+    export AI_PROVIDER=openai
+    export AI_API_URL=https://api.perplexity.ai
+    export AI_MODEL=llama-3.1-sonar-huge-128k-online
+    export AI_API_KEY=pplx-...
+    export SERVICE_PATH=/path/to/service
+    python3 analyze-service.py
     
-    # Full customization
-    python3 analyze-service.py ../../customer-service --provider ollama --model qwen2.5-coder:14b
+    # OpenAI-compatible (Ollama self-hosted)
+    export AI_PROVIDER=openai
+    export AI_API_URL=http://localhost:11434/v1
+    export AI_MODEL=llama3.1
+    export AI_API_KEY=optional
+    export SERVICE_PATH=/path/to/service
+    python3 analyze-service.py
+    
+    # With test scenarios (optional)
+    export TEST_SCENARIOS_PATH=/path/to/test-scenarios.yml
+    python3 analyze-service.py
 
-Environment Variables:
-    AI_PROVIDER, AI_MODEL, AI_API_URL, AI_API_KEY
-    ANTHROPIC_API_KEY, PERPLEXITY_API_KEY
+Required Environment Variables:
+    AI_PROVIDER - AI provider (anthropic|openai)
+    AI_MODEL - Model name/ID
+    AI_API_KEY - API authentication key
+    SERVICE_PATH - Path to service directory to analyze
+
+Optional Environment Variables:
+    AI_API_URL - API endpoint (defaults: anthropic→https://api.anthropic.com, openai→https://api.openai.com/v1)
+    AI_CONFIDENCE_THRESHOLD - Confidence threshold 0-100 (default: 70)
+    TEST_SCENARIOS_PATH - Path to test-scenarios.yml (if provided, enables functional compliance check)
+    SERVICE_NAME - Service name for reports (defaults to directory name)
+    
+Note: max_tokens, temperature, and timeout are configured in config.json
 """
 
 import sys
 import os
 import json
-import argparse
 import time
 import threading
 from pathlib import Path
@@ -90,60 +118,71 @@ def load_system_prompt():
         return f.read()
 
 def load_test_scenarios(service_path, scenarios_path=None):
-    """Load test scenarios from specified path or service directory."""
-    if scenarios_path:
-        # Use provided path
-        scenarios_file = Path(scenarios_path)
-        print(f"📋 Loading test scenarios from: {scenarios_file}")
-    else:
-        # Default: look in service directory
-        scenarios_file = Path(service_path) / 'test-scenarios.yml'
-        print(f"📋 Looking for test scenarios: {scenarios_file}")
+    """Load test scenarios from TEST_SCENARIOS_PATH environment variable only."""
+    if not scenarios_path:
+        # No scenarios path provided - skip functional compliance
+        return None
+    
+    scenarios_file = Path(scenarios_path)
+    print(f"📋 Loading test scenarios from: {scenarios_file}")
     
     if not scenarios_file.exists():
-        if scenarios_path:
-            print(f"   ✗ File not found: {scenarios_file}\n")
-        else:
-            print(f"   ℹ️  No test-scenarios.yml found (optional)\n")
+        print(f"   ✗ File not found: {scenarios_file}\n")
         return None
     
     try:
         with open(scenarios_file, 'r', encoding='utf-8') as f:
             content = f.read()
-            print(f"   ✓ Test scenarios loaded ({len(content)} characters)\n")
+            # Extract service name from the YAML to verify correct file loaded
+            service_name_in_file = "unknown"
+            for line in content.split('\n')[:10]:
+                if 'service_name:' in line:
+                    service_name_in_file = line.split('service_name:')[1].strip().strip('"\'')
+                    break
+            print(f"   ✓ Test scenarios loaded ({len(content)} characters)")
+            print(f"   ✓ Service in file: {service_name_in_file}")
+            print(f"   ✓ File path: {scenarios_file}\n")
             return content
     except Exception as e:
         print(f"   ✗ Error loading scenarios: {e}\n")
         return None
 
 def show_progress(stop_event):
-    """Show animated progress indicator."""
+    """Show periodic progress updates with elapsed time (Docker-friendly)."""
     categories = [
-        "🏗️  Architecture & Design",
-        "✨ Code Quality",
-        "⚡ Performance",
-        "🛡️  Error Handling",
-        "📝 Logging",
-        "🔍 Self-Critique",
-        "🎯 Domain-Specific",
+        "🏗️  Code Architecture & Design",
+        "🛡️  Error Handling & Observability",
+        "⚡ Performance & Resource Management",
+        "🤖 AI Quality Assurance",
+        "🎯 Domain & Business Logic",
         "🧪 Functional Compliance"
     ]
     
+    print("\n🤖 Analyzing code with AI...")
+    print("   This may take 2-5 minutes depending on codebase size\n")
+    
+    start_time = time.time()
     idx = 0
-    spinner = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
-    spin_idx = 0
+    last_update = 0
     
     while not stop_event.is_set():
-        category = categories[idx % len(categories)]
-        print(f"\r   {spinner[spin_idx]} Analyzing: {category}   ", end='', flush=True)
-        spin_idx = (spin_idx + 1) % len(spinner)
-        time.sleep(0.1)
+        elapsed = int(time.time() - start_time)
         
-        # Change category every 10 iterations (1 second)
-        if spin_idx == 0:
+        # Print update every 10 seconds
+        if elapsed >= last_update + 10 and elapsed > 0:
+            minutes = elapsed // 60
+            seconds = elapsed % 60
+            category = categories[idx % len(categories)]
+            print(f"   ⏱️  {minutes:02d}:{seconds:02d} - Analyzing: {category}")
             idx += 1
+            last_update = elapsed
+        
+        time.sleep(1)
     
-    print("\r   ✓ Analysis complete!                                ", flush=True)
+    elapsed = int(time.time() - start_time)
+    minutes = elapsed // 60
+    seconds = elapsed % 60
+    print(f"   ✓ Analysis complete! (took {minutes}m {seconds}s)\n")
 
 def extract_file_structure(file_path, content):
     """Extract high-level structure from a file (classes, methods, imports)."""
@@ -287,31 +326,23 @@ def validate_and_correct_counts(data):
     else:
         print("   ✓ All counts accurate!")
     
-    # Validate category count  
-    expected_categories = 9
-    actual_categories = len(data.get('categories', []))
-    if actual_categories != expected_categories:
-        print(f"   ⚠️  Category count: Expected {expected_categories}, got {actual_categories}")
-    
     return data
 
 def analyze_with_ai(service_path, code_files, config, scenarios_path=None):
     """Route to appropriate AI provider based on configuration."""
     provider = config['provider']
     
-    if provider == 'claude':
-        return _analyze_with_claude(service_path, code_files, config, scenarios_path)
-    elif provider == 'ollama':
-        return _analyze_with_ollama(service_path, code_files, config, scenarios_path)
-    elif provider == 'perplexity':
-        return _analyze_with_perplexity(service_path, code_files, config, scenarios_path)
+    if provider == 'anthropic':
+        return _analyze_with_anthropic(service_path, code_files, config, scenarios_path)
+    elif provider == 'openai':
+        return _analyze_with_openai(service_path, code_files, config, scenarios_path)
     else:
         print(f"❌ Unknown provider: {provider}")
-        print("   Supported providers: claude, ollama, perplexity")
+        print("   Supported providers: anthropic, openai")
         sys.exit(1)
 
-def _analyze_with_claude(service_path, code_files, config, scenarios_path=None):
-    """Analyze with Claude (Anthropic)."""
+def _analyze_with_anthropic(service_path, code_files, config, scenarios_path=None):
+    """Analyze with Anthropic (Claude)."""
     try:
         import anthropic
     except ImportError:
@@ -347,7 +378,7 @@ def _analyze_with_claude(service_path, code_files, config, scenarios_path=None):
         progress_thread.join(timeout=1)
         
         print("\n   ✓ Received response from Claude\n")
-        return _parse_ai_response(response.content[0].text, code_files)
+        return _parse_ai_response(response.content[0].text, code_files, config)
         
     except Exception as e:
         stop_event.set()
@@ -355,60 +386,8 @@ def _analyze_with_claude(service_path, code_files, config, scenarios_path=None):
         print(f"\n❌ Error: {e}")
         sys.exit(1)
 
-def _analyze_with_ollama(service_path, code_files, config, scenarios_path=None):
-    """Analyze with Ollama (local models like Qwen3-Coder)."""
-    try:
-        import requests
-    except ImportError:
-        print("❌ Error: requests package not installed")
-        print("   Run: pip install requests")
-        sys.exit(1)
-    
-    # Build codebase context and prepare prompt
-    codebase_context = build_codebase_context(code_files)
-    system_prompt = load_system_prompt()
-    detailed_content = _prepare_code_content(code_files)
-    test_scenarios = load_test_scenarios(service_path, scenarios_path)
-    
-    # Start progress indicator
-    stop_event = threading.Event()
-    progress_thread = threading.Thread(target=show_progress, args=(stop_event,))
-    progress_thread.daemon = True
-    progress_thread.start()
-    
-    try:
-        prompt = _build_analysis_prompt(system_prompt, codebase_context, detailed_content, config, test_scenarios)
-        
-        # Ollama API call
-        response = requests.post(
-            f"{config['api_url']}/api/generate",
-            json={
-                "model": config['model'],
-                "prompt": prompt,
-                "stream": False,
-                "options": {
-                    "temperature": config['temperature'],
-                    "num_predict": config['max_tokens']
-                }
-            },
-            timeout=config['timeout']
-        )
-        response.raise_for_status()
-        
-        stop_event.set()
-        progress_thread.join(timeout=1)
-        
-        print("\n   ✓ Received response from Ollama\n")
-        return _parse_ai_response(response.json()['response'], code_files)
-        
-    except Exception as e:
-        stop_event.set()
-        progress_thread.join(timeout=1)
-        print(f"\n❌ Error: {e}")
-        sys.exit(1)
-
-def _analyze_with_perplexity(service_path, code_files, config, scenarios_path=None):
-    """Analyze with Perplexity (OpenAI-compatible API)."""
+def _analyze_with_openai(service_path, code_files, config, scenarios_path=None):
+    """Analyze with OpenAI-compatible API (Perplexity, Ollama, vLLM, LocalAI, etc.)."""
     try:
         import openai
     except ImportError:
@@ -443,8 +422,8 @@ def _analyze_with_perplexity(service_path, code_files, config, scenarios_path=No
         stop_event.set()
         progress_thread.join(timeout=1)
         
-        print("\n   ✓ Received response from Perplexity\n")
-        return _parse_ai_response(response.choices[0].message.content, code_files)
+        print("\n   ✓ Received response from OpenAI-compatible API\n")
+        return _parse_ai_response(response.choices[0].message.content, code_files, config)
         
     except Exception as e:
         stop_event.set()
@@ -503,7 +482,7 @@ def _build_analysis_prompt(system_prompt, codebase_context, detailed_content, co
 
 TEST SCENARIOS FOR VALIDATION:
 The service includes test-scenarios.yml with business requirements to validate.
-You MUST validate ONLY the "scenarios:" list in Category 10 (Functional Compliance).
+You MUST validate ONLY the "scenarios:" list in Category 6 (Functional Compliance).
 
 {test_scenarios}
 
@@ -558,7 +537,9 @@ COMPLETE CODEBASE CONTENT:
 
 CRITICAL INSTRUCTIONS:
 1. Output ONLY valid JSON (no markdown wrappers)
-2. Include ALL 10 categories with full metrics (including Test Scenario Compliance if scenarios provided)
+2. Category Requirements:
+   - If test scenarios provided: Include ALL 6 categories (1-5 plus Functional Compliance as category 6)
+   - If NO test scenarios: Include ONLY 5 categories (1-5, SKIP Functional Compliance entirely)
 3. Keep descriptions concise (under 80 chars)
 4. List ALL issues found (no artificial limits)
 5. Code snippets max 2 lines each
@@ -579,7 +560,7 @@ GRADE VALUES for final_assessment (use ONE of these):
 
 Begin JSON:"""
 
-def _parse_ai_response(response_text, code_files):
+def _parse_ai_response(response_text, code_files, config):
     """Parse AI response and extract JSON."""
     # Handle markdown code blocks
     if "```json" in response_text:
@@ -590,10 +571,13 @@ def _parse_ai_response(response_text, code_files):
     # Parse JSON
     analysis_data = json.loads(response_text)
     
-    # Update timestamp
+    # Update timestamp and add AI configuration metadata
     ist_now = datetime.now(ZoneInfo('Asia/Kolkata'))
     analysis_data['metadata']['generated_at'] = ist_now.strftime('%Y-%m-%d %H:%M:%S IST')
     analysis_data['metadata']['files_scanned'] = len(code_files)
+    analysis_data['metadata']['ai_provider'] = config['provider']
+    analysis_data['metadata']['ai_model'] = config['model']
+    analysis_data['metadata']['confidence_threshold'] = config['confidence_threshold']
     analysis_data['summary']['files_scanned'] = len(code_files)
     
     # Validate and correct counts
@@ -609,7 +593,9 @@ def validate_json(data, schema_path):
         print("✅ JSON validation passed")
         return True
     except jsonschema.exceptions.ValidationError as e:
-        print(f"❌ Validation failed: {e.message}")
+        print(f"\n⚠️  JSON Validation Warning:")
+        print(f"   Path: {' -> '.join(str(p) for p in e.path) if e.path else 'root'}")
+        print(f"   Issue: {e.message[:200]}")  # Truncate long messages
         return False
 
 def render_html(data, template_path, output_path):
@@ -627,81 +613,58 @@ def render_html(data, template_path, output_path):
     print(f"✅ Report saved: {output_path}\n")
 
 def main():
-    parser = argparse.ArgumentParser(
-        description='Code Critique Analysis with AI',
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog='''
-Examples:
-  # Use default provider from config.json
-  python3 analyze-service.py customer-service
-  
-  # Specify provider
-  python3 analyze-service.py customer-service --provider ollama
-  
-  # Full customization
-  python3 analyze-service.py customer-service --provider ollama --model qwen2.5-coder:14b --api-url http://localhost:11434
-  
-  # Using environment variables
-  export AI_PROVIDER=ollama
-  export AI_MODEL=qwen2.5-coder:32b-instruct
-  python3 analyze-service.py customer-service
-        '''
-    )
-    
-    # Required arguments
-    parser.add_argument('service_path', help='Path to service directory')
-    
-    # Provider selection
-    parser.add_argument('--provider', help='AI provider (claude|perplexity|ollama)')
-    parser.add_argument('--model', help='Model name/ID')
-    parser.add_argument('--api-url', help='API endpoint URL')
-    parser.add_argument('--api-key', help='API authentication key')
-    
-    # Model parameters
-    parser.add_argument('--max-tokens', type=int, help='Maximum response tokens')
-    parser.add_argument('--temperature', type=float, help='Sampling temperature (0-1)')
-    parser.add_argument('--timeout', type=float, help='API timeout in seconds')
-    
-    # Analysis settings
-    parser.add_argument('--confidence', type=int, help='Confidence threshold (0-100)')
-    parser.add_argument('--scenarios', help='Path to test-scenarios.yml file')
-    
-    args = parser.parse_args()
-    
-    # Load base configuration
+    # Load configuration from config.json
     config = load_config()
     
-    # Resolve provider configuration (CLI > ENV > config.json)
-    provider = args.provider or os.environ.get('AI_PROVIDER') or config.get('ai_provider', 'claude')
-    
-    # Get provider-specific config from config.json
-    provider_configs = config.get('providers', {})
-    provider_config = provider_configs.get(provider, {})
-    
-    # Merge configuration with priority: CLI > ENV > config.json
-    final_config = {
-        'provider': provider,
-        'model': args.model or os.environ.get('AI_MODEL') or provider_config.get('model'),
-        'api_url': args.api_url or os.environ.get('AI_API_URL') or provider_config.get('api_url'),
-        'max_tokens': args.max_tokens or int(os.environ.get('AI_MAX_TOKENS', 0)) or provider_config.get('max_tokens', 20000),
-        'temperature': args.temperature if args.temperature is not None else float(os.environ.get('AI_TEMPERATURE', -1)) if os.environ.get('AI_TEMPERATURE') else provider_config.get('temperature', 0),
-        'timeout': args.timeout or float(os.environ.get('AI_TIMEOUT', 0)) or provider_config.get('timeout', 180.0),
-        'confidence_threshold': args.confidence or int(os.environ.get('AI_CONFIDENCE_THRESHOLD', 0)) or config.get('confidence_threshold', 70),
-    }
-    
-    # Get API key
-    api_key_env = provider_config.get('api_key_env')
-    final_config['api_key'] = args.api_key or os.environ.get('AI_API_KEY') or (os.environ.get(api_key_env) if api_key_env else None)
-    
-    # Validate required API key for cloud providers
-    if provider in ['claude', 'perplexity'] and not final_config['api_key']:
-        print(f"❌ Error: No API key provided for {provider}")
-        print(f"   Option 1: export {api_key_env}='your-key'")
-        print(f"   Option 2: export AI_API_KEY='your-key'")
-        print(f"   Option 3: --api-key your-key")
+    # Build configuration from environment variables
+    provider = os.environ.get('AI_PROVIDER')
+    if not provider:
+        print("❌ Error: AI_PROVIDER environment variable is required")
+        print("   Set to one of: anthropic, openai")
+        print("   Example: export AI_PROVIDER=anthropic")
         sys.exit(1)
     
-    service_path = Path(args.service_path).resolve()
+    model = os.environ.get('AI_MODEL')
+    if not model:
+        print(f"❌ Error: AI_MODEL environment variable is required")
+        print(f"   Example for Anthropic: export AI_MODEL=claude-sonnet-4-5-20250929")
+        print(f"   Example for OpenAI: export AI_MODEL=gpt-4")
+        print(f"   Example for Perplexity: export AI_MODEL=llama-3.1-sonar-huge-128k-online")
+        sys.exit(1)
+    
+    # Provider-specific defaults for API URLs
+    api_url_defaults = {
+        'anthropic': 'https://api.anthropic.com',
+        'openai': 'https://api.openai.com/v1'
+    }
+    
+    final_config = {
+        'provider': provider,
+        'model': model,
+        'api_url': os.environ.get('AI_API_URL', api_url_defaults.get(provider, '')),
+        'api_key': os.environ.get('AI_API_KEY'),
+        'max_tokens': config.get('max_tokens', 20000),
+        'temperature': config.get('temperature', 0),
+        'timeout': config.get('timeout', 180.0),
+        'confidence_threshold': int(os.environ.get('AI_CONFIDENCE_THRESHOLD', '0')) or config.get('confidence_threshold', 70),
+    }
+    
+    # Validate required API key
+    if not final_config['api_key']:
+        print(f"❌ Error: No API key provided")
+        print(f"   Set AI_API_KEY environment variable")
+        print(f"   Example: export AI_API_KEY='your-key'")
+        sys.exit(1)
+    
+    # Get service path from environment variable
+    service_path_str = os.environ.get('SERVICE_PATH')
+    if not service_path_str:
+        print(f"❌ Error: SERVICE_PATH environment variable is required")
+        print(f"   Set SERVICE_PATH to the directory path of the service to analyze")
+        print(f"   Example: export SERVICE_PATH=/path/to/service")
+        sys.exit(1)
+    
+    service_path = Path(service_path_str).resolve()
     if not service_path.exists():
         print(f"❌ Service path does not exist: {service_path}")
         sys.exit(1)
@@ -713,10 +676,13 @@ Examples:
     script_dir = Path(__file__).parent
     code_critique_dir = script_dir.parent
     
+    # Determine service name (prefer env var for Docker compatibility)
+    service_name = os.environ.get('SERVICE_NAME') or service_path.name
+    
     # Paths
     schema_path = code_critique_dir / 'schemas' / 'code-critique-schema.json'
     template_path = code_critique_dir / 'templates' / 'code-critique-template.html'
-    output_dir = code_critique_dir / 'reports' / service_path.name
+    output_dir = code_critique_dir / 'reports' / service_name
     output_html = output_dir / 'code-critique-report.html'
     output_json = output_dir / 'code-critique-data.json'
     
@@ -732,8 +698,8 @@ Examples:
     print(f"   API URL: {final_config['api_url']}")
     print(f"   Confidence Threshold: {final_config['confidence_threshold']}%\n")
     
-    # Get scenarios path (CLI > ENV > None)
-    scenarios_path = args.scenarios or os.environ.get('TEST_SCENARIOS_PATH')
+    # Get scenarios path from environment variable
+    scenarios_path = os.environ.get('TEST_SCENARIOS_PATH')
     
     # Analyze with AI (route to appropriate provider)
     analysis_data = analyze_with_ai(service_path, code_files, final_config, scenarios_path)
@@ -759,6 +725,27 @@ Examples:
     print(f"   Critical Issues: {analysis_data['summary']['critical_count']}")
     print(f"   Warnings: {analysis_data['summary']['warning_count']}")
     print(f"   Files Analyzed: {len(code_files)}")
+    
+    # Show Functional Compliance stats if available
+    functional_compliance = None
+    for category in analysis_data.get('categories', []):
+        if category.get('name') == 'Functional Compliance':
+            functional_compliance = category
+            break
+    
+    if functional_compliance:
+        items = functional_compliance.get('items', [])
+        pass_count = sum(1 for item in items if item.get('assessment') == 'compliant')
+        fail_count = sum(1 for item in items if item.get('assessment') == 'critical')
+        partial_count = sum(1 for item in items if item.get('assessment') == 'warning')
+        cannot_verify = sum(1 for item in items if item.get('assessment') == 'info')
+        
+        print(f"\n🧪 Functional Compliance:")
+        print(f"   ✅ Pass: {pass_count}")
+        print(f"   ❌ Fail: {fail_count}")
+        print(f"   ⚠️  Partial: {partial_count}")
+        print(f"   ❓ Cannot Verify: {cannot_verify}")
+    
     print(f"\n🌐 View Report:")
     print(f"   open {output_html}\n")
 
