@@ -24,7 +24,8 @@ services:
       # Service Configuration
       - SERVICE_PATH=/service
       - SERVICE_NAME=${SERVICE_NAME}
-      - TEST_SCENARIOS_PATH=${TEST_SCENARIOS_PATH}
+      # TEST_SCENARIOS_FILE is set by Makefile to /service/filename
+      - TEST_SCENARIOS_PATH=${TEST_SCENARIOS_FILE}
       
       # CI/CD Pipeline Variables (GoCD)
       - GO_PIPELINE_NAME=${GO_PIPELINE_NAME}

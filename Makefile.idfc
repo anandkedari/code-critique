@@ -53,9 +53,19 @@ publish: docker_login ## Publish image to artifactory
 
 analyze: docker_login ## Run code analysis
 	@echo "$(BLUE)Running code analysis for $(SERVICE_NAME_FROM_ENV)...$(NC)"
-	@REVISION=${REVISION} SERVICE_NAME=${SERVICE_NAME_FROM_ENV} docker-compose \
+	@if [ -n "$(TEST_SCENARIOS_PATH)" ]; then \
+		TEST_SCENARIOS_FILE="/service/$$(basename $(TEST_SCENARIOS_PATH))" \
+		REVISION=${REVISION} SERVICE_NAME=${SERVICE_NAME_FROM_ENV} \
+		docker-compose \
 		-p analyze-${COMPOSE_PROJECT_NAME} \
 		-f docker-compose.idfc.yml \
-		run --rm analyze
+		run --rm analyze; \
+	else \
+		REVISION=${REVISION} SERVICE_NAME=${SERVICE_NAME_FROM_ENV} \
+		docker-compose \
+		-p analyze-${COMPOSE_PROJECT_NAME} \
+		-f docker-compose.idfc.yml \
+		run --rm analyze; \
+	fi
 	@echo "$(GREEN)✓ Analysis complete!$(NC)"
 	@echo "$(YELLOW)Report: reports/$(SERVICE_NAME_FROM_ENV)/code-critique-report.html$(NC)"
