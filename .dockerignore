@@ -65,7 +65,7 @@ docker-compose*.yml
 .dockerignore*
 
 # Makefile alternatives (don't need both in image)
-Makefile.tw
+Makefile
 Makefile.idfc
 
 # Metadata
