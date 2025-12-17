@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  code-critique:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        AI_PROVIDER: ${AI_PROVIDER}
+    image: code-critique:latest
+    container_name: code-critique
+    command: sh -c "python3 scripts/analyze-service.py"
+    environment:
+      - AI_PROVIDER=${AI_PROVIDER}
+      - AI_MODEL=${AI_MODEL}
+      - AI_API_KEY=${AI_API_KEY}
+      - AI_API_URL=${AI_API_URL}
+      - AI_CONFIDENCE_THRESHOLD=${AI_CONFIDENCE_THRESHOLD}
+      - SERVICE_PATH=/service
+      - SERVICE_NAME=${SERVICE_NAME}
+      # TEST_SCENARIOS_FILE is set by Makefile to /service/filename
+      - TEST_SCENARIOS_PATH=${TEST_SCENARIOS_FILE}
+    volumes:
+      # Mount service code to analyze (read-only)
+      - ${SERVICE_PATH}:/service:ro
+      # Mount reports directory (read-write)
+      - ./reports:/app/code-critique/reports
+      # Mount config file (for defaults)
+      - ./config.json:/app/code-critique/config.json:ro
+    working_dir: /app/code-critique
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
