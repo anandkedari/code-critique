@@ -38,6 +38,6 @@ publish: ## Publish Docker image to registry (OPTIONAL: REGISTRY=localhost:5000)
 
 analyze: ## Run analysis
 	TEST_SCENARIOS_FILE="/service/$$(basename $(TEST_SCENARIOS_PATH))" \
-	SERVICE_NAME="customer-service" \
-	SERVICE_PATH="./customer-service" \
+	SERVICE_NAME=$$(basename "$(SERVICE_PATH)") \
+	SERVICE_PATH=$(SERVICE_PATH) \
 	docker-compose -f docker-compose.yml run --rm code-critique;
