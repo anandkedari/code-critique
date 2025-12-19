@@ -12,12 +12,12 @@ services:
       - AI_API_URL=${AI_API_URL}
       - AI_CONFIDENCE_THRESHOLD=${AI_CONFIDENCE_THRESHOLD}
       - SERVICE_PATH=/service
-      - SERVICE_NAME=${SERVICE_NAME}
+      - SERVICE_NAME=customer-service
       # TEST_SCENARIOS_FILE is set by Makefile to /service/filename
       - TEST_SCENARIOS_PATH=${TEST_SCENARIOS_FILE}
     volumes:
       # Mount service code to analyze (read-only)
-      - ${SERVICE_PATH}:/service:ro
+      - ./customer-service:/service:ro
       # Mount reports directory (read-write)
       - ./reports:/app/code-critique/reports
     working_dir: /app/code-critique
