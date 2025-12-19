@@ -36,8 +36,17 @@ publish: ## Publish Docker image to registry (OPTIONAL: REGISTRY=localhost:5000)
 	echo "  - $$REGISTRY/code-critique:$$SHORT_SHA" && \
 	echo "  - $$REGISTRY/code-critique:latest"
 
-analyze: ## Run analysis
-	TEST_SCENARIOS_FILE="/service/$$(basename $(TEST_SCENARIOS_PATH))" \
+analyze: ## Run analysis (Docker-in-Docker compatible)
+	@echo "Starting analysis with Docker-in-Docker support..."
+	@# Create a temporary container and copy files into it
+	@docker-compose -f docker-compose.yml create code-critique
+	@echo "Copying service code into container..."
+	@docker cp $(SERVICE_PATH)/. code-critique:/service/
+	@echo "Running analysis..."
+	@TEST_SCENARIOS_FILE="/service/$$(basename $(TEST_SCENARIOS_PATH))" \
 	SERVICE_NAME=$$(basename "$(SERVICE_PATH)") \
-	SERVICE_PATH=$(SERVICE_PATH) \
-	docker-compose -f docker-compose.yml run --rm code-critique;
+	docker-compose -f docker-compose.yml start code-critique
+	@docker wait code-critique || true
+	@docker logs code-critique
+	@echo "Cleaning up..."
+	@docker-compose -f docker-compose.yml down

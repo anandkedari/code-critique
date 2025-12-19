@@ -16,10 +16,9 @@ services:
       # TEST_SCENARIOS_FILE is set by Makefile to /service/filename
       - TEST_SCENARIOS_PATH=${TEST_SCENARIOS_FILE}
     volumes:
-      # Mount service code to analyze (read-only)
-      - ${SERVICE_PATH}:/service:ro
       # Mount reports directory (read-write)
       - ./reports:/app/code-critique/reports
+      # Note: Service code is copied via docker cp in Makefile, not mounted
     working_dir: /app/code-critique
     extra_hosts:
       - "host.docker.internal:host-gateway"
