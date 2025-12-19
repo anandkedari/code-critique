@@ -49,43 +49,14 @@ analyze: ## Run analysis (REQUIRED: SERVICE_PATH=/path/to/service)
 	@echo "$(BLUE)Running code-critique analysis...$(NC)"
 	@echo "   Service Path: $(SERVICE_PATH)"
 	@echo "   Service Name: $$(basename "$(SERVICE_PATH)")"
-	@CURRENT_DIR=$$(pwd); \
-	AGENT_VOLUME=""; \
-	if echo "$$CURRENT_DIR" | grep -q "^/godata/"; then \
-		HOSTNAME=$$(hostname); \
-		if echo "$$HOSTNAME" | grep -q "gocd-agent"; then \
-			AGENT_NUM=$$(echo "$$HOSTNAME" | grep -o '[0-9]' | head -1); \
-			if [ -z "$$AGENT_NUM" ]; then AGENT_NUM="1"; fi; \
-			AGENT_VOLUME="gocd-agent-$$AGENT_NUM-data"; \
-			echo "   Detected GoCD Agent Volume: $$AGENT_VOLUME"; \
-		fi; \
-	fi; \
-	if [ -n "$$AGENT_VOLUME" ]; then \
-		VOLUME_MOUNT_PATH=$$(echo "$$CURRENT_DIR" | sed 's|^/godata||'); \
-		FULL_SERVICE_PATH="$$VOLUME_MOUNT_PATH/$(SERVICE_PATH)"; \
-		echo "   Using volume mount: $$AGENT_VOLUME:$$FULL_SERVICE_PATH"; \
-		if [ -n "$(TEST_SCENARIOS_PATH)" ]; then \
-			TEST_SCENARIOS_FILE="/service/$$(basename $(TEST_SCENARIOS_PATH))" \
-			SERVICE_NAME=$$(basename "$(SERVICE_PATH)") \
-			SERVICE_HOST_PATH="$$AGENT_VOLUME:$$FULL_SERVICE_PATH" \
-			GOCD_VOLUME="$$AGENT_VOLUME" \
-			docker-compose -f docker-compose.yml run --rm code-critique; \
-		else \
-			SERVICE_NAME=$$(basename "$(SERVICE_PATH)") \
-			SERVICE_HOST_PATH="$$AGENT_VOLUME:$$FULL_SERVICE_PATH" \
-			GOCD_VOLUME="$$AGENT_VOLUME" \
-			docker-compose -f docker-compose.yml run --rm code-critique; \
-		fi; \
+	@if [ -n "$(TEST_SCENARIOS_PATH)" ]; then \
+		TEST_SCENARIOS_FILE="/service/$$(basename $(TEST_SCENARIOS_PATH))" \
+		SERVICE_NAME=$$(basename "$(SERVICE_PATH)") \
+		SERVICE_HOST_PATH=$$(pwd)/$(SERVICE_PATH) \
+		docker-compose -f docker-compose.yml run --rm code-critique; \
 	else \
-		if [ -n "$(TEST_SCENARIOS_PATH)" ]; then \
-			TEST_SCENARIOS_FILE="/service/$$(basename $(TEST_SCENARIOS_PATH))" \
-			SERVICE_NAME=$$(basename "$(SERVICE_PATH)") \
-			SERVICE_HOST_PATH="$$CURRENT_DIR/$(SERVICE_PATH)" \
-			docker-compose -f docker-compose.yml run --rm code-critique; \
-		else \
-			SERVICE_NAME=$$(basename "$(SERVICE_PATH)") \
-			SERVICE_HOST_PATH="$$CURRENT_DIR/$(SERVICE_PATH)" \
-			docker-compose -f docker-compose.yml run --rm code-critique; \
-		fi; \
+		SERVICE_NAME=$$(basename "$(SERVICE_PATH)") \
+		SERVICE_HOST_PATH=$$(pwd)/$(SERVICE_PATH) \
+		docker-compose -f docker-compose.yml run --rm code-critique; \
 	fi
 	@echo "$(GREEN)✓ Analysis complete!$(NC)"

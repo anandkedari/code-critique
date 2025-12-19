@@ -15,11 +15,9 @@ services:
       - SERVICE_NAME=${SERVICE_NAME}
       # TEST_SCENARIOS_FILE is set by Makefile to /service/filename
       - TEST_SCENARIOS_PATH=${TEST_SCENARIOS_FILE}
-      # GOCD_VOLUME is the agent's volume name passed from Makefile
-      - GOCD_VOLUME=${GOCD_VOLUME:-}
     volumes:
       # Mount service code to analyze (read-only)
-      - ${SERVICE_HOST_PATH}:/service:ro
+      - ./${SERVICE_HOST_PATH}:/service:ro
       # Mount reports directory (read-write)
       - ./reports:/app/code-critique/reports
     working_dir: /app/code-critique
