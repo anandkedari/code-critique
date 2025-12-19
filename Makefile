@@ -52,11 +52,11 @@ analyze: ## Run analysis (REQUIRED: SERVICE_PATH=/path/to/service)
 	@if [ -n "$(TEST_SCENARIOS_PATH)" ]; then \
 		TEST_SCENARIOS_FILE="/service/$$(basename $(TEST_SCENARIOS_PATH))" \
 		SERVICE_NAME=$$(basename "$(SERVICE_PATH)") \
-		SERVICE_HOST_PATH=$(SERVICE_PATH) \
+		SERVICE_HOST_PATH=$$(pwd)/$(SERVICE_PATH) \
 		docker-compose -f docker-compose.yml run --rm code-critique; \
 	else \
 		SERVICE_NAME=$$(basename "$(SERVICE_PATH)") \
-		SERVICE_HOST_PATH=$(SERVICE_PATH) \
+		SERVICE_HOST_PATH=$$(pwd)/$(SERVICE_PATH) \
 		docker-compose -f docker-compose.yml run --rm code-critique; \
 	fi
 	@echo "$(GREEN)✓ Analysis complete!$(NC)"
