@@ -4,7 +4,7 @@ services:
   code-critique:
     image: localhost:5000/code-critique:latest
     container_name: code-critique
-    command: sh -c "sleep 1000 && python3 scripts/analyze-service.py"
+    command: sh -c "pwd && ls && cd customer-service/ && pwd && ls && python3 scripts/analyze-service.py"
     environment:
       - AI_PROVIDER=${AI_PROVIDER}
       - AI_MODEL=${AI_MODEL}
