@@ -16,6 +16,23 @@ build: ## Build Docker image (REQUIRED: AI_PROVIDER=anthropic or AI_PROVIDER=ope
 	@docker build --build-arg AI_PROVIDER=$(AI_PROVIDER) -t code-critique:latest -f Dockerfile .
 	@echo "$(GREEN)✓ Image built for $(AI_PROVIDER) provider$(NC)"
 
+publish: ## Publish Docker image to registry (OPTIONAL: REGISTRY=localhost:5000)
+	@REGISTRY=$${REGISTRY:-localhost:5000}; \
+	GIT_SHA=$$(git rev-parse HEAD); \
+	SHORT_SHA=$$(git rev-parse --short=7 HEAD); \
+	echo "$(BLUE)Publishing code-critique:latest to $$REGISTRY...$(NC)"; \
+	docker tag code-critique:latest $$REGISTRY/code-critique:$$GIT_SHA && \
+	docker tag code-critique:latest $$REGISTRY/code-critique:$$SHORT_SHA && \
+	docker tag code-critique:latest $$REGISTRY/code-critique:latest && \
+	echo "$(BLUE)Pushing images...$(NC)" && \
+	docker push $$REGISTRY/code-critique:$$GIT_SHA && \
+	docker push $$REGISTRY/code-critique:$$SHORT_SHA && \
+	docker push $$REGISTRY/code-critique:latest && \
+	echo "$(GREEN)✓ Published to $$REGISTRY/code-critique$(NC)" && \
+	echo "  - $$REGISTRY/code-critique:$$GIT_SHA" && \
+	echo "  - $$REGISTRY/code-critique:$$SHORT_SHA" && \
+	echo "  - $$REGISTRY/code-critique:latest"
+
 analyze: ## Run analysis
 	@echo "$(BLUE)Running code-critique...$(NC)"
 	@if [ -n "$(TEST_SCENARIOS_PATH)" ]; then \
