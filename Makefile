@@ -51,9 +51,6 @@ analyze: ## Run analysis (Docker-in-Docker compatible)
 	docker-compose -f docker-compose.yml start code-critique
 	@docker wait code-critique || true
 	@docker logs code-critique
-	@echo "Copying reports to host..."
-	@mkdir -p reports
-	@docker cp code-critique:/app/code-critique/reports/. reports/ 2>/dev/null || echo "No reports to copy"
 	@echo "Cleaning up..."
 	@docker-compose -f docker-compose.yml down --remove-orphans
 
