@@ -38,6 +38,10 @@ publish: ## Publish Docker image to registry (OPTIONAL: REGISTRY=localhost:5000)
 
 analyze: ## Run analysis (Docker-in-Docker compatible)
 	@echo "Starting analysis with Docker-in-Docker support..."
+	@# Clean up any existing containers and networks from previous runs
+	@echo "Cleaning up previous run..."
+	@docker-compose -f docker-compose.yml down --remove-orphans 2>/dev/null || true
+	@docker network prune -f 2>/dev/null || true
 	@# Create a temporary container and copy files into it
 	@docker-compose -f docker-compose.yml create code-critique
 	@echo "Copying service code into container..."
@@ -49,4 +53,7 @@ analyze: ## Run analysis (Docker-in-Docker compatible)
 	@docker wait code-critique || true
 	@docker logs code-critique
 	@echo "Cleaning up..."
-	@docker-compose -f docker-compose.yml down
+	@docker-compose -f docker-compose.yml down --remove-orphans
+
+
+docker cp ./customer-service/. code-critique:/service/
