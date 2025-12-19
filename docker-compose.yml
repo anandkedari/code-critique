@@ -4,7 +4,7 @@ services:
   code-critique:
     image: localhost:5000/code-critique:latest
     container_name: code-critique
-    command: sh -c "pwd && ls && cd customer-service/ && pwd && ls && python3 scripts/analyze-service.py"
+    command: sh -c "python3 scripts/analyze-service.py"
     environment:
       - AI_PROVIDER=${AI_PROVIDER}
       - AI_MODEL=${AI_MODEL}
@@ -17,7 +17,7 @@ services:
       - TEST_SCENARIOS_PATH=${TEST_SCENARIOS_FILE}
     volumes:
       # Mount service code to analyze (read-only)
-      - ./${SERVICE_PATH}:/service:ro
+      - ${SERVICE_PATH}:/service:ro
       # Mount reports directory (read-write)
       - ./reports:/app/code-critique/reports
     working_dir: /app/code-critique
