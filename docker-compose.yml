@@ -2,11 +2,6 @@ version: '3.8'
 
 services:
   code-critique:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        AI_PROVIDER: ${AI_PROVIDER}
     image: localhost:5000/code-critique:latest
     container_name: code-critique
     command: sh -c "python3 scripts/analyze-service.py"
@@ -25,8 +20,6 @@ services:
       - ${SERVICE_PATH}:/service:ro
       # Mount reports directory (read-write)
       - ./reports:/app/code-critique/reports
-      # Mount config file (for defaults)
-      - ./config.json:/app/code-critique/config.json:ro
     working_dir: /app/code-critique
     extra_hosts:
       - "host.docker.internal:host-gateway"

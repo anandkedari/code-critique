@@ -6,6 +6,9 @@ GREEN := \033[0;32m
 YELLOW := \033[0;33m
 NC := \033[0m # No Color
 
+TEST_SCENARIOS_PATH := $(or no-scenarios-path.yaml, $(shell basename ${TEST_SCENARIOS_PATH}))
+SERVICE_NAME=$$(basename "$(SERVICE_PATH)")
+
 build: ## Build Docker image (REQUIRED: AI_PROVIDER=anthropic or AI_PROVIDER=openai)
 	@if [ -z "$(AI_PROVIDER)" ]; then \
 		echo "$(YELLOW)Error: AI_PROVIDER is required. Set to 'anthropic' or 'openai'$(NC)"; \
@@ -34,13 +37,4 @@ publish: ## Publish Docker image to registry (OPTIONAL: REGISTRY=localhost:5000)
 	echo "  - $$REGISTRY/code-critique:latest"
 
 analyze: ## Run analysis
-	@echo "$(BLUE)Running code-critique...$(NC)"
-	@if [ -n "$(TEST_SCENARIOS_PATH)" ]; then \
-		TEST_SCENARIOS_FILE="/service/$$(basename $(TEST_SCENARIOS_PATH))" \
-		SERVICE_NAME=$$(basename "$(SERVICE_PATH)") \
-		docker-compose -f docker-compose.yml run --rm code-critique; \
-	else \
-		SERVICE_NAME=$$(basename "$(SERVICE_PATH)") \
-		docker-compose -f docker-compose.yml run --rm code-critique; \
-	fi
-	@echo "$(GREEN)✓ Analysis complete!$(NC)"
+	docker-compose -f docker-compose.yml run --rm code-critique;
