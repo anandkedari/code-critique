@@ -36,8 +36,27 @@ publish: ## Publish Docker image to registry (OPTIONAL: REGISTRY=localhost:5000)
 	echo "  - $$REGISTRY/code-critique:$$SHORT_SHA" && \
 	echo "  - $$REGISTRY/code-critique:latest"
 
-analyze: ## Run analysis
-	TEST_SCENARIOS_FILE="/service/$$(basename $(TEST_SCENARIOS_PATH))" \
-	SERVICE_NAME=$$(basename "$(SERVICE_PATH)") \
-	SERVICE_PATH=$(SERVICE_PATH) \
-	docker-compose -f docker-compose.yml run --rm code-critique;
+analyze: ## Run analysis (REQUIRED: SERVICE_PATH=/path/to/service)
+	@if [ -z "$(SERVICE_PATH)" ]; then \
+		echo "$(YELLOW)Error: SERVICE_PATH is required$(NC)"; \
+		echo "$(YELLOW)Example: SERVICE_PATH=customer-service make analyze$(NC)"; \
+		exit 1; \
+	fi
+	@if [ ! -d "$(SERVICE_PATH)" ]; then \
+		echo "$(YELLOW)Error: SERVICE_PATH directory does not exist: $(SERVICE_PATH)$(NC)"; \
+		exit 1; \
+	fi
+	@echo "$(BLUE)Running code-critique analysis...$(NC)"
+	@echo "   Service Path: $(SERVICE_PATH)"
+	@echo "   Service Name: $$(basename "$(SERVICE_PATH)")"
+	@if [ -n "$(TEST_SCENARIOS_PATH)" ]; then \
+		TEST_SCENARIOS_FILE="/service/$$(basename $(TEST_SCENARIOS_PATH))" \
+		SERVICE_NAME=$$(basename "$(SERVICE_PATH)") \
+		SERVICE_HOST_PATH=$(SERVICE_PATH) \
+		docker-compose -f docker-compose.yml run --rm code-critique; \
+	else \
+		SERVICE_NAME=$$(basename "$(SERVICE_PATH)") \
+		SERVICE_HOST_PATH=$(SERVICE_PATH) \
+		docker-compose -f docker-compose.yml run --rm code-critique; \
+	fi
+	@echo "$(GREEN)✓ Analysis complete!$(NC)"
