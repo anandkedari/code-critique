@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
       args:
         AI_PROVIDER: ${AI_PROVIDER}
-    image: code-critique:latest
+    image: localhost:5000/code-critique:latest
     container_name: code-critique
     command: sh -c "python3 scripts/analyze-service.py"
     environment:
