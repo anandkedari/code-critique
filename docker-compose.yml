@@ -17,7 +17,7 @@ services:
       - TEST_SCENARIOS_PATH=${TEST_SCENARIOS_FILE}
     volumes:
       # Mount service code to analyze (read-only)
-      - ./${SERVICE_HOST_PATH}:/service:ro
+      - ./${SERVICE_PATH}:/service:ro
       # Mount reports directory (read-write)
       - ./reports:/app/code-critique/reports
     working_dir: /app/code-critique
