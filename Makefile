@@ -41,9 +41,8 @@ analyze: ## Run analysis (Docker-in-Docker compatible)
 	@# Clean up any existing containers and networks from previous runs
 	@echo "Cleaning up previous run..."
 	@docker-compose -f docker-compose.yml down --remove-orphans 2>/dev/null || true
-	@docker network prune -f 2>/dev/null || true
-	@# Create a temporary container and copy files into it
-	@docker-compose -f docker-compose.yml create code-critique
+	@# Create container without starting (modern approach, replaces deprecated 'create')
+	@docker-compose -f docker-compose.yml up --no-start
 	@echo "Copying service code into container..."
 	@docker cp $(SERVICE_PATH)/. code-critique:/service/
 	@echo "Running analysis..."
