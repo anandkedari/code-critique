@@ -43,10 +43,7 @@ analyze: ## Run analysis (Docker-in-Docker compatible)
 	@docker-compose up --no-start
 	@echo "Copying files into container..."
 	@docker cp $(SERVICE_PATH)/. code-critique:/service/
-	@if [ -f "$(TEST_SCENARIOS_PATH)" ]; then \
-		docker exec code-critique mkdir -p /app/code-critique/test-scenarios && \
-		docker cp $(TEST_SCENARIOS_PATH) code-critique:/app/code-critique/$(TEST_SCENARIOS_PATH); \
-	fi
+	@[ -d "test-scenarios" ] && docker cp test-scenarios/. code-critique:/app/code-critique/test-scenarios/ || true
 	@echo "Running analysis..."
 	@TEST_SCENARIOS_PATH="$(TEST_SCENARIOS_PATH)" SERVICE_NAME=$$(basename "$(SERVICE_PATH)") docker-compose start code-critique
 	@docker wait code-critique
