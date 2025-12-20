@@ -46,8 +46,12 @@ analyze: ## Run analysis (Docker-in-Docker compatible)
 	@docker-compose -f docker-compose.yml up --no-start
 	@echo "Copying service code into container..."
 	@docker cp $(SERVICE_PATH)/. code-critique:/service/
+	@echo "Copying test scenarios into container..."
+	@if [ -d "test-scenarios" ]; then \
+		docker cp test-scenarios code-critique:/app/code-critique/test-scenarios; \
+	fi
 	@echo "Running analysis..."
-	@TEST_SCENARIOS_FILE="/service/$$(basename $(TEST_SCENARIOS_PATH))" \
+	@TEST_SCENARIOS_FILE="$(TEST_SCENARIOS_PATH)" \
 	SERVICE_NAME=$$(basename "$(SERVICE_PATH)") \
 	docker-compose -f docker-compose.yml start code-critique
 	@docker wait code-critique || true
