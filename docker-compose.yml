@@ -17,7 +17,7 @@ services:
       - TEST_SCENARIOS_PATH=${TEST_SCENARIOS_FILE}
     volumes:
       # Mount reports directory (read-write)
-      - ../reports/:/app/code-critique
+      - ../helloWorld/:/app/code-critique
       # Note: Service code is copied via docker cp in Makefile, not mounted
     working_dir: /app/code-critique
     extra_hosts:
