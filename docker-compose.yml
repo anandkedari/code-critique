@@ -4,7 +4,7 @@ services:
   code-critique:
     image: localhost:5000/code-critique:latest
     container_name: code-critique
-    command: sh -c "python3 scripts/analyze-service.py && echo "--reports/service--" && ls -la reports/service && echo "--reports/customer-service--" && ls -la reports/service"
+    command: sh -c "python3 scripts/analyze-service.py && echo "--reports/service--" && ls -la reports/service && echo "--reports/customer-service--" && ls -la reports/customer-service"
     environment:
       - AI_PROVIDER=${AI_PROVIDER}
       - AI_MODEL=${AI_MODEL}

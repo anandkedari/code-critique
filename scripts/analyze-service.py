@@ -676,8 +676,13 @@ def main():
     script_dir = Path(__file__).parent
     code_critique_dir = script_dir.parent
     
-    # Determine service name (prefer env var for Docker compatibility)
-    service_name = os.environ.get('SERVICE_NAME') or service_path.name
+    # Get service name from environment variable (REQUIRED)
+    service_name = os.environ.get('SERVICE_NAME')
+    if not service_name:
+        print(f"❌ Error: SERVICE_NAME environment variable is required")
+        print(f"   Set SERVICE_NAME to the name of the service being analyzed")
+        print(f"   Example: export SERVICE_NAME=customer-service")
+        sys.exit(1)
     
     # Paths
     schema_path = code_critique_dir / 'schemas' / 'code-critique-schema.json'
