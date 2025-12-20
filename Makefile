@@ -37,30 +37,17 @@ publish: ## Publish Docker image to registry (OPTIONAL: REGISTRY=localhost:5000)
 	echo "  - $$REGISTRY/code-critique:latest"
 
 analyze: ## Run analysis (Docker-in-Docker compatible)
-	@echo "Starting analysis with Docker-in-Docker support..."
-	@# Clean up any existing containers and networks from previous runs
-	@echo "Cleaning up previous run..."
-	@docker-compose -f docker-compose.yml down --remove-orphans 2>/dev/null || true
-	@docker rm -f code-critique 2>/dev/null || true
-	@# Create container without starting (modern approach, replaces deprecated 'create')
-	@docker-compose -f docker-compose.yml up --no-start
-	@echo "Copying service code into container..."
-	@docker cp $(SERVICE_PATH)/. code-critique:/service/
-	@echo "Copying test scenarios into container..."
-	@if [ -f "$(TEST_SCENARIOS_PATH)" ]; then \
-		mkdir -p test-scenarios && \
-		docker cp $(TEST_SCENARIOS_PATH) code-critique:/app/code-critique/$(TEST_SCENARIOS_PATH); \
-	elif [ -d "test-scenarios" ]; then \
-		docker cp test-scenarios code-critique:/app/code-critique/test-scenarios; \
-	fi
-	@echo "Running analysis..."
-	@TEST_SCENARIOS_FILE="$(TEST_SCENARIOS_PATH)" \
-	SERVICE_NAME=$$(basename "$(SERVICE_PATH)") \
-	docker-compose -f docker-compose.yml start code-critique
-	@docker wait code-critique || true
-	@docker logs code-critique
-	@echo "Copying reports from container..."
-	@mkdir -p ./reports
-	@docker cp code-critique:/app/code-critique/reports/. ./reports/ || echo "Warning: Could not copy reports"
+	@echo "Starting analysis..."
 	@echo "Cleaning up..."
-	@docker-compose -f docker-compose.yml down --remove-orphans
+	@docker-compose down --remove-orphans 2>/dev/null || true
+	@docker-compose up --no-start
+	@echo "Copying files into container..."
+	@docker cp $(SERVICE_PATH)/. code-critique:/service/
+	@[ -f "$(TEST_SCENARIOS_PATH)" ] && docker cp $(TEST_SCENARIOS_PATH) code-critique:/app/code-critique/$(TEST_SCENARIOS_PATH) || true
+	@echo "Running analysis..."
+	@TEST_SCENARIOS_PATH="$(TEST_SCENARIOS_PATH)" SERVICE_NAME=$$(basename "$(SERVICE_PATH)") docker-compose start code-critique
+	@docker wait code-critique
+	@docker logs code-critique
+	@echo "Copying reports..."
+	@mkdir -p ./reports && docker cp code-critique:/app/code-critique/reports/. ./reports/
+	@docker-compose down --remove-orphans

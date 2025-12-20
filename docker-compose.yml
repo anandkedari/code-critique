@@ -4,7 +4,8 @@ services:
   code-critique:
     image: localhost:5000/code-critique:latest
     container_name: code-critique
-    command: sh -c "python3 scripts/analyze-service.py"
+    command: python3 scripts/analyze-service.py
+    working_dir: /app/code-critique
     environment:
       - AI_PROVIDER=${AI_PROVIDER}
       - AI_MODEL=${AI_MODEL}
@@ -13,12 +14,6 @@ services:
       - AI_CONFIDENCE_THRESHOLD=${AI_CONFIDENCE_THRESHOLD}
       - SERVICE_PATH=/service
       - SERVICE_NAME=${SERVICE_NAME}
-      # TEST_SCENARIOS_FILE is passed from Makefile with the scenarios path
-      - TEST_SCENARIOS_PATH=${TEST_SCENARIOS_FILE}
+      - TEST_SCENARIOS_PATH=${TEST_SCENARIOS_PATH}
     volumes:
-      # Mount reports directory (read-write)
       - ./reports:/app/code-critique/reports
-      # Note: Service code is copied via docker cp in Makefile, not mounted
-    working_dir: /app/code-critique
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
