@@ -61,6 +61,3 @@ analyze: ## Run analysis (Docker-in-Docker compatible)
 	@docker cp code-critique:/app/code-critique/reports/. ./reports/ || echo "Warning: Could not copy reports"
 	@echo "Cleaning up..."
 	@docker-compose -f docker-compose.yml down --remove-orphans
-
-
-docker cp ./customer-service/. code-critique:/service/
