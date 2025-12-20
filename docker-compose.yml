@@ -13,7 +13,7 @@ services:
       - AI_CONFIDENCE_THRESHOLD=${AI_CONFIDENCE_THRESHOLD}
       - SERVICE_PATH=/service
       - SERVICE_NAME=${SERVICE_NAME}
-      # TEST_SCENARIOS_FILE is set by Makefile to /service/filename
+      # TEST_SCENARIOS_FILE is passed from Makefile with the scenarios path
       - TEST_SCENARIOS_PATH=${TEST_SCENARIOS_FILE}
     volumes:
       # Mount reports directory (read-write)

@@ -47,7 +47,10 @@ analyze: ## Run analysis (Docker-in-Docker compatible)
 	@echo "Copying service code into container..."
 	@docker cp $(SERVICE_PATH)/. code-critique:/service/
 	@echo "Copying test scenarios into container..."
-	@if [ -d "test-scenarios" ]; then \
+	@if [ -f "$(TEST_SCENARIOS_PATH)" ]; then \
+		mkdir -p test-scenarios && \
+		docker cp $(TEST_SCENARIOS_PATH) code-critique:/app/code-critique/$(TEST_SCENARIOS_PATH); \
+	elif [ -d "test-scenarios" ]; then \
 		docker cp test-scenarios code-critique:/app/code-critique/test-scenarios; \
 	fi
 	@echo "Running analysis..."
